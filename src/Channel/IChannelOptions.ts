@@ -1,9 +1,9 @@
 import {
-  ISound,
-} from '../Sound/ISound';
+  IChannelSoundsMap,
+} from './IChannelSoundsMap';
 
 export interface IChannelOptions {
   context: AudioContext;
-  sounds?: { [key: string]: ISound, };
+  sounds?: IChannelSoundsMap;
   volume?: number;
 }

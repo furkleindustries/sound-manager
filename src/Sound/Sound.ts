@@ -72,15 +72,15 @@ export class Sound implements ISound {
     }
 
     if (typeof volume !== 'undefined' && volume >= 0 && volume <= 1) {
-      this.gainNode.gain.value = volume;
+      this.setVolume(volume);
     }
 
     if (typeof loop === 'boolean') {
-      this.sourceNode.loop = loop;
+      this.setLoop(loop);
     }
 
     if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
-      this.__pausedTime = trackPosition;
+      this.setTrackPosition(trackPosition);
     }
 
     if (autoplay === true) {
@@ -107,7 +107,7 @@ export class Sound implements ISound {
     if (this.playing) {
       this.__startedTime = this.getContextCurrentTime() - trackPosition;
     } else {
-      this.__pausedTime = this.getContextCurrentTime() - trackPosition;
+      this.__pausedTime = trackPosition;
     }
 
     return this;
