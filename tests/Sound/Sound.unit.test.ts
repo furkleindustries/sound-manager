@@ -10,6 +10,28 @@ const getAudioBuffer = () => (
 );
 
 describe('Sound unit tests.', () => {
+  it('Has an inputNode property which is an instance of AudioNode.', () => {
+    const buffer = getAudioBuffer(); 
+
+    const context = new AudioContext();
+
+    expect(new Sound({
+      buffer,
+      context,
+    }).inputNode).toBeInstanceOf(AudioNode);
+  });
+
+  it('Has an outputNode property which is an instance of AudioNode.', () => {
+    const buffer = getAudioBuffer(); 
+
+    const context = new AudioContext();
+
+    expect(new Sound({
+      buffer,
+      context,
+    }).outputNode).toBeInstanceOf(AudioNode);
+  });
+
   it('Has a sourceNode property which is an instance of AudioBufferSourceNode after it is constructed.', () => {
     const buffer = getAudioBuffer(); 
 

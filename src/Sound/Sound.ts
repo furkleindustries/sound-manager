@@ -6,6 +6,14 @@ import {
 } from './ISoundOptions';
 
 export class Sound implements ISound {
+  get inputNode() {
+    return this.sourceNode;
+  }
+
+  get outputNode() {
+    return this.gainNode;
+  }
+
   private __sourceNode: AudioBufferSourceNode
   get sourceNode() {
     return this.__sourceNode;

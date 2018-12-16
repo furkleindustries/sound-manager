@@ -1,4 +1,8 @@
-export interface ISound {
+import {
+  IAudioInputOutputNode,
+} from '../interfaces/IAudioInputOutputNode';
+
+export interface ISound extends IAudioInputOutputNode {
   readonly sourceNode: AudioBufferSourceNode;
   readonly gainNode: GainNode;
   readonly volume: number;

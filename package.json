@@ -4,7 +4,7 @@
   "description": "A sound library for Twine and other hypertext frameworks.\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[Dfiction frameworks.\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b.",
   "main": "dist/index.min.js",
   "scripts": {
-    "build": "tsc",
+    "build": "webpack -p",
     "test": "jest"
   },
   "repository": {
@@ -26,6 +26,9 @@
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.15",
     "jest": "^23.6.0",
-    "typescript": "^3.2.2"
+    "ts-loader": "^5.3.1",
+    "typescript": "^3.2.2",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2"
   }
 }

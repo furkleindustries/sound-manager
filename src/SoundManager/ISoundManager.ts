@@ -1,27 +1,36 @@
 import {
-  IChannel,
-} from '../Channel/IChannel';
+  IAudioInputOutputNode,
+} from '../interfaces/IAudioInputOutputNode';
+import {
+  IGroup,
+} from '../Group/IGroup';
 import {
   ISound,
 } from '../Sound/ISound';
 import {
-  ISoundManagerChannelsMap,
-} from './ISoundManagerChannelsMap';
+  IGroupsMap,
+} from './IGroupsMap';
+import {
+  ISoundsMap,
+} from '../Group/ISoundsMap';
 
-export interface ISoundManager {
-  readonly channels: ISoundManagerChannelsMap;
+export interface ISoundManager extends IAudioInputOutputNode {
+  readonly groups: IGroupsMap;
   readonly audioContext: AudioContext;
   readonly analyserNode: AnalyserNode;
   readonly gainNode: GainNode;
   readonly masterVolume: number;
-  getChannel(name: string): IChannel;
-  addChannel(name: string, channel: IChannel): ISoundManager;
-  removeChannel(name: string): ISoundManager;
-  clearAllChannels(): ISoundManager;
-  getSound(name: string, channelName?: string): ISound;
-  addSound(name: string, sound: ISound, channelName?: string): ISoundManager;
-  removeSound(name: string, channelName?: string): ISoundManager;
+  getGroup(name: string): IGroup;
+  addGroups(groups: IGroupsMap): ISoundManager;
+  removeGroups(names: string | string[]): ISoundManager;
+  clearAllGroups(): ISoundManager;
+  getSound(name: string, groupName?: string): ISound | null;
+  addSounds(sounds: ISoundsMap, groupName?: string): ISoundManager;
+  removeSounds(names: string | string[], groupName?: string): ISoundManager;
+  clearAllSounds(groupName?: string): ISoundManager;
   setMasterVolume(value: number): ISoundManager;
-  getChannelVolume(channelName: string): number;
-  setChannelVolume(value: number, channelName: string): ISoundManager;
+  getGroupVolume(name?: string): number;
+  setGroupVolume(value: number, groupName?: string): ISoundManager;
+  getSoundVolume(name: string, groupName?: string): number;
+  setSoundVolume(name: string, value: number, groupName?: string): ISoundManager;
 }
