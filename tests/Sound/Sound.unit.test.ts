@@ -1,19 +1,14 @@
 import {
   Sound,
-} from '../../src/Sound/Sound';
+} from '../../src/Sound/Sound';;
 
-const getAudioBuffer = () => (
-    new AudioBuffer({
-    length: 100,
-    sampleRate: 12000,
-  })
-);
+const getContext = () => new AudioContext();
+const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 12000);
 
 describe('Sound unit tests.', () => {
   it('Has an inputNode property which is an instance of AudioNode.', () => {
-    const buffer = getAudioBuffer(); 
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
@@ -22,9 +17,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has an outputNode property which is an instance of AudioNode.', () => {
-    const buffer = getAudioBuffer(); 
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
@@ -33,9 +27,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a sourceNode property which is an instance of AudioBufferSourceNode after it is constructed.', () => {
-    const buffer = getAudioBuffer(); 
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
@@ -44,9 +37,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a sourceNode property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -61,9 +53,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a gainNode property which is an instance of GainNode after it is constructed.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
@@ -72,9 +63,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a gainNode property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -89,9 +79,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a volume property which is a number.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -103,9 +92,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a volume property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -120,9 +108,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Defaults to a volume of 1.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -133,9 +120,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Allows setting the volume through the options object.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const argVol = 0.4;
     const sound = new Sound({
@@ -148,9 +134,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a boolean loop property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -161,9 +146,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a loop property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -178,9 +162,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a loop property which defaults to false.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -190,10 +173,10 @@ describe('Sound unit tests.', () => {
     expect(sound.loop).toBe(false);
   });
 
-  it('Allows setting the loop property through the options object.', () => {
-    const buffer = getAudioBuffer();
+  it('Allows setting the loop property through the options object.', () => {    
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
-    const context = new AudioContext();
     const loop = true;
 
     const sound = new Sound({
@@ -206,9 +189,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a numeric, non-negative trackPosition property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -219,9 +201,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a trackPosition property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -236,9 +217,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a trackPosition property which defaults to 0.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -248,10 +228,10 @@ describe('Sound unit tests.', () => {
     expect(sound.trackPosition).toBe(0);
   });
 
-  it('Allows setting the trackPosition property through the options object.', () => {
-    const buffer = getAudioBuffer();
+  it('Allows setting the trackPosition property through the options object.', () => {    
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
-    const context = new AudioContext();
     const trackPosition = 0.5;
 
     const sound = new Sound({
@@ -264,9 +244,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a boolean playing property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -277,9 +256,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a playing property which is readonly.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -294,9 +272,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a playing property which defaults to false.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -306,10 +283,10 @@ describe('Sound unit tests.', () => {
     expect(sound.playing).toBe(false);
   });
 
-  it('Allows setting the playing property through the autoplay property of the options object.', () => {
-    const buffer = getAudioBuffer();
+  it('Allows setting the playing property through the autoplay property of the options object.', () => {    
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
-    const context = new AudioContext();
     const autoplay = true;
 
     const sound = new Sound({
@@ -322,9 +299,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a getContextCurrentTime function which returns the currentTime property of the AudioContext passed in the options object.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -335,9 +311,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a setVolume function which alters the volume property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -349,9 +324,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a setLoop function which changes the loop property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -363,9 +337,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a setTrackPosition function which changes the representation returned by the trackPosition property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -377,9 +350,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a play function which changes the playing property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -390,9 +362,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a pause function which changes the playing property but leaves the track position as is.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -408,9 +379,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a stop function which changes the playing property and resets the trackPosition property to 0.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -425,9 +395,8 @@ describe('Sound unit tests.', () => {
   });
 
   it('Has a rewind function which decreases the trackPosition property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
@@ -442,10 +411,9 @@ describe('Sound unit tests.', () => {
     expect(sound.trackPosition).toBe(origPosition - toRewind);
   });
 
-  it('Has a fastFowrward function which increases the trackPosition property.', () => {
-    const buffer = getAudioBuffer();
-
-    const context = new AudioContext();
+  it('Has a fastForward function which increases the trackPosition property.', () => {
+    const context = getContext();
+    const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,

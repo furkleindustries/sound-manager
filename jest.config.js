@@ -3,8 +3,8 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest',
   },
   testMatch: [
-    '**/tests/**/*.test.{j,t}s?(x)',
-    '<rootDir>/src/**/?(*.)(spec|test).{j,t}s?(x)',
+    '**/tests/**/*.test.{j,t}s',
+    '<rootDir>/src/**/?(*.)(spec|test).{j,t}s',
   ],
   moduleFileExtensions: [
     'ts',
@@ -14,5 +14,12 @@ module.exports = {
   ],
   moduleDirectories: [
     'node_modules',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/setup.js',
+  ],
+  setupFiles: [
+    '<rootDir>/tests/setup.js',
   ],
 };
