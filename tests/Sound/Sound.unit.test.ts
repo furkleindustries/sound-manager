@@ -47,8 +47,11 @@ describe('Sound unit tests.', () => {
 
     const sourceNode = sound.sourceNode;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.sourceNode = sym;
+    try {
+      // @ts-ignore
+      sound.sourceNode = sym;
+    } catch (e) {}
+
     expect(sound.sourceNode === sourceNode && sound.sourceNode !== sym as any).toBe(true);
   });
 
@@ -73,8 +76,11 @@ describe('Sound unit tests.', () => {
 
     const gainNode = sound.gainNode;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.gainNode = sym;
+    try {
+      // @ts-ignore
+      sound.gainNode = sym;
+    } catch (e) {}
+
     expect(sound.gainNode === gainNode && sound.gainNode !== sym as any).toBe(true);
   });
 
@@ -102,8 +108,11 @@ describe('Sound unit tests.', () => {
 
     const volume = sound.volume;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.volume = sym;
+    try {
+      // @ts-ignore
+      sound.volume = sym;
+    } catch (e) {}
+
     expect(sound.volume === volume && sound.volume as any !== sym).toBe(true);
   });
 
@@ -156,8 +165,11 @@ describe('Sound unit tests.', () => {
 
     const loop = sound.loop;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.loop = sym;
+    try {
+      // @ts-ignore
+      sound.loop = sym;
+    } catch (e) {}
+
     expect(sound.loop === loop && sound.loop as any !== sym).toBe(true);
   });
 
@@ -211,8 +223,11 @@ describe('Sound unit tests.', () => {
 
     const trackPosition = sound.trackPosition;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.trackPosition = sym;
+    try {
+      // @ts-ignore
+      sound.trackPosition = sym;
+    } catch (e) {}
+
     expect(sound.trackPosition === trackPosition && sound.trackPosition as any !== sym).toBe(true);
   });
 
@@ -266,8 +281,11 @@ describe('Sound unit tests.', () => {
 
     const playing = sound.playing;
     const sym = Symbol('fail');
-    // @ts-ignore
-    sound.playing = sym;
+    try {
+      // @ts-ignore
+      sound.playing = sym;
+    } catch (e) {}
+
     expect(sound.playing === playing && sound.playing as any !== sym).toBe(true);
   });
 
@@ -295,7 +313,7 @@ describe('Sound unit tests.', () => {
       context,
     });
 
-    expect(sound.play).toBe(autoplay);
+    expect(sound.playing).toBe(autoplay);
   });
 
   it('Has a getContextCurrentTime function which returns the currentTime property of the AudioContext passed in the options object.', () => {
