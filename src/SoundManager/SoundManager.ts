@@ -10,6 +10,7 @@ import {
 import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
+import { Group } from '../Group/Group';
 
 export class SoundManager implements ISoundManager {
   private __groups: IGroupsMap = Object.freeze({});
@@ -121,6 +122,12 @@ export class SoundManager implements ISoundManager {
       names.forEach(remove);
     }
 
+    if (!('default' in this.groups)) {
+      this.addGroups({
+        default: new Group({ context: this.audioContext, }),
+      });
+    }
+
     return this;
   }
 
@@ -129,7 +136,11 @@ export class SoundManager implements ISoundManager {
   }
 
   getSound(name: string, groupName: string = 'default') {
-    return (this.groups[groupName] || { sounds: {} }).sounds[name] || null;
+    if (!(groupName in this.groups)) {
+      throw new Error();
+    }
+
+    return this.groups[groupName].sounds[name] || null;
   }
 
   addSounds(sounds: ISoundsMap, groupName: string = 'default') {
@@ -152,18 +163,60 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  clearAllSounds(groupName: string = 'default') {
+  clearAllSounds(groupName?: string) {
+    if (groupName) {
+      if (!(groupName in this.groups)) {
+        throw new Error();
+      }
+
+      this.groups[groupName].clearAllSounds();
+    }
+
+    Object.keys(this.groups).forEach((key) => {
+      this.groups[key].clearAllSounds();
+    });
+
+    return this;
+  }
+
+  playSounds(names: string | string[], groupName: string = 'default') {
     if (!(groupName in this.groups)) {
       throw new Error();
     }
 
-    this.groups[groupName].clearAllSounds();
+    this.groups[groupName].playSounds(names);
+
+    return this;
+  }
+
+  stopSounds(names: string | string[], groupName: string = 'default') {
+    if (!(groupName in this.groups)) {
+      throw new Error();
+    }
+
+    this.groups[groupName].stopSounds(names);
+
+    return this;
+  }
+
+  stopAllSounds(groupName?: string) {
+    if (groupName) {
+      if (!(groupName in this.groups)) {
+        throw new Error();
+      }
+
+      this.groups[groupName].stopAllSounds();
+    }
+
+    Object.keys(this.groups).forEach((groupName) => {
+      this.groups[groupName].stopAllSounds();
+    });
 
     return this;
   }
 
   setMasterVolume(value: number) {
-    this.gainNode.gain.value = value;
+    this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime);
     return this;
   }
 

@@ -25,7 +25,7 @@ export class Sound implements ISound {
   }
 
   get volume() {
-    return this.__gainNode.gain.value;
+    return this.gainNode.gain.value;
   }
 
   get loop() {
@@ -59,12 +59,12 @@ export class Sound implements ISound {
       trackPosition,
       volume,
     } = options;
-
-    this.getContextCurrentTime = () => context.currentTime;
-
+    
     if (!context) {
       throw new Error();
     }
+    
+    this.getContextCurrentTime = () => context.currentTime;
 
     this.__startedTime = this.getContextCurrentTime();
 
@@ -98,7 +98,7 @@ export class Sound implements ISound {
 
   setVolume(value: number) {
     if (value >= 0 && value <= 1) {
-      this.gainNode.gain.value = value;
+      this.gainNode.gain.setValueAtTime(value, this.getContextCurrentTime());
     } else {
       throw new Error();
     }

@@ -36,6 +36,8 @@ export class Group implements IGroup {
     return this.gainNode.gain.value;
   }
 
+  getContextCurrentTime: () => number;
+
   constructor(options: IGroupOptions) {
     const opts = options || {}
 
@@ -44,6 +46,12 @@ export class Group implements IGroup {
       sounds,
       volume,
     } = opts;
+
+    if (!context) {
+      throw new Error();
+    }
+
+    this.getContextCurrentTime = () => context.currentTime;
 
     this.__gainNode = context.createGain();
     this.__analyserNode = context.createAnalyser();
@@ -112,8 +120,74 @@ export class Group implements IGroup {
     return this;
   }
 
+  playSounds(names: string | string[]) {
+    const play = (name: string) => {
+      if (!(name in this.sounds)) {
+        throw new Error();
+      }
+
+      this.sounds[name].play();
+    };
+    
+    if (typeof names === 'string') {
+      play(names);
+    } else {
+      names.forEach(play);
+    }
+
+    return this;
+  }
+
+  playAllSounds() {
+    return this.playSounds(Object.keys(this.sounds));
+  }
+
+  pauseSounds(names: string | string[]) {
+    const pause = (name: string) => {
+      if (!(name in this.sounds)) {
+        throw new Error();
+      }
+
+      this.sounds[name].pause();
+    };
+    
+    if (typeof names === 'string') {
+      pause(names);
+    } else {
+      names.forEach(pause);
+    }
+
+    return this;
+  }
+
+  pauseAllSounds() {
+    return this.pauseSounds(Object.keys(this.sounds));
+  }
+
+  stopSounds(names: string | string[]) {
+    const stop = (name: string) => {
+      if (!(name in this.sounds)) {
+        throw new Error();
+      }
+
+      this.sounds[name].stop();
+    };
+    
+    if (typeof names === 'string') {
+      stop(names);
+    } else {
+      names.forEach(stop);
+    }
+
+    return this;
+  }
+
+  stopAllSounds() {
+    return this.stopSounds(Object.keys(this.sounds));
+  }
+
   setVolume(value: number) {
-    this.gainNode.gain.value = value;
+    this.gainNode.gain.setValueAtTime(value, this.getContextCurrentTime());
     return this;
   }
 }
