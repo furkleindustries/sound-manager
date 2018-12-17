@@ -17,7 +17,7 @@ export interface IGroup extends IAudioInputOutputNode {
   getSound(name: string): ISound | null;
   addSounds(sounds: ISoundsMap): IGroup;
   removeSounds(names: string | string[]): IGroup;
-  clearAllSounds(): IGroup;
+  removeAllSounds(): IGroup;
   playSounds(names: string | string[]): IGroup;
   playAllSounds(): IGroup;
   pauseSounds(names: string | string[]): IGroup;

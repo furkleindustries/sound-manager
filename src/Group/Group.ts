@@ -55,7 +55,8 @@ export class Group implements IGroup {
 
     this.__gainNode = context.createGain();
     this.__analyserNode = context.createAnalyser();
-    this.gainNode.connect(this.analyserNode);
+
+    this.inputNode.connect(this.outputNode);
 
     if (sounds && typeof sounds === 'object') {
       this.addSounds(sounds);
@@ -80,7 +81,7 @@ export class Group implements IGroup {
 
     names.forEach((soundName) => {
       const sound = sounds[soundName];
-      sound.gainNode.connect(this.gainNode);
+      sound.outputNode.connect(this.outputNode);
     });
 
     this.__sounds = Object.freeze(Object.assign(
@@ -94,9 +95,9 @@ export class Group implements IGroup {
 
   removeSounds(names: string | string[]) {
     const remove = (soundName: string) => {
-      const sounds = Object.assign(this.sounds);
+      const sounds = Object.assign({}, this.sounds) as any;
       const sound = sounds[soundName];
-      sound.gainNode.disconnect();
+      sound.outputNode.disconnect();
       delete sounds[soundName];
       this.__sounds = Object.freeze(sounds);
     };
@@ -110,14 +111,8 @@ export class Group implements IGroup {
     return this;
   }
 
-  clearAllSounds() {
-    Object.keys(this.sounds).forEach((key) => {
-      const sound = this.sounds[key];
-      sound.gainNode.disconnect();
-    });
-
-    this.__sounds = Object.freeze({});
-    return this;
+  removeAllSounds() {
+    return this.removeSounds(Object.keys(this.sounds));
   }
 
   playSounds(names: string | string[]) {

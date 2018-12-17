@@ -23,11 +23,11 @@ export interface ISoundManager extends IAudioInputOutputNode {
   getGroup(name: string): IGroup;
   addGroups(groups: IGroupsMap): ISoundManager;
   removeGroups(names: string | string[]): ISoundManager;
-  clearAllGroups(): ISoundManager;
+  removeAllGroups(): ISoundManager;
   getSound(name: string, groupName?: string): ISound | null;
   addSounds(sounds: ISoundsMap, groupName?: string): ISoundManager;
   removeSounds(names: string | string[], groupName?: string): ISoundManager;
-  clearAllSounds(): ISoundManager;
+  removeAllSounds(groupName?: string): ISoundManager;
   playSounds(names: string | string[], groupName?: string): ISoundManager;
   playAllSounds(groupName?: string): ISoundManager;
   pauseSounds(names: string | string[], groupName?: string): ISoundManager;

@@ -73,7 +73,7 @@ describe('Group unit tests.', () => {
     const group = createGroup();
     const sym = Symbol('test');
     // @ts-ignore
-    group.sounds.test = sym;
+    group.__sounds = { test: sym, };
 
     expect(group.sounds.test === sym as any);
   });
@@ -215,9 +215,9 @@ describe('Group unit tests.', () => {
     // @ts-ignore
     group.__sounds = sounds;
 
-    group.clearAllSounds();
+    group.removeAllSounds();
 
-    expect(group.removeSounds).toHaveBeenCalledWith(sounds);
+    expect(group.removeSounds).toHaveBeenCalledWith(Object.keys(sounds));
   });
 
   it('Has a setVolume function which alters the volume property.', () => {

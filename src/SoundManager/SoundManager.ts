@@ -65,14 +65,15 @@ export class SoundManager implements ISoundManager {
 
     this.__analyserNode = this.audioContext.createAnalyser();
     this.__gainNode = this.audioContext.createGain();
-    this.gainNode.connect(this.analyserNode);
-    this.analyserNode.connect(this.audioContext.destination);
+
+    this.inputNode.connect(this.outputNode);
+    this.outputNode.connect(this.audioContext.destination);
 
     if (groups) {
       this.__groups = Object.freeze(Object.assign({}, groups));
       Object.keys(this.groups).forEach((groupName) => {
         const group = this.groups[groupName];
-        group.analyserNode.connect(this.gainNode);
+        group.outputNode.connect(this.inputNode);
       });
     }
 
@@ -95,7 +96,7 @@ export class SoundManager implements ISoundManager {
 
     names.forEach((groupName) => {
       const group = groups[groupName];
-      group.analyserNode.connect(this.gainNode);
+      group.outputNode.connect(this.inputNode);
     });
 
     this.__groups = Object.freeze(Object.assign(
@@ -111,7 +112,7 @@ export class SoundManager implements ISoundManager {
     const remove = (groupName: string) => {
       const groups = Object.assign(this.groups);
       const group = groups[groupName];
-      group.analyserNode.disconnect();
+      group.outputNode.disconnect();
       delete groups[groupName];
       this.__groups = Object.freeze(groups);
     };
@@ -131,7 +132,7 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  clearAllGroups() {
+  removeAllGroups() {
     return this.removeGroups(Object.keys(this.groups));
   }
 
@@ -163,18 +164,18 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  clearAllSounds(groupName?: string) {
+  removeAllSounds(groupName?: string) {
     if (groupName) {
       if (!(groupName in this.groups)) {
         throw new Error();
       }
 
-      this.groups[groupName].clearAllSounds();
+      this.groups[groupName].removeAllSounds();
+    } else {
+      Object.keys(this.groups).forEach((key) => {
+        this.groups[key].removeAllSounds();
+      });
     }
-
-    Object.keys(this.groups).forEach((key) => {
-      this.groups[key].clearAllSounds();
-    });
 
     return this;
   }
@@ -185,6 +186,48 @@ export class SoundManager implements ISoundManager {
     }
 
     this.groups[groupName].playSounds(names);
+
+    return this;
+  }
+
+  playAllSounds(groupName?: string) {
+    if (groupName) {
+      if (!(groupName in this.groups)) {
+        throw new Error();
+      }
+
+      this.groups[groupName].playAllSounds();
+    } else {
+      Object.keys(this.groups).forEach((groupName) => {
+        this.groups[groupName].playAllSounds();
+      });
+    }
+
+    return this;
+  }
+
+  pauseSounds(names: string | string[], groupName: string = 'default') {
+    if (!(groupName in this.groups)) {
+      throw new Error();
+    }
+
+    this.groups[groupName].pauseSounds(names);
+
+    return this;
+  }
+
+  pauseAllSounds(groupName?: string) {
+    if (groupName) {
+      if (!(groupName in this.groups)) {
+        throw new Error();
+      }
+
+      this.groups[groupName].pauseAllSounds();
+    } else {
+      Object.keys(this.groups).forEach((groupName) => {
+        this.groups[groupName].pauseAllSounds();
+      });
+    }
 
     return this;
   }
@@ -206,11 +249,11 @@ export class SoundManager implements ISoundManager {
       }
 
       this.groups[groupName].stopAllSounds();
+    } else {
+      Object.keys(this.groups).forEach((groupName) => {
+        this.groups[groupName].stopAllSounds();
+      });
     }
-
-    Object.keys(this.groups).forEach((groupName) => {
-      this.groups[groupName].stopAllSounds();
-    });
 
     return this;
   }

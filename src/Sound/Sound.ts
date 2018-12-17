@@ -131,24 +131,32 @@ export class Sound implements ISound {
   }
 
   pause() {
-    this.sourceNode.stop();
+    if (this.playing) {
+      this.sourceNode.stop();
+    }
+
     this.__pausedTime = this.trackPosition;
     this.__startedTime = 0;
     this.__playing = false;
+
     return this;
   }
 
   stop() {
-    this.sourceNode.stop();
+    if (this.playing) {
+      this.sourceNode.stop();
+    }
+
     this.__startedTime = 0;
     this.__pausedTime = 0;
     this.__playing = false;
+
     return this;
   }
 
   rewind(seconds: number) {
-    this.sourceNode.stop();
     if (this.playing) {
+      this.sourceNode.stop();
       this.__startedTime += seconds;
       this.sourceNode.start(this.trackPosition);
     } else {
@@ -159,8 +167,8 @@ export class Sound implements ISound {
   }
 
   fastForward(seconds: number) {
-    this.sourceNode.stop();
     if (this.playing) {
+      this.sourceNode.stop();
       this.__startedTime -= seconds;
       this.sourceNode.start(this.trackPosition);
     } else {
