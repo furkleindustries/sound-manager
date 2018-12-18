@@ -6,6 +6,10 @@ import {
 } from './ISoundOptions';
 
 export class Sound implements ISound {
+  private __startedTime: number = 0;
+  private __pausedTime: number = 0; 
+  private __playing: boolean = false;
+
   private __audioElement: HTMLAudioElement | null = null;
 
   isWebAudio: () => boolean;
@@ -27,6 +31,7 @@ export class Sound implements ISound {
     if (context) {
       this.isWebAudio = () => true;
       this.getContextCurrentTime = () => context.currentTime;
+
       if (buffer) {
         const sourceNode = context.createBufferSource();
         sourceNode.buffer = buffer;
@@ -74,33 +79,28 @@ export class Sound implements ISound {
     }
   }
 
-  getVolume() {
-    if (this.isWebAudio()) {
-      return this.getGainNode().gain.value;
-    } else {
-      return this.__audioElement!.volume;
-    }
-  }
-
-  setVolume(value: number): ISound {
-    if (this.isWebAudio()) {
-      this.getGainNode().gain.setValueAtTime(
-        value,
-        this.getContextCurrentTime(),
-      );
-    } else {        
-      this.__audioElement!.volume = value;
-    }
-
-    return this;
-  };
-
   getInputNode() {
     return this.getSourceNode();
   }
 
   getOutputNode() {
     return this.getGainNode();
+  }
+
+  getPlaying() {
+    if (this.isWebAudio()) {
+      return this.__playing;
+    } else {
+      return !this.__audioElement!.paused;
+    }
+  }
+
+  getLoop() {
+    if (this.isWebAudio()) {
+      return this.getSourceNode().loop;
+    } else {
+      return this.__audioElement!.loop;
+    }
   }
 
   setLoop(doLoop: boolean) {
@@ -113,9 +113,30 @@ export class Sound implements ISound {
     return this;
   }
 
+  getVolume() {
+    if (this.isWebAudio()) {
+      return this.getGainNode().gain.value;
+    } else {
+      return this.__audioElement!.volume;
+    }
+  }
+
+  setVolume(value: number): this {
+    if (this.isWebAudio()) {
+      this.getGainNode().gain.setValueAtTime(
+        value,
+        this.getContextCurrentTime(),
+      );
+    } else {        
+      this.__audioElement!.volume = value;
+    }
+
+    return this;
+  }
+
   getTrackPosition() {
     if (this.isWebAudio()) {
-      if (this.playing) {
+      if (this.getPlaying()) {
         return this.getContextCurrentTime() - this.__startedTime;
       } else {
         return this.__pausedTime;
@@ -127,7 +148,7 @@ export class Sound implements ISound {
 
   setTrackPosition(trackPosition: number) {
     if (this.isWebAudio()) {
-      if (this.playing) {
+      if (this.getPlaying()) {
         this.__startedTime = this.getContextCurrentTime() - trackPosition;
       } else {
         this.__pausedTime = trackPosition;
@@ -140,57 +161,79 @@ export class Sound implements ISound {
   }
 
   play() {
-    const trackPosition = this.trackPosition || 0;
-    this.sourceNode.start(trackPosition);
-    this.__startedTime = this.getContextCurrentTime() - trackPosition;
-    this.__pausedTime = 0;
-    this.__playing = true;
+    const trackPosition = this.getTrackPosition();
+    if (this.isWebAudio()) {
+      this.getSourceNode().start(trackPosition);
+      this.__startedTime = this.getContextCurrentTime() - trackPosition;
+      this.__pausedTime = 0;
+      this.__playing = true;
+    } else {
+      this.__audioElement!.currentTime = 0;
+      this.__audioElement!.play();
+    }
     return this;
   }
 
   pause() {
-    if (this.playing) {
-      this.sourceNode.stop();
-    }
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+      }
 
-    this.__pausedTime = this.trackPosition;
-    this.__startedTime = 0;
-    this.__playing = false;
+      this.__pausedTime = this.getTrackPosition();
+      this.__startedTime = 0;
+      this.__playing = false;
+    } else {
+      this.__audioElement!.pause();
+    }
 
     return this;
   }
 
   stop() {
-    if (this.playing) {
-      this.sourceNode.stop();
-    }
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+      }
 
-    this.__startedTime = 0;
-    this.__pausedTime = 0;
-    this.__playing = false;
+      this.__startedTime = 0;
+      this.__pausedTime = 0;
+      this.__playing = false;
+    } else {
+      this.__audioElement!.pause();
+      this.__audioElement!.currentTime = 0;
+    }
 
     return this;
   }
 
   rewind(seconds: number) {
-    if (this.playing) {
-      this.sourceNode.stop();
-      this.__startedTime += seconds;
-      this.sourceNode.start(this.trackPosition);
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+        this.__startedTime += seconds;
+        this.getSourceNode().start(this.getTrackPosition());
+      } else {
+        this.__pausedTime -= seconds;
+      }
     } else {
-      this.__pausedTime -= seconds;
+      this.__audioElement!.currentTime -= seconds;
     }
 
     return this;
   }
 
   fastForward(seconds: number) {
-    if (this.playing) {
-      this.sourceNode.stop();
-      this.__startedTime -= seconds;
-      this.sourceNode.start(this.trackPosition);
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+        this.__startedTime -= seconds;
+        this.getSourceNode().start(this.getTrackPosition());
+      } else {
+        this.__pausedTime += seconds;
+      }
     } else {
-      this.__pausedTime += seconds;
+      this.__audioElement!.currentTime += seconds;
     }
 
     return this;

@@ -8,6 +8,9 @@ import {
   IGroupsMap,
 } from './IGroupsMap';
 import {
+  IGroupOptions,
+} from '../Group/IGroupOptions';
+import {
   ISoundManager,
 } from './ISoundManager';
 import {
@@ -19,7 +22,6 @@ import {
 import {
   ISoundOptions,
 } from '../Sound/ISoundOptions';
-import { IGroupOptions } from '../Group/IGroupOptions';
 
 export class SoundManager implements ISoundManager {
   private __groups: IGroupsMap = Object.freeze({});
@@ -37,7 +39,7 @@ export class SoundManager implements ISoundManager {
   public getVolume: () => number;
   public setVolume: (value: number) => this;
 
-  constructor(options: ISoundManagerOptions) {
+  constructor(options?: ISoundManagerOptions) {
     const opts = options || {};
     const {
       groups,
@@ -126,7 +128,7 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  createGroup(options: Partial<IGroupOptions>) {
+  createGroup(options?: Partial<IGroupOptions>) {
     if (this.isWebAudio()) {
       return new Group(Object.assign({}, options, {
         context: this.getAudioContext(),
@@ -137,7 +139,12 @@ export class SoundManager implements ISoundManager {
   }
 
   getGroup(name: string) {
-    return this.groups[name] || null;
+    const group = this.groups[name];
+    if (!group) {
+      throw new Error();
+    }
+
+    return group;
   }
 
   addGroups(groups: IGroupsMap) {
@@ -185,13 +192,14 @@ export class SoundManager implements ISoundManager {
     }
 
     if (!('default' in this.groups)) {
+      /* Re-add a (now-empty) default group. */
       if (this.isWebAudio()) {
         this.addGroups({
-          default: new Group({ context: this.getAudioContext(), }),
+          default: this.createGroup({ context: this.getAudioContext(), }),
         });
       } else {
         this.addGroups({
-          default: this.createGroup('default'),
+          default: this.createGroup(),
         });
       }
     }
@@ -214,11 +222,8 @@ export class SoundManager implements ISoundManager {
   }
 
   getSound(name: string, groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    return this.groups[groupName].sounds[name] || null;
+    const group = this.getGroup(groupName);
+    return group.getSound(name);
   }
 
   addSounds(sounds: ISoundsMap, groupName: string = 'default') {
@@ -232,25 +237,16 @@ export class SoundManager implements ISoundManager {
   }
 
   removeSounds(names: string | string[], groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].removeSounds(names);
-
+    this.getGroup(groupName).removeSounds(names);
     return this;
   }
 
   removeAllSounds(groupName?: string) {
     if (groupName) {
-      if (!(groupName in this.groups)) {
-        throw new Error();
-      }
-
-      this.groups[groupName].removeAllSounds();
+      this.getGroup(groupName).removeAllSounds();
     } else {
-      Object.keys(this.groups).forEach((key) => {
-        this.groups[key].removeAllSounds();
+      Object.keys(this.groups).forEach((groupName) => {
+        this.getGroup(groupName).removeAllSounds();
       });
     }
 
@@ -258,25 +254,16 @@ export class SoundManager implements ISoundManager {
   }
 
   playSounds(names: string | string[], groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].playSounds(names);
-
+    this.getGroup(groupName).playSounds(names);
     return this;
   }
 
   playAllSounds(groupName?: string) {
     if (groupName) {
-      if (!(groupName in this.groups)) {
-        throw new Error();
-      }
-
-      this.groups[groupName].playAllSounds();
+      this.getGroup(groupName).playAllSounds();
     } else {
       Object.keys(this.groups).forEach((groupName) => {
-        this.groups[groupName].playAllSounds();
+        this.getGroup(groupName).playAllSounds();
       });
     }
 
@@ -284,25 +271,16 @@ export class SoundManager implements ISoundManager {
   }
 
   pauseSounds(names: string | string[], groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].pauseSounds(names);
-
+    this.getGroup(groupName).pauseSounds(names);
     return this;
   }
 
   pauseAllSounds(groupName?: string) {
     if (groupName) {
-      if (!(groupName in this.groups)) {
-        throw new Error();
-      }
-
-      this.groups[groupName].pauseAllSounds();
+      this.getGroup(groupName).pauseAllSounds();
     } else {
       Object.keys(this.groups).forEach((groupName) => {
-        this.groups[groupName].pauseAllSounds();
+        this.getGroup(groupName).pauseAllSounds();
       });
     }
 
@@ -310,25 +288,16 @@ export class SoundManager implements ISoundManager {
   }
 
   stopSounds(names: string | string[], groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].stopSounds(names);
-
+    this.getGroup(groupName).stopSounds(names);
     return this;
   }
 
   stopAllSounds(groupName?: string) {
     if (groupName) {
-      if (!(groupName in this.groups)) {
-        throw new Error();
-      }
-
-      this.groups[groupName].stopAllSounds();
+      this.getGroup(groupName).stopAllSounds();
     } else {
       Object.keys(this.groups).forEach((groupName) => {
-        this.groups[groupName].stopAllSounds();
+        this.getGroup(groupName).stopAllSounds();
       });
     }
 
@@ -336,48 +305,20 @@ export class SoundManager implements ISoundManager {
   }
 
   getGroupVolume(name: string = 'default') {
-    if (!(name in this.groups)) {
-      throw new Error();
-    }
-
-    return this.groups[name].getVolume();
+    return this.getGroup(name).getVolume();
   }
 
   setGroupVolume(value: number, groupName: string = 'default'): ISoundManager {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].setVolume(value);
-
+    this.getGroup(groupName).setVolume(value);
     return this;
   }
 
   getSoundVolume(name: string, groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    const group = this.groups[groupName];
-    if (!(name in group.sounds)) {
-      throw new Error();
-    }
-
-    return group.sounds[name].volume;
+    return this.getGroup(groupName).getSound(name).getVolume();
   }
 
   setSoundVolume(name: string, value: number, groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    const group = this.groups[groupName];
-    if (!(name in group.sounds)) {
-      throw new Error();
-    }
-
-    group.sounds[name].setVolume(value);
-
+    this.getGroup(groupName).getSound(name).setVolume(value);
     return this;
   }
 }

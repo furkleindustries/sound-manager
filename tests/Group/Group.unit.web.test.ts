@@ -35,38 +35,38 @@ describe('Group unit tests.', () => {
 
   it('Has an inputNode property which is an instance of AudioNode.', () => {
     const group = createGroup();
-    expect(group.inputNode).toBeInstanceOf(AudioNode);
+    expect(group.getInputNode()).toBeInstanceOf(AudioNode);
   });
 
   it('Has an outputNode property which is an instance of AudioNode.', () => {
     const group = createGroup();
-    expect(group.outputNode).toBeInstanceOf(AudioNode);
+    expect(group.getOutputNode()).toBeInstanceOf(AudioNode);
   });
 
   it('Has an analyserNode property which is an instance of AnalyserNode.', () => {
     const group = createGroup();
-    expect(group.analyserNode).toBeInstanceOf(AnalyserNode);
+    expect(group.getAnalyserNode()).toBeInstanceOf(AnalyserNode);
   });
 
   it('Has a gainNode property which is an instance of GainNode.', () => {
     const group = createGroup();
-    expect(group.gainNode).toBeInstanceOf(GainNode);
+    expect(group.getGainNode()).toBeInstanceOf(GainNode);
   });
 
   it('Has a volume property which is a number between 0 and 1.', () => {
     const group = createGroup();
-    expect(group.volume >= 0 && group.volume <= 1).toBe(true);
+    expect(group.getVolume() >= 0 && group.getVolume() <= 1).toBe(true);
   });
 
   it('Has a volume property which defaults to 1.', () => {
     const group = createGroup();
-    expect(group.volume).toBe(1);
+    expect(group.getVolume()).toBe(1);
   });
 
   it('Allows setting the volume through the options object.', () => {
     const volume = 0.5;
     const group = createGroup({ volume, });
-    expect(group.volume).toBe(volume);
+    expect(group.getVolume()).toBe(volume);
   });
 
   it('Has a getSound function which returns the sound from its key.', () => {
@@ -225,6 +225,6 @@ describe('Group unit tests.', () => {
     const newVal = 0.333213;
     group.setVolume(newVal);
 
-    expect(group.volume).toBe(newVal);
+    expect(group.getVolume()).toBe(newVal);
   });
 });

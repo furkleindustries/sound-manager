@@ -106,7 +106,7 @@ export class Group implements IGroup {
 
     if (this.isWebAudio()) {
       names.forEach((soundName) => {
-        const sound = sounds[soundName];
+        const sound = this.getSound(soundName);
         if (sound.isWebAudio()) {
           sound.getOutputNode().connect(this.getOutputNode());
         }
@@ -155,7 +155,7 @@ export class Group implements IGroup {
 
       this.sounds[name].play();
     };
-    
+
     if (typeof names === 'string') {
       play(names);
     } else {
@@ -177,7 +177,7 @@ export class Group implements IGroup {
 
       this.sounds[name].pause();
     };
-    
+
     if (typeof names === 'string') {
       pause(names);
     } else {
@@ -193,11 +193,7 @@ export class Group implements IGroup {
 
   stopSounds(names: string | string[]) {
     const stop = (name: string) => {
-      if (!(name in this.sounds)) {
-        throw new Error();
-      }
-
-      this.sounds[name].stop();
+      this.getSound(name).stop();
     };
     
     if (typeof names === 'string') {

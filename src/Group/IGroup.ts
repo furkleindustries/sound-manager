@@ -14,7 +14,7 @@ import {
 export interface IGroup extends IWebAudioNode, IAnalysableNode {
   readonly sounds: ISoundsMap;
   getContextCurrentTime(): number;
-  getSound(name: string): ISound | null;
+  getSound(name: string): ISound;
   addSounds(sounds: ISoundsMap): IGroup;
   removeSounds(names: string | string[]): IGroup;
   removeAllSounds(): IGroup;

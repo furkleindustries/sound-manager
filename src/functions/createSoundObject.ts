@@ -13,16 +13,14 @@ import {
 
 export const createSoundObject = (
   url: string,
-  options: ISoundOptions,
+  options?: ISoundOptions,
 ): Promise<ISound | HTMLAudioElement> =>
 {
-  if (!options) {
-    throw new Error();
-  }
+  const opts = options || {};
 
   const {
     context,
-  } = options;
+  } = opts;
 
   return new Promise<ISound | HTMLAudioElement>((resolve, reject) => {
     if (context) {
@@ -31,10 +29,16 @@ export const createSoundObject = (
           buffer,
           ...options,
         }));
-      }, () => {
+      }, (err) => {
+        console.warn('Loading Web Audio failed. Falling back to HTML5 audio.');
+        console.warn(err);
         try {
-          return resolve(new Audio(url));
+          return resolve(new Sound({
+            audioElement: new Audio(url),
+            ...options,
+          }));
         } catch (e) {
+          console.error('HTML5 Audio failed too. Cannot construct Sound.');
           return reject(e);
         }
       });
