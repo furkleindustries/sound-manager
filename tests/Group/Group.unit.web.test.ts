@@ -19,9 +19,10 @@ describe('Group unit tests.', () => {
 
   it('Allows setting the sounds property through the options object.', () => {
     const sound = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         connect: jest.fn(),
-      },
+      }),
     } as any;
 
     const group = createGroup({
@@ -82,15 +83,17 @@ describe('Group unit tests.', () => {
     const group = createGroup();
 
     const soundOne = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         connect: jest.fn(),
-      },
+      }),
     } as any;
 
     const soundTwo = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         connect: jest.fn(),
-      },
+      }),
     } as any;
 
     group.addSounds({
@@ -107,32 +110,36 @@ describe('Group unit tests.', () => {
   it('Has an addSounds function which connects the sound to the output node.', () => {
     const group = createGroup();
 
+    const mock = jest.fn();
     const sound = {
-      outputNode: {
-        connect: jest.fn(),
-      },
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
+        connect: mock,
+      }),
     } as any;
 
     group.addSounds({
       test: sound,
     });
 
-    expect(sound.outputNode.connect).toBeCalledTimes(1);
+    expect(mock).toBeCalledTimes(1);
   });
 
   it('Has a removeSounds function which removes the provided string from the sounds map.', () => {
     const group = createGroup();
 
     const soundOne = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     const soundTwo = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     // @ts-ignore
@@ -152,15 +159,17 @@ describe('Group unit tests.', () => {
     const group = createGroup();
 
     const soundOne = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     const soundTwo = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     // @ts-ignore
@@ -177,10 +186,12 @@ describe('Group unit tests.', () => {
   it('Has a removeSounds function which disconnects the output node.', () => {
     const group = createGroup();
 
+    const mock = jest.fn();
     const sound = {
-      outputNode: {
-        disconnect: jest.fn(),
-      },
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
+        disconnect: mock,
+      }),
     } as any;
 
     // @ts-ignore
@@ -188,7 +199,7 @@ describe('Group unit tests.', () => {
 
     group.removeSounds('test');
 
-    expect(sound.outputNode.disconnect).toBeCalledTimes(1);
+    expect(mock).toBeCalledTimes(1);
   });
 
   it('Has a clearAllSounds function which passes the entire sounds map to removeSounds.', () => {
@@ -196,15 +207,17 @@ describe('Group unit tests.', () => {
     group.removeSounds = jest.fn();
 
     const soundOne = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     const soundTwo = {
-      outputNode: {
+      isWebAudio: jest.fn(() => true),
+      getOutputNode: () => ({
         disconnect: jest.fn(),
-      },
+      }),
     } as any;
 
     const sounds = {

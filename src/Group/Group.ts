@@ -93,7 +93,12 @@ export class Group implements IGroup {
   }
 
   getSound(name: string) {
-    return this.sounds[name] || null;
+    const sound = this.sounds[name];
+    if (!sound) {
+      throw new Error();
+    }
+
+    return sound;
   }
 
   addSounds(sounds: ISoundsMap) {
@@ -106,7 +111,7 @@ export class Group implements IGroup {
 
     if (this.isWebAudio()) {
       names.forEach((soundName) => {
-        const sound = this.getSound(soundName);
+        const sound = sounds[soundName];
         if (sound.isWebAudio()) {
           sound.getOutputNode().connect(this.getOutputNode());
         }
