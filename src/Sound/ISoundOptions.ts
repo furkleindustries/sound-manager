@@ -1,6 +1,7 @@
 export interface ISoundOptions {
-  buffer: AudioBuffer;
-  context: AudioContext;
+  audioElement?: HTMLAudioElement;
+  buffer?: AudioBuffer;
+  context?: AudioContext;
   autoplay?: boolean;
   loop?: boolean;
   trackPosition?: number;

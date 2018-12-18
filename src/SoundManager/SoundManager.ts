@@ -1,49 +1,41 @@
 import {
-  ISoundManager,
-} from './ISoundManager';
+  createSoundObject,
+} from '../functions/createSoundObject';
+import {
+  Group,
+} from '../Group/Group';
 import {
   IGroupsMap,
 } from './IGroupsMap';
+import {
+  ISoundManager,
+} from './ISoundManager';
 import {
   ISoundManagerOptions,
 } from './ISoundManagerOptions';
 import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
-import { Group } from '../Group/Group';
+import {
+  ISoundOptions,
+} from '../Sound/ISoundOptions';
+import { IGroupOptions } from '../Group/IGroupOptions';
 
 export class SoundManager implements ISoundManager {
   private __groups: IGroupsMap = Object.freeze({});
   get groups() {
     return this.__groups;
   }
+ 
+  public isWebAudio: () => boolean;
 
-  private __audioContext: AudioContext;
-  get audioContext() {
-    return this.__audioContext;
-  }
-
-  get inputNode() {
-    return this.gainNode;
-  }
-
-  get outputNode() {
-    return this.analyserNode;
-  }
-
-  private __analyserNode: AnalyserNode;
-  get analyserNode() {
-    return this.__analyserNode;
-  }
-
-  private __gainNode: GainNode;
-  get gainNode() {
-    return this.__gainNode;
-  }
-
-  get masterVolume() {
-    return this.gainNode.gain.value;
-  }
+  public getAudioContext: () => AudioContext;
+  public getInputNode: () => AudioNode;
+  public getOutputNode: () => AudioNode;
+  public getGainNode: () => GainNode;
+  public getAnalyserNode: () => AnalyserNode;
+  public getVolume: () => number;
+  public setVolume: (value: number) => this;
 
   constructor(options: ISoundManagerOptions) {
     const opts = options || {};
@@ -53,32 +45,94 @@ export class SoundManager implements ISoundManager {
       masterVolume,
     } = opts;
 
+    this.isWebAudio = () => true;
     if (context) {
-      this.__audioContext = context;
-    } else {
-      this.__audioContext = new (
+      this.getAudioContext = () => context;
+    } else if (
+      AudioContext ||
+      // @ts-ignore
+      webkitAudioContext)
+    {
+      this.getAudioContext = () => new (
         AudioContext ||
         // @ts-ignore
         webkitAudioContext
       )();
+    } else {
+      this.isWebAudio = () => false;
+      this.getAudioContext = () => {
+        throw new Error();
+      };
     }
 
-    this.__analyserNode = this.audioContext.createAnalyser();
-    this.__gainNode = this.audioContext.createGain();
+    if (this.isWebAudio()) {
+      let analyserNode = this.getAudioContext().createAnalyser();
+      this.getAnalyserNode = () => analyserNode;
+      let gainNode = this.getAudioContext().createGain();
+      this.getGainNode = () => gainNode;
+  
+      this.getInputNode = () => this.getAnalyserNode();
+      this.getOutputNode = () => this.getGainNode();
 
-    this.inputNode.connect(this.outputNode);
-    this.outputNode.connect(this.audioContext.destination);
+      this.getInputNode().connect(this.getOutputNode());
+      this.getOutputNode().connect(this.getAudioContext().destination);
+
+      this.getVolume = () => this.getGainNode().gain.value;
+      this.setVolume = (value: number) => {
+        this.getGainNode().gain.setValueAtTime(
+          value,
+          this.getAudioContext().currentTime,
+        );
+
+        return this;
+      }
+    } else {
+      this.getAnalyserNode = () => {
+        throw new Error();
+      };
+
+      this.getGainNode = () => {
+        throw new Error();
+      };
+
+      this.getInputNode = () => {
+        throw new Error();
+      };
+
+      this.getOutputNode = () => {
+        throw new Error();
+      };
+
+      let volume = 1;
+      this.getVolume = () => volume;
+      this.setVolume = (value: number) => {
+        volume = value;
+        return this;
+      };
+    }
 
     if (groups) {
       this.__groups = Object.freeze(Object.assign({}, groups));
       Object.keys(this.groups).forEach((groupName) => {
         const group = this.groups[groupName];
-        group.outputNode.connect(this.inputNode);
+        if (this.isWebAudio()) {
+          group.getOutputNode().connect(this.getInputNode());
+        }
       });
     }
 
     if (typeof masterVolume !== 'undefined') {
-      this.setMasterVolume(masterVolume);
+      this.setVolume(masterVolume);
+    }
+  }
+
+  createGroup(options: Partial<IGroupOptions>) {
+    if (this.isWebAudio()) {
+      return new Group(Object.assign({}, options, {
+        context: this.getAudioContext(),
+      }));
+    } else {
+      return new Group(Object.assign({}, options));
     }
   }
 
@@ -94,10 +148,14 @@ export class SoundManager implements ISoundManager {
       }
     });
 
-    names.forEach((groupName) => {
-      const group = groups[groupName];
-      group.outputNode.connect(this.inputNode);
-    });
+    if (this.isWebAudio()) {
+      names.forEach((groupName) => {
+        const group = groups[groupName];
+        if (group.isWebAudio()) {
+          group.getOutputNode().connect(this.getInputNode());
+        }
+      });
+    }
 
     this.__groups = Object.freeze(Object.assign(
       {},
@@ -112,7 +170,10 @@ export class SoundManager implements ISoundManager {
     const remove = (groupName: string) => {
       const groups = Object.assign(this.groups);
       const group = groups[groupName];
-      group.outputNode.disconnect();
+      if (group.isWebAudio()) {
+        group.getOutputNode().disconnect();
+      }
+
       delete groups[groupName];
       this.__groups = Object.freeze(groups);
     };
@@ -124,9 +185,15 @@ export class SoundManager implements ISoundManager {
     }
 
     if (!('default' in this.groups)) {
-      this.addGroups({
-        default: new Group({ context: this.audioContext, }),
-      });
+      if (this.isWebAudio()) {
+        this.addGroups({
+          default: new Group({ context: this.getAudioContext(), }),
+        });
+      } else {
+        this.addGroups({
+          default: this.createGroup('default'),
+        });
+      }
     }
 
     return this;
@@ -134,6 +201,16 @@ export class SoundManager implements ISoundManager {
 
   removeAllGroups() {
     return this.removeGroups(Object.keys(this.groups));
+  }
+
+  createSound(url: string, options?: Partial<ISoundOptions>) {
+    if (this.isWebAudio()) {
+      return createSoundObject(url, Object.assign({}, options, {
+        context: this.getAudioContext(),
+      } as ISoundOptions));
+    } else {
+      return createSoundObject(url, Object.assign({}, options));
+    }
   }
 
   getSound(name: string, groupName: string = 'default') {
@@ -258,17 +335,12 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  setMasterVolume(value: number) {
-    this.gainNode.gain.setValueAtTime(value, this.audioContext.currentTime);
-    return this;
-  }
-
   getGroupVolume(name: string = 'default') {
     if (!(name in this.groups)) {
       throw new Error();
     }
 
-    return this.groups[name].volume;
+    return this.groups[name].getVolume();
   }
 
   setGroupVolume(value: number, groupName: string = 'default'): ISoundManager {

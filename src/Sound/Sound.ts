@@ -6,52 +6,16 @@ import {
 } from './ISoundOptions';
 
 export class Sound implements ISound {
-  get inputNode() {
-    return this.sourceNode;
-  }
+  private __audioElement: HTMLAudioElement | null = null;
 
-  get outputNode() {
-    return this.gainNode;
-  }
-
-  private __sourceNode: AudioBufferSourceNode
-  get sourceNode() {
-    return this.__sourceNode;
-  }
-
-  private __gainNode: GainNode;
-  get gainNode() {
-    return this.__gainNode;
-  }
-
-  get volume() {
-    return this.gainNode.gain.value;
-  }
-
-  get loop() {
-    return this.__sourceNode.loop;
-  }
-  
-  private __startedTime: number = 0;
-  private __pausedTime: number = 0;
-  
-  get trackPosition() {
-    if (this.playing) {
-      return this.getContextCurrentTime() - this.__startedTime;
-    }
-
-    return this.__pausedTime;
-  }
-
-  private __playing: boolean = false;
-  get playing() {
-    return this.__playing;
-  }
-
+  isWebAudio: () => boolean;
   getContextCurrentTime: () => number;
+  getSourceNode: () => AudioBufferSourceNode;
+  getGainNode: () => GainNode;
 
   constructor(options: ISoundOptions) {
     const {
+      audioElement,
       autoplay,
       buffer,
       context,
@@ -59,22 +23,36 @@ export class Sound implements ISound {
       trackPosition,
       volume,
     } = options;
-    
-    if (!context) {
-      throw new Error();
-    }
-    
-    this.getContextCurrentTime = () => context.currentTime;
 
-    this.__startedTime = this.getContextCurrentTime();
+    if (context) {
+      this.isWebAudio = () => true;
+      this.getContextCurrentTime = () => context.currentTime;
+      if (buffer) {
+        const sourceNode = context.createBufferSource();
+        sourceNode.buffer = buffer;
+        this.getSourceNode = () => sourceNode;
 
-    if (buffer) {
-      const sourceNode = context.createBufferSource();
-      sourceNode.buffer = buffer;
-      this.__sourceNode = sourceNode;
-      const gainNode = context.createGain();
-      sourceNode.connect(gainNode);
-      this.__gainNode = gainNode;
+        const gainNode = context.createGain();
+        this.getSourceNode().connect(gainNode);
+        this.getGainNode = () => gainNode;
+      } else {
+        throw new Error();
+      }
+    } else if (audioElement) {
+      this.__audioElement = audioElement;
+
+      this.isWebAudio = () => false;
+      this.getContextCurrentTime = () => {
+        throw new Error();
+      };
+
+      this.getSourceNode = () => {
+        throw new Error();
+      };
+
+      this.getGainNode = () => {
+        throw new Error();
+      };
     } else {
       throw new Error();
     }
@@ -96,26 +74,66 @@ export class Sound implements ISound {
     }
   }
 
-  setVolume(value: number) {
-    if (value >= 0 && value <= 1) {
-      this.gainNode.gain.setValueAtTime(value, this.getContextCurrentTime());
+  getVolume() {
+    if (this.isWebAudio()) {
+      return this.getGainNode().gain.value;
     } else {
-      throw new Error();
+      return this.__audioElement!.volume;
+    }
+  }
+
+  setVolume(value: number): ISound {
+    if (this.isWebAudio()) {
+      this.getGainNode().gain.setValueAtTime(
+        value,
+        this.getContextCurrentTime(),
+      );
+    } else {        
+      this.__audioElement!.volume = value;
+    }
+
+    return this;
+  };
+
+  getInputNode() {
+    return this.getSourceNode();
+  }
+
+  getOutputNode() {
+    return this.getGainNode();
+  }
+
+  setLoop(doLoop: boolean) {
+    if (this.isWebAudio()) {
+      this.getSourceNode().loop = doLoop;
+    } else {
+      this.__audioElement!.loop = doLoop;
     }
 
     return this;
   }
 
-  setLoop(doLoop: boolean) {
-    this.sourceNode.loop = doLoop;
-    return this;
+  getTrackPosition() {
+    if (this.isWebAudio()) {
+      if (this.playing) {
+        return this.getContextCurrentTime() - this.__startedTime;
+      } else {
+        return this.__pausedTime;
+      }
+    } else {
+      return this.__audioElement!.currentTime;
+    }
   }
 
   setTrackPosition(trackPosition: number) {
-    if (this.playing) {
-      this.__startedTime = this.getContextCurrentTime() - trackPosition;
+    if (this.isWebAudio()) {
+      if (this.playing) {
+        this.__startedTime = this.getContextCurrentTime() - trackPosition;
+      } else {
+        this.__pausedTime = trackPosition;
+      }
     } else {
-      this.__pausedTime = trackPosition;
+      this.__audioElement!.currentTime = trackPosition;
     }
 
     return this;

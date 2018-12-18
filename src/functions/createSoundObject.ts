@@ -2,28 +2,42 @@ import {
   ISound,
 } from '../Sound/ISound';
 import {
+  ISoundOptions,
+} from '../Sound/ISoundOptions';
+import {
   loadAudioBuffer,
 } from './loadAudioBuffer';
 import {
   Sound,
 } from '../Sound/Sound';
-import { ISoundOptions } from '../Sound/ISoundOptions';
 
 export const createSoundObject = (
   url: string,
-  context: AudioContext,
-  options?: ISoundOptions,
-): Promise<ISound> =>
+  options: ISoundOptions,
+): Promise<ISound | HTMLAudioElement> =>
 {
-  return new Promise((resolve, reject) => {
-    loadAudioBuffer(url, context).then((buffer) => {
-      return resolve(new Sound({
-        buffer,
-        context,
-        ...options,
-      }));
-    }, (err) => {
-      return reject(err);
-    })
+  if (!options) {
+    throw new Error();
+  }
+
+  const {
+    context,
+  } = options;
+
+  return new Promise<ISound | HTMLAudioElement>((resolve, reject) => {
+    if (context) {
+      loadAudioBuffer(url, context).then((buffer) => {
+        return resolve(new Sound({
+          buffer,
+          ...options,
+        }));
+      }, () => {
+        try {
+          return resolve(new Audio(url));
+        } catch (e) {
+          return reject(e);
+        }
+      });
+    }
   });
 };

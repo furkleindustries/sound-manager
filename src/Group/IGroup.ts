@@ -1,19 +1,19 @@
 import {
-  IAudioInputOutputNode,
-} from '../interfaces/IAudioInputOutputNode';
+  IAnalysableNode,
+} from '../interfaces/IAnalysableNode';
+import {
+  ISound,
+} from '../Sound/ISound';
 import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  ISound,
-} from '../Sound/ISound';
+  IWebAudioNode,
+} from '../interfaces/IWebAudioNode';
 
-export interface IGroup extends IAudioInputOutputNode {
+export interface IGroup extends IWebAudioNode, IAnalysableNode {
   readonly sounds: ISoundsMap;
-  readonly analyserNode: AnalyserNode;
-  readonly gainNode: GainNode;
-  readonly volume: number;
-  getContextCurrentTime: () => number;
+  getContextCurrentTime(): number;
   getSound(name: string): ISound | null;
   addSounds(sounds: ISoundsMap): IGroup;
   removeSounds(names: string | string[]): IGroup;
@@ -24,5 +24,4 @@ export interface IGroup extends IAudioInputOutputNode {
   pauseAllSounds(): IGroup;
   stopSounds(names: string | string[]): IGroup;
   stopAllSounds(): IGroup;
-  setVolume(value: number): IGroup;
 }

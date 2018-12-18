@@ -3,7 +3,7 @@ import {
 } from './ISoundsMap';
 
 export interface IGroupOptions {
-  context: AudioContext;
+  context?: AudioContext;
   sounds?: ISoundsMap;
   volume?: number;
 }

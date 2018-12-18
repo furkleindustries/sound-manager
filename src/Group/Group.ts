@@ -14,29 +14,12 @@ export class Group implements IGroup {
     return this.__sounds;
   }
 
-  get inputNode() {
-    return this.gainNode;
-  }
-
-  get outputNode() {
-    return this.analyserNode;
-  }
-
-  private __analyserNode: AnalyserNode;
-  get analyserNode() {
-    return this.__analyserNode;
-  }
-
-  private __gainNode: GainNode;
-  get gainNode() {
-    return this.__gainNode;
-  }
-
-  get volume() {
-    return this.gainNode.gain.value;
-  }
-
+  isWebAudio: () => boolean;
   getContextCurrentTime: () => number;
+  getAnalyserNode: () => AnalyserNode;
+  getGainNode: () => GainNode;
+  getVolume: () => number;
+  setVolume: (value: number) => this;
 
   constructor(options: IGroupOptions) {
     const opts = options || {}
@@ -47,16 +30,50 @@ export class Group implements IGroup {
       volume,
     } = opts;
 
-    if (!context) {
-      throw new Error();
+    if (context) {
+      this.isWebAudio = () => true;
+
+      this.getContextCurrentTime = () => context.currentTime;
+
+      let analyserNode = context.createAnalyser();
+      this.getAnalyserNode = () => analyserNode;
+
+      let gainNode = context.createGain();
+      this.getGainNode = () => gainNode;
+
+      this.getInputNode().connect(this.getOutputNode());
+
+      this.getVolume = () => this.getGainNode().gain.value;
+      this.setVolume = (value: number) => {
+        this.getGainNode().gain.setValueAtTime(
+          value,
+          this.getContextCurrentTime(),
+        );
+
+        return this;
+      };
+    } else {
+      this.isWebAudio = () => false;
+
+      this.getContextCurrentTime = () => {
+        throw new Error();
+      };
+
+      this.getAnalyserNode = () => {
+        throw new Error();
+      };
+
+      this.getGainNode = () => {
+        throw new Error();
+      };
+
+      let volume = 1;
+      this.getVolume = () => volume;
+      this.setVolume = (value: number) => {
+        volume = value;
+        return this;
+      };
     }
-
-    this.getContextCurrentTime = () => context.currentTime;
-
-    this.__gainNode = context.createGain();
-    this.__analyserNode = context.createAnalyser();
-
-    this.inputNode.connect(this.outputNode);
 
     if (sounds && typeof sounds === 'object') {
       this.addSounds(sounds);
@@ -65,6 +82,14 @@ export class Group implements IGroup {
     if (typeof volume !== 'undefined' && volume >= 0 && volume <= 1) {
       this.setVolume(volume);
     }
+  }
+
+  getInputNode(): AudioNode {
+    return this.getGainNode();
+  }
+
+  getOutputNode(): AudioNode {
+    return this.getAnalyserNode();
   }
 
   getSound(name: string) {
@@ -79,10 +104,14 @@ export class Group implements IGroup {
       }
     });
 
-    names.forEach((soundName) => {
-      const sound = sounds[soundName];
-      sound.outputNode.connect(this.outputNode);
-    });
+    if (this.isWebAudio()) {
+      names.forEach((soundName) => {
+        const sound = sounds[soundName];
+        if (sound.isWebAudio()) {
+          sound.getOutputNode().connect(this.getOutputNode());
+        }
+      });
+    }
 
     this.__sounds = Object.freeze(Object.assign(
       {},
@@ -97,7 +126,10 @@ export class Group implements IGroup {
     const remove = (soundName: string) => {
       const sounds = Object.assign({}, this.sounds) as any;
       const sound = sounds[soundName];
-      sound.outputNode.disconnect();
+      if (sound.isWebAudio()) {
+        sound.getOutputNode().disconnect();
+      }
+
       delete sounds[soundName];
       this.__sounds = Object.freeze(sounds);
     };
@@ -179,10 +211,5 @@ export class Group implements IGroup {
 
   stopAllSounds() {
     return this.stopSounds(Object.keys(this.sounds));
-  }
-
-  setVolume(value: number) {
-    this.gainNode.gain.setValueAtTime(value, this.getContextCurrentTime());
-    return this;
   }
 }

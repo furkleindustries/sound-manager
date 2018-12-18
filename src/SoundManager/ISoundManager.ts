@@ -1,29 +1,33 @@
 import {
-  IAudioInputOutputNode,
-} from '../interfaces/IAudioInputOutputNode';
+  IAnalysableNode,
+} from '../interfaces/IAnalysableNode';
 import {
   IGroup,
 } from '../Group/IGroup';
 import {
-  ISound,
-} from '../Sound/ISound';
-import {
   IGroupsMap,
 } from './IGroupsMap';
 import {
+  ISound,
+} from '../Sound/ISound';
+import {
+  ISoundOptions,
+} from '../Sound/ISoundOptions';
+import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
+import {
+  IWebAudioNode,
+} from '../interfaces/IWebAudioNode';
 
-export interface ISoundManager extends IAudioInputOutputNode {
+export interface ISoundManager extends IWebAudioNode, IAnalysableNode {
   readonly groups: IGroupsMap;
-  readonly audioContext: AudioContext;
-  readonly analyserNode: AnalyserNode;
-  readonly gainNode: GainNode;
-  readonly masterVolume: number;
+  getAudioContext(): AudioContext;
   getGroup(name: string): IGroup;
   addGroups(groups: IGroupsMap): ISoundManager;
   removeGroups(names: string | string[]): ISoundManager;
   removeAllGroups(): ISoundManager;
+  createSound(url: string, options?: Partial<ISoundOptions>): Promise<ISound | HTMLAudioElement>;
   getSound(name: string, groupName?: string): ISound | null;
   addSounds(sounds: ISoundsMap, groupName?: string): ISoundManager;
   removeSounds(names: string | string[], groupName?: string): ISoundManager;
@@ -34,7 +38,6 @@ export interface ISoundManager extends IAudioInputOutputNode {
   pauseAllSounds(groupName?: string): ISoundManager;
   stopSounds(names: string | string[], groupName?: string): ISoundManager;
   stopAllSounds(groupName?: string): ISoundManager;
-  setMasterVolume(value: number): ISoundManager;
   getGroupVolume(name?: string): number;
   setGroupVolume(value: number, groupName?: string): ISoundManager;
   getSoundVolume(name: string, groupName?: string): number;

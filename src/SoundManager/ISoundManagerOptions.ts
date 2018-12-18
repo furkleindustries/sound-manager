@@ -3,7 +3,7 @@ import {
 } from './IGroupsMap';
 
 export interface ISoundManagerOptions {
-  groups?: IGroupsMap;
   context?: AudioContext;
+  groups?: IGroupsMap;
   masterVolume?: number;
 }

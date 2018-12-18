@@ -1,17 +1,14 @@
 import {
-  IAudioInputOutputNode,
-} from '../interfaces/IAudioInputOutputNode';
+  IWebAudioNode,
+} from '../interfaces/IWebAudioNode';
 
-export interface ISound extends IAudioInputOutputNode {
-  readonly sourceNode: AudioBufferSourceNode;
-  readonly gainNode: GainNode;
-  readonly volume: number;
-  readonly loop: boolean;
-  readonly trackPosition: number;
-  readonly playing: boolean;
-  getContextCurrentTime: () => number;
-  setVolume(value: number): ISound;
+export interface ISound extends IWebAudioNode {
+  getTrackPosition(): number;
+  getPlaying(): boolean;
+  getLoop(): boolean;
   setLoop(doLoop: boolean): ISound;
+  getSourceNode(): AudioBufferSourceNode;
+  getContextCurrentTime(): number;
   setTrackPosition(seconds: number): ISound;
   play(): ISound;
   pause(): ISound;
