@@ -2,28 +2,46 @@ import {
   ISound,
 } from '../Sound/ISound';
 import {
+  ISoundOptions,
+} from '../Sound/ISoundOptions';
+import {
   loadAudioBuffer,
 } from './loadAudioBuffer';
 import {
   Sound,
 } from '../Sound/Sound';
-import { ISoundOptions } from '../Sound/ISoundOptions';
 
 export const createSoundObject = (
   url: string,
-  context: AudioContext,
   options?: ISoundOptions,
-): Promise<ISound> =>
+): Promise<ISound | HTMLAudioElement> =>
 {
-  return new Promise((resolve, reject) => {
-    loadAudioBuffer(url, context).then((buffer) => {
-      return resolve(new Sound({
-        buffer,
-        context,
-        ...options,
-      }));
-    }, (err) => {
-      return reject(err);
-    })
+  const opts = options || {};
+
+  const {
+    context,
+  } = opts;
+
+  return new Promise<ISound | HTMLAudioElement>((resolve, reject) => {
+    if (context) {
+      loadAudioBuffer(url, context).then((buffer) => {
+        return resolve(new Sound({
+          buffer,
+          ...options,
+        }));
+      }, (err) => {
+        console.warn('Loading Web Audio failed. Falling back to HTML5 audio.');
+        console.warn(err);
+        try {
+          return resolve(new Sound({
+            audioElement: new Audio(url),
+            ...options,
+          }));
+        } catch (e) {
+          console.error('HTML5 Audio failed too. Cannot construct Sound.');
+          return reject(e);
+        }
+      });
+    }
   });
 };

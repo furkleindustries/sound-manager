@@ -8,26 +8,25 @@ export const loadAudioBuffer = (
   request.responseType = 'arraybuffer';
 
   return new Promise((resolve, reject) => {
-    request.onload = function() {
-      // Asynchronously decode the audio file data in request.response
+    request.onload = () => {
       context.decodeAudioData(
         request.response,
-        function (buffer) {
+        (buffer) => {
           if (!buffer) {
             return reject(`error decoding file data:  ${url}`);
           }
 
           return resolve(buffer);
         },
-        function (error) {
+        (error) => {
           return reject(error);
         },
       );
-    }
+    };
 
-    request.onerror = function() {
+    request.onerror = () => {
       reject(`Encountered error loading audio from ${url}`);
-    }
+    };
 
     request.send();
   })

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>sound-manager test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="../dist/bundle.js"></script>
+  </head>
+
+  <body>
+    <script>
+    const context = new AudioContext();
+    const manager = new soundManager.SoundManager();
+    manager.createSound('http://www.hyperion-records.co.uk/audiotest/14%20Clementi%20Piano%20Sonata%20in%20D%20major,%20Op%2025%20No%206%20-%20Movement%202%20Un%20poco%20andante.MP3').then((sound) => {
+      sound.play();
+    });
+    </script>
+  </body>
+</html>

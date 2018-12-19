@@ -6,44 +6,20 @@ import {
 } from './ISoundOptions';
 
 export class Sound implements ISound {
-  private __sourceNode: AudioBufferSourceNode
-  get sourceNode() {
-    return this.__sourceNode;
-  }
-
-  private __gainNode: GainNode;
-  get gainNode() {
-    return this.__gainNode;
-  }
-
-  get volume() {
-    return this.__gainNode.gain.value;
-  }
-
-  get loop() {
-    return this.__sourceNode.loop;
-  }
-  
   private __startedTime: number = 0;
-  private __pausedTime: number = 0;
-  
-  get trackPosition() {
-    if (this.playing) {
-      return this.getContextCurrentTime() - this.__startedTime;
-    }
-
-    return this.__pausedTime;
-  }
-
+  private __pausedTime: number = 0; 
   private __playing: boolean = false;
-  get playing() {
-    return this.__playing;
-  }
 
+  private __audioElement: HTMLAudioElement | null = null;
+
+  isWebAudio: () => boolean;
   getContextCurrentTime: () => number;
+  getSourceNode: () => AudioBufferSourceNode;
+  getGainNode: () => GainNode;
 
   constructor(options: ISoundOptions) {
     const {
+      audioElement,
       autoplay,
       buffer,
       context,
@@ -52,35 +28,50 @@ export class Sound implements ISound {
       volume,
     } = options;
 
-    this.getContextCurrentTime = () => context.currentTime;
+    if (context) {
+      this.isWebAudio = () => true;
+      this.getContextCurrentTime = () => context.currentTime;
 
-    if (!context) {
-      throw new Error();
-    }
+      if (buffer) {
+        const sourceNode = context.createBufferSource();
+        sourceNode.buffer = buffer;
+        this.getSourceNode = () => sourceNode;
 
-    this.__startedTime = this.getContextCurrentTime();
+        const gainNode = context.createGain();
+        this.getSourceNode().connect(gainNode);
+        this.getGainNode = () => gainNode;
+      } else {
+        throw new Error();
+      }
+    } else if (audioElement) {
+      this.__audioElement = audioElement;
 
-    if (buffer) {
-      const sourceNode = context.createBufferSource();
-      sourceNode.buffer = buffer;
-      this.__sourceNode = sourceNode;
-      const gainNode = context.createGain();
-      sourceNode.connect(gainNode);
-      this.__gainNode = gainNode;
+      this.isWebAudio = () => false;
+      this.getContextCurrentTime = () => {
+        throw new Error();
+      };
+
+      this.getSourceNode = () => {
+        throw new Error();
+      };
+
+      this.getGainNode = () => {
+        throw new Error();
+      };
     } else {
       throw new Error();
     }
 
     if (typeof volume !== 'undefined' && volume >= 0 && volume <= 1) {
-      this.gainNode.gain.value = volume;
+      this.setVolume(volume);
     }
 
     if (typeof loop === 'boolean') {
-      this.sourceNode.loop = loop;
+      this.setLoop(loop);
     }
 
     if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
-      this.__pausedTime = trackPosition;
+      this.setTrackPosition(trackPosition);
     }
 
     if (autoplay === true) {
@@ -88,75 +79,161 @@ export class Sound implements ISound {
     }
   }
 
-  setVolume(value: number) {
-    if (value >= 0 && value <= 1) {
-      this.gainNode.gain.value = value;
+  getInputNode() {
+    return this.getSourceNode();
+  }
+
+  getOutputNode() {
+    return this.getGainNode();
+  }
+
+  getPlaying() {
+    if (this.isWebAudio()) {
+      return this.__playing;
     } else {
-      throw new Error();
+      return !this.__audioElement!.paused;
+    }
+  }
+
+  getLoop() {
+    if (this.isWebAudio()) {
+      return this.getSourceNode().loop;
+    } else {
+      return this.__audioElement!.loop;
+    }
+  }
+
+  setLoop(doLoop: boolean) {
+    if (this.isWebAudio()) {
+      this.getSourceNode().loop = doLoop;
+    } else {
+      this.__audioElement!.loop = doLoop;
     }
 
     return this;
   }
 
-  setLoop(doLoop: boolean) {
-    this.sourceNode.loop = doLoop;
+  getVolume() {
+    if (this.isWebAudio()) {
+      return this.getGainNode().gain.value;
+    } else {
+      return this.__audioElement!.volume;
+    }
+  }
+
+  setVolume(value: number): this {
+    if (this.isWebAudio()) {
+      this.getGainNode().gain.setValueAtTime(
+        value,
+        this.getContextCurrentTime(),
+      );
+    } else {        
+      this.__audioElement!.volume = value;
+    }
+
     return this;
   }
 
-  setTrackPosition(trackPosition: number) {
-    if (this.playing) {
-      this.__startedTime = this.getContextCurrentTime() - trackPosition;
+  getTrackPosition() {
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        return this.getContextCurrentTime() - this.__startedTime;
+      } else {
+        return this.__pausedTime;
+      }
     } else {
-      this.__pausedTime = this.getContextCurrentTime() - trackPosition;
+      return this.__audioElement!.currentTime;
+    }
+  }
+
+  setTrackPosition(trackPosition: number) {
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.__startedTime = this.getContextCurrentTime() - trackPosition;
+      } else {
+        this.__pausedTime = trackPosition;
+      }
+    } else {
+      this.__audioElement!.currentTime = trackPosition;
     }
 
     return this;
   }
 
   play() {
-    const trackPosition = this.trackPosition || 0;
-    this.sourceNode.start(trackPosition);
-    this.__startedTime = this.getContextCurrentTime() - trackPosition;
-    this.__pausedTime = 0;
-    this.__playing = true;
+    const trackPosition = this.getTrackPosition();
+    if (this.isWebAudio()) {
+      this.getSourceNode().start(trackPosition);
+      this.__startedTime = this.getContextCurrentTime() - trackPosition;
+      this.__pausedTime = 0;
+      this.__playing = true;
+    } else {
+      this.__audioElement!.currentTime = 0;
+      this.__audioElement!.play();
+    }
     return this;
   }
 
   pause() {
-    this.sourceNode.stop();
-    this.__pausedTime = this.trackPosition;
-    this.__startedTime = 0;
-    this.__playing = false;
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+      }
+
+      this.__pausedTime = this.getTrackPosition();
+      this.__startedTime = 0;
+      this.__playing = false;
+    } else {
+      this.__audioElement!.pause();
+    }
+
     return this;
   }
 
   stop() {
-    this.sourceNode.stop();
-    this.__startedTime = 0;
-    this.__pausedTime = 0;
-    this.__playing = false;
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+      }
+
+      this.__startedTime = 0;
+      this.__pausedTime = 0;
+      this.__playing = false;
+    } else {
+      this.__audioElement!.pause();
+      this.__audioElement!.currentTime = 0;
+    }
+
     return this;
   }
 
   rewind(seconds: number) {
-    this.sourceNode.stop();
-    if (this.playing) {
-      this.__startedTime += seconds;
-      this.sourceNode.start(this.trackPosition);
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+        this.__startedTime += seconds;
+        this.getSourceNode().start(this.getTrackPosition());
+      } else {
+        this.__pausedTime -= seconds;
+      }
     } else {
-      this.__pausedTime -= seconds;
+      this.__audioElement!.currentTime -= seconds;
     }
 
     return this;
   }
 
   fastForward(seconds: number) {
-    this.sourceNode.stop();
-    if (this.playing) {
-      this.__startedTime -= seconds;
-      this.sourceNode.start(this.trackPosition);
+    if (this.isWebAudio()) {
+      if (this.getPlaying()) {
+        this.getSourceNode().stop();
+        this.__startedTime -= seconds;
+        this.getSourceNode().start(this.getTrackPosition());
+      } else {
+        this.__pausedTime += seconds;
+      }
     } else {
-      this.__pausedTime += seconds;
+      this.__audioElement!.currentTime += seconds;
     }
 
     return this;
