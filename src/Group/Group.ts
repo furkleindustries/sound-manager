@@ -14,6 +14,8 @@ export class Group implements IGroup {
     return this.__sounds;
   }
 
+  private __panelRegistered: boolean = false;
+
   isWebAudio: () => boolean;
   getContextCurrentTime: () => number;
   getAnalyserNode: () => AnalyserNode;
@@ -50,7 +52,7 @@ export class Group implements IGroup {
           this.getContextCurrentTime(),
         );
 
-        return this;
+        return this.updateAllAudioElementsVolume();
       };
     } else {
       this.isWebAudio = () => false;
@@ -71,7 +73,7 @@ export class Group implements IGroup {
       this.getVolume = () => volume;
       this.setVolume = (value: number) => {
         volume = value;
-        return this;
+        return this.updateAllAudioElementsVolume();
       };
     }
 
@@ -79,7 +81,7 @@ export class Group implements IGroup {
       this.addSounds(sounds);
     }
 
-    if (typeof volume !== 'undefined' && volume >= 0 && volume <= 1) {
+    if (typeof volume !== 'undefined') {
       this.setVolume(volume);
     }
   }
@@ -112,17 +114,17 @@ export class Group implements IGroup {
     if (this.isWebAudio()) {
       names.forEach((soundName) => {
         const sound = sounds[soundName];
+        sound.getGroupVolume = () => this.getVolume();
         if (sound.isWebAudio()) {
           sound.getOutputNode().connect(this.getOutputNode());
         }
       });
     }
 
-    this.__sounds = Object.freeze(Object.assign(
-      {},
-      this.sounds,
-      sounds,
-    ));
+    this.__sounds = Object.freeze({
+      ...this.sounds,
+      ...sounds,
+    });
 
     return this;
   }
@@ -212,5 +214,18 @@ export class Group implements IGroup {
 
   stopAllSounds() {
     return this.stopSounds(Object.keys(this.sounds));
+  }
+
+  updateAllAudioElementsVolume() {
+    Object.keys(this.sounds).forEach((soundName) => {
+      const sound = this.getSound(soundName);
+      sound.updateAudioElementVolume();
+    });
+
+    return this;
+  }
+
+  isPanelRegistered() {
+    return this.__panelRegistered;
   }
 }

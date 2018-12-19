@@ -1,15 +1,27 @@
 import {
-  createSoundObject,
-} from '../functions/createSoundObject';
+  createSound,
+} from '../functions/createSound';
+import {
+  generateAudioPanelElement,
+} from '../functions/generateAudioPanelElement';
 import {
   Group,
 } from '../Group/Group';
+import {
+  IGroup,
+} from '../Group/IGroup';
+import {
+  ICreateSoundOptions,
+} from '../interfaces/ICreateSoundOptions';
 import {
   IGroupsMap,
 } from './IGroupsMap';
 import {
   IGroupOptions,
 } from '../Group/IGroupOptions';
+import {
+  ISound,
+} from '../Sound/ISound';
 import {
   ISoundManager,
 } from './ISoundManager';
@@ -19,25 +31,24 @@ import {
 import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
-import {
-  ISoundOptions,
-} from '../Sound/ISoundOptions';
+import { updateAudioPanelElement } from '../functions/updateAudioPanelElement';
 
 export class SoundManager implements ISoundManager {
   private __groups: IGroupsMap = Object.freeze({});
   get groups() {
     return this.__groups;
   }
- 
-  public isWebAudio: () => boolean;
 
-  public getAudioContext: () => AudioContext;
-  public getInputNode: () => AudioNode;
-  public getOutputNode: () => AudioNode;
-  public getGainNode: () => GainNode;
-  public getAnalyserNode: () => AnalyserNode;
-  public getVolume: () => number;
-  public setVolume: (value: number) => this;
+  private __audioPanelElement: HTMLElement | null = null;
+ 
+  public readonly isWebAudio: () => boolean;
+  public readonly getAudioContext: () => AudioContext;
+  public readonly getInputNode: () => AudioNode;
+  public readonly getOutputNode: () => AudioNode;
+  public readonly getGainNode: () => GainNode;
+  public readonly getAnalyserNode: () => AnalyserNode;
+  public readonly getVolume: () => number;
+  public readonly setVolume: (value: number) => this;
 
   constructor(options?: ISoundManagerOptions) {
     const opts = options || {};
@@ -55,11 +66,13 @@ export class SoundManager implements ISoundManager {
       // @ts-ignore
       webkitAudioContext)
     {
-      this.getAudioContext = () => new (
+      const context = new (
         AudioContext ||
         // @ts-ignore
         webkitAudioContext
       )();
+
+      this.getAudioContext = () => context;
     } else {
       this.isWebAudio = () => false;
       this.getAudioContext = () => {
@@ -68,9 +81,9 @@ export class SoundManager implements ISoundManager {
     }
 
     if (this.isWebAudio()) {
-      let analyserNode = this.getAudioContext().createAnalyser();
+      const analyserNode = this.getAudioContext().createAnalyser();
       this.getAnalyserNode = () => analyserNode;
-      let gainNode = this.getAudioContext().createGain();
+      const gainNode = this.getAudioContext().createGain();
       this.getGainNode = () => gainNode;
   
       this.getInputNode = () => this.getAnalyserNode();
@@ -86,7 +99,7 @@ export class SoundManager implements ISoundManager {
           this.getAudioContext().currentTime,
         );
 
-        return this;
+        return this.updateAllAudioElementsVolume();
       }
     } else {
       this.getAnalyserNode = () => {
@@ -109,12 +122,16 @@ export class SoundManager implements ISoundManager {
       this.getVolume = () => volume;
       this.setVolume = (value: number) => {
         volume = value;
-        return this;
+        return this.updateAllAudioElementsVolume();
       };
     }
 
+    this.__groups = Object.freeze({
+      default: this.createGroup(),
+    });
+
     if (groups) {
-      this.__groups = Object.freeze(Object.assign({}, groups));
+      this.__groups = Object.freeze({ ...groups, });
       Object.keys(this.groups).forEach((groupName) => {
         const group = this.groups[groupName];
         if (this.isWebAudio()) {
@@ -147,6 +164,12 @@ export class SoundManager implements ISoundManager {
     return group;
   }
 
+  addGroup(name: string, group: IGroup) {
+    return this.addGroups({
+      [name]: group,
+    });
+  }
+
   addGroups(groups: IGroupsMap) {
     const names = Object.keys(groups);
     names.forEach((groupName) => {
@@ -164,13 +187,16 @@ export class SoundManager implements ISoundManager {
       });
     }
 
-    this.__groups = Object.freeze(Object.assign(
-      {},
-      this.groups,
-      groups,
-    ));
+    this.__groups = Object.freeze({
+      ...this.groups,
+      ...groups,
+    });
 
     return this;
+  }
+
+  removeGroup(name: string) {
+    return this.removeGroups(name);
   }
 
   removeGroups(names: string | string[]) {
@@ -211,19 +237,30 @@ export class SoundManager implements ISoundManager {
     return this.removeGroups(Object.keys(this.groups));
   }
 
-  createSound(url: string, options?: Partial<ISoundOptions>) {
+  createSound(url: string, options?: ICreateSoundOptions): Promise<ISound> {
     if (this.isWebAudio()) {
-      return createSoundObject(url, Object.assign({}, options, {
+      return createSound(url, {
+        ...options,
         context: this.getAudioContext(),
-      } as ISoundOptions));
+        manager: this,
+      });
     } else {
-      return createSoundObject(url, Object.assign({}, options));
+      return createSound(url, {
+        ...options,
+        manager: this,
+      });
     }
   }
 
   getSound(name: string, groupName: string = 'default') {
     const group = this.getGroup(groupName);
     return group.getSound(name);
+  }
+
+  addSound(name: string, sound: ISound, groupName: string = 'default') {
+    return this.addSounds({
+      [name]: sound,
+    }, groupName);
   }
 
   addSounds(sounds: ISoundsMap, groupName: string = 'default') {
@@ -234,6 +271,10 @@ export class SoundManager implements ISoundManager {
     this.groups[groupName].addSounds(sounds);
 
     return this;
+  }
+
+  removeSound(name: string, groupName: string = 'default') {
+    return this.removeSounds(name, groupName);
   }
 
   removeSounds(names: string | string[], groupName: string = 'default') {
@@ -253,6 +294,10 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
+  playSound(name: string, groupName: string = 'default') {
+    return this.playSounds(name, groupName);
+  }
+
   playSounds(names: string | string[], groupName: string = 'default') {
     this.getGroup(groupName).playSounds(names);
     return this;
@@ -270,6 +315,10 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
+  pauseSound(name: string, groupName: string = 'default') {
+    return this.pauseSounds(name, groupName);
+  }
+
   pauseSounds(names: string | string[], groupName: string = 'default') {
     this.getGroup(groupName).pauseSounds(names);
     return this;
@@ -285,6 +334,10 @@ export class SoundManager implements ISoundManager {
     }
 
     return this;
+  }
+
+  stopSound(name: string, groupName: string = 'default') {
+    return this.stopSounds(name, groupName);
   }
 
   stopSounds(names: string | string[], groupName: string = 'default') {
@@ -308,7 +361,7 @@ export class SoundManager implements ISoundManager {
     return this.getGroup(name).getVolume();
   }
 
-  setGroupVolume(value: number, groupName: string = 'default'): ISoundManager {
+  setGroupVolume(value: number, groupName: string = 'default') {
     this.getGroup(groupName).setVolume(value);
     return this;
   }
@@ -319,6 +372,48 @@ export class SoundManager implements ISoundManager {
 
   setSoundVolume(name: string, value: number, groupName: string = 'default') {
     this.getGroup(groupName).getSound(name).setVolume(value);
+    return this;
+  }
+
+  updateAllAudioElementsVolume() {
+    Object.keys(this.groups).forEach((groupName) => {
+      this.getGroup(groupName).updateAllAudioElementsVolume();
+    });
+
+    return this;
+  }
+
+  generateAudioPanelElement(): HTMLElement {
+    this.__audioPanelElement = generateAudioPanelElement(this);
+    return this.__audioPanelElement;
+  }
+
+  updateAudioPanelElement() {
+    if (!this.__audioPanelElement) {
+      throw new Error();
+    }
+
+    const newElem = updateAudioPanelElement(this, this.__audioPanelElement);
+    this.__audioPanelElement = newElem;
+    return this;
+  }
+
+  panelRegister(soundOrGroup: ISound | IGroup) {
+    // @ts-ignore
+    soundOrGroup.__panelRegistered = true;
+    if (this.__audioPanelElement) {
+      this.updateAudioPanelElement();
+    }
+
+    return this;
+  }
+
+  panelDeregister(soundOrGroup: ISound | IGroup) {
+    // @ts-ignore
+    soundOrGroup.__panelRegistered = false;
+    if (this.__audioPanelElement) {
+      this.updateAudioPanelElement();
+    }
     return this;
   }
 }

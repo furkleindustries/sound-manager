@@ -12,10 +12,17 @@ export class Sound implements ISound {
 
   private __audioElement: HTMLAudioElement | null = null;
 
-  isWebAudio: () => boolean;
-  getContextCurrentTime: () => number;
-  getSourceNode: () => AudioBufferSourceNode;
-  getGainNode: () => GainNode;
+  private __panelRegistered: boolean = false;
+
+  public readonly isWebAudio: () => boolean;
+  public readonly getContextCurrentTime: () => number;
+  public readonly getSourceNode: () => AudioBufferSourceNode;
+  public readonly getGainNode: () => GainNode;
+  public readonly getManagerVolume: () => number;
+  public getGroupVolume: () => number;
+  public readonly updateAudioElementVolume: () => ISound;
+  public readonly getVolume: () => number;
+  public readonly setVolume: (value: number) => ISound;
 
   constructor(options: ISoundOptions) {
     const {
@@ -23,10 +30,18 @@ export class Sound implements ISound {
       autoplay,
       buffer,
       context,
+      getManagerVolume,
       loop,
       trackPosition,
       volume,
     } = options;
+
+    if (typeof getManagerVolume !== 'function') {
+      throw new Error();
+    }
+
+    this.getManagerVolume = getManagerVolume;
+    this.getGroupVolume = () => 1;
 
     if (context) {
       this.isWebAudio = () => true;
@@ -43,8 +58,37 @@ export class Sound implements ISound {
       } else {
         throw new Error();
       }
+
+      this.getVolume = () => this.getGainNode().gain.value;
+
+      this.setVolume = (value: number) => {
+        this.getGainNode().gain.setValueAtTime(
+          value,
+          this.getContextCurrentTime(),
+        );
+
+        return this;
+      };
+
+      this.updateAudioElementVolume = () => this;
     } else if (audioElement) {
       this.__audioElement = audioElement;
+      
+      this.__audioElement.addEventListener('timeupdate', (/*e*/) => {
+        //const tgt = e.target as HTMLAudioElement
+        //console.log(tgt.currentTime, tgt.currentTime === tgt.duration ? 'Completed.' : 'Not completed.');
+      });
+
+      this.updateAudioElementVolume = () => {
+        /* Set the audio element volume to the product of manager, group, and
+         * sound volumes. */
+        this.__audioElement!.volume =
+          this.getManagerVolume() *
+          this.getGroupVolume() *
+          this.getVolume();
+
+        return this;
+      };
 
       this.isWebAudio = () => false;
       this.getContextCurrentTime = () => {
@@ -57,6 +101,13 @@ export class Sound implements ISound {
 
       this.getGainNode = () => {
         throw new Error();
+      };
+
+      let volume = 1;
+      this.getVolume = () => volume;
+      this.setVolume = (value: number) => {
+        volume = value;
+        return this.updateAudioElementVolume();
       };
     } else {
       throw new Error();
@@ -113,27 +164,6 @@ export class Sound implements ISound {
     return this;
   }
 
-  getVolume() {
-    if (this.isWebAudio()) {
-      return this.getGainNode().gain.value;
-    } else {
-      return this.__audioElement!.volume;
-    }
-  }
-
-  setVolume(value: number): this {
-    if (this.isWebAudio()) {
-      this.getGainNode().gain.setValueAtTime(
-        value,
-        this.getContextCurrentTime(),
-      );
-    } else {        
-      this.__audioElement!.volume = value;
-    }
-
-    return this;
-  }
-
   getTrackPosition() {
     if (this.isWebAudio()) {
       if (this.getPlaying()) {
@@ -168,7 +198,10 @@ export class Sound implements ISound {
       this.__pausedTime = 0;
       this.__playing = true;
     } else {
-      this.__audioElement!.currentTime = 0;
+      /* Set the actual audio element volume to the product of manager, group,
+       * and sound volumes. */
+      this.updateAudioElementVolume();
+      this.__audioElement!.currentTime = this.__pausedTime;
       this.__audioElement!.play();
     }
 
@@ -186,6 +219,7 @@ export class Sound implements ISound {
       this.__playing = false;
     } else {
       this.__audioElement!.pause();
+      this.__pausedTime = this.getTrackPosition();
     }
 
     return this;
@@ -202,6 +236,7 @@ export class Sound implements ISound {
       this.__playing = false;
     } else {
       this.__audioElement!.pause();
+      this.__pausedTime = 0;
       this.__audioElement!.currentTime = 0;
     }
 
@@ -238,5 +273,9 @@ export class Sound implements ISound {
     }
 
     return this;
+  }
+
+  isPanelRegistered() {
+    return this.__panelRegistered;
   }
 }

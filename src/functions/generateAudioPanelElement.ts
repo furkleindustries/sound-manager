@@ -1,0 +1,45 @@
+import {
+  generateVolumeInput,
+} from './generateGroupVolumeInput';
+import {
+  ISoundManager,
+} from '../SoundManager/ISoundManager';
+
+export const generateAudioPanelElement = (manager: ISoundManager) => {
+  const audioPanelElement = document.createElement('div');
+  audioPanelElement.className = 'sound-manager-panel';
+
+  const title = document.createElement('h2');
+  title.className = 'sound-manager-title';
+  title.textContent = 'Sound Manager Options';
+  audioPanelElement.appendChild(title);
+
+  /* Add the master volume slider. */
+  audioPanelElement.appendChild(generateVolumeInput(
+    manager,
+  ));
+
+  Object.keys(manager.groups).forEach((groupName) => {
+    const group = manager.getGroup(groupName);
+    if (group.isPanelRegistered()) {
+      /* Add registered group sliders. */
+      audioPanelElement.appendChild(generateVolumeInput(
+        group,
+        groupName,
+      ));
+    }
+
+    Object.keys(group.sounds).forEach((soundName) => {
+      const sound = group.getSound(soundName);
+      if (sound.isPanelRegistered()) {
+        /* Add registered sound sliders. */
+        audioPanelElement.appendChild(generateVolumeInput(
+          sound,
+          soundName,
+        ));
+      }
+    });
+  });
+
+  return audioPanelElement;
+};
