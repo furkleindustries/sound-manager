@@ -1,8 +1,11 @@
 import {
+  IPanelRegisterableNode,
+} from '../interfaces/IPanelRegisterableNode';
+import {
   IWebAudioNode,
 } from '../interfaces/IWebAudioNode';
 
-export interface ISound extends IWebAudioNode {
+export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getTrackPosition(): number;
   getPlaying(): boolean;
   getLoop(): boolean;
@@ -10,6 +13,9 @@ export interface ISound extends IWebAudioNode {
   getSourceNode(): AudioBufferSourceNode;
   getContextCurrentTime(): number;
   setTrackPosition(seconds: number): ISound;
+  getManagerVolume(): number;
+  getGroupVolume(): number;
+  updateAudioElementVolume(): ISound;
   play(): ISound;
   pause(): ISound;
   stop(): ISound;

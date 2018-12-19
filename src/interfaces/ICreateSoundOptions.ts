@@ -2,12 +2,10 @@ import {
   ISoundManager,
 } from '../SoundManager/ISoundManager';
 
-export interface ISoundOptions {
+export interface ICreateSoundOptions {
   manager: ISoundManager;
-  getManagerVolume(): number;
   audioElement?: HTMLAudioElement;
   autoplay?: boolean;
-  buffer?: AudioBuffer;
   context?: AudioContext;
   loop?: boolean;
   trackPosition?: number;

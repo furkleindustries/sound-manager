@@ -2,6 +2,9 @@ import {
   IAnalysableNode,
 } from '../interfaces/IAnalysableNode';
 import {
+  IPanelRegisterableNode,
+} from '../interfaces/IPanelRegisterableNode';
+import {
   ISound,
 } from '../Sound/ISound';
 import {
@@ -11,7 +14,7 @@ import {
   IWebAudioNode,
 } from '../interfaces/IWebAudioNode';
 
-export interface IGroup extends IWebAudioNode, IAnalysableNode {
+export interface IGroup extends IWebAudioNode, IAnalysableNode, IPanelRegisterableNode {
   readonly sounds: ISoundsMap;
   getContextCurrentTime(): number;
   getSound(name: string): ISound;
@@ -24,4 +27,5 @@ export interface IGroup extends IWebAudioNode, IAnalysableNode {
   pauseAllSounds(): IGroup;
   stopSounds(names: string | string[]): IGroup;
   stopAllSounds(): IGroup;
+  updateAllAudioElementsVolume(): IGroup;
 }
