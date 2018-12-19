@@ -171,6 +171,7 @@ export class Sound implements ISound {
       this.__audioElement!.currentTime = 0;
       this.__audioElement!.play();
     }
+
     return this;
   }
 
