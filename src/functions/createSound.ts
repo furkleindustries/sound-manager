@@ -14,17 +14,15 @@ import {
   loadAudioBuffer,
 } from './loadAudioBuffer';
 
-export const createSound = (
-  url: string,
-  options: ICreateSoundOptions,
-): Promise<ISound> =>
-{
+export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
   const {
     manager,
+    url,
   } = options;
 
   const noManagerOpts = { ...options, };
   delete noManagerOpts.manager;
+  delete noManagerOpts.url;
 
   const noContextOpts = { ...noManagerOpts, };
   delete noContextOpts.context;

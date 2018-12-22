@@ -20,6 +20,12 @@ import {
   IGroupOptions,
 } from '../Group/IGroupOptions';
 import {
+  IPlaylistOptions,
+} from '../Playlist/IPlaylistOptions';
+import {
+  IPlaylistsMap,
+} from './IPlaylistsMap';
+import {
   ISound,
 } from '../Sound/ISound';
 import {
@@ -31,12 +37,22 @@ import {
 import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
-import { updateAudioPanelElement } from '../functions/updateAudioPanelElement';
+import {
+  Playlist,
+} from '../Playlist/Playlist';
+import {
+  updateAudioPanelElement,
+} from '../functions/updateAudioPanelElement';
 
 export class SoundManager implements ISoundManager {
   private __groups: IGroupsMap = Object.freeze({});
   get groups() {
     return this.__groups;
+  }
+
+  private __playlists: IPlaylistsMap = Object.freeze({});
+  get playlists() {
+    return this.__playlists;
   }
 
   private __audioPanelElement: HTMLElement | null = null;
@@ -145,7 +161,7 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  createGroup(options?: Partial<IGroupOptions>) {
+  createGroup(options?: IGroupOptions) {
     if (this.isWebAudio()) {
       return new Group(Object.assign({}, options, {
         context: this.getAudioContext(),
@@ -155,19 +171,13 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  getGroup(name: string) {
-    const group = this.groups[name];
-    if (!group) {
-      throw new Error();
-    }
-
-    return group;
-  }
-
-  addGroup(name: string, group: IGroup) {
-    return this.addGroups({
+  addGroup(name: string, options: IGroupOptions) {
+    const group = this.createGroup(options);
+    this.addGroups({
       [name]: group,
     });
+
+    return group;
   }
 
   addGroups(groups: IGroupsMap) {
@@ -182,6 +192,7 @@ export class SoundManager implements ISoundManager {
       names.forEach((groupName) => {
         const group = groups[groupName];
         if (group.isWebAudio()) {
+          /* Chain the group's output node to the manager's input node. */
           group.getOutputNode().connect(this.getInputNode());
         }
       });
@@ -193,6 +204,15 @@ export class SoundManager implements ISoundManager {
     });
 
     return this;
+  }
+
+  getGroup(name: string) {
+    const group = this.groups[name];
+    if (!group) {
+      throw new Error();
+    }
+
+    return group;
   }
 
   removeGroup(name: string) {
@@ -220,13 +240,9 @@ export class SoundManager implements ISoundManager {
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
       if (this.isWebAudio()) {
-        this.addGroups({
-          default: this.createGroup({ context: this.getAudioContext(), }),
-        });
+        this.addGroup('default', { context: this.getAudioContext(), });
       } else {
-        this.addGroups({
-          default: this.createGroup(),
-        });
+        this.addGroup('default', this.createGroup());
       }
     }
 
@@ -237,40 +253,161 @@ export class SoundManager implements ISoundManager {
     return this.removeGroups(Object.keys(this.groups));
   }
 
-  createSound(url: string, options?: ICreateSoundOptions): Promise<ISound> {
+  getGroupVolume(name: string = 'default') {
+    return this.getGroup(name).getVolume();
+  }
+
+  setGroupVolume(value: number, groupName: string = 'default') {
+    this.getGroup(groupName).setVolume(value);
+    return this;
+  }
+
+  createPlaylist(options: IPlaylistOptions) {
+    const opts = options || {};
+    return new Playlist({ ...opts, });
+  }
+
+  addPlaylist(name: string, options: IPlaylistOptions) {
+    const playlist = this.createPlaylist(options);
+    this.addPlaylists({
+      [name]: playlist,
+    });
+
+    return playlist;
+  }
+
+  addPlaylists(playlists: IPlaylistsMap) {
+    const playls = playlists || {};
+
+    const names = Object.keys(playls);
+    names.forEach((groupName) => {
+      if (groupName in this.playlists) {
+        throw new Error();
+      }
+    });
+
+    this.__playlists = Object.freeze({
+      ...this.__playlists,
+      ...playls,
+    });
+
+    return this;
+  }
+
+  getPlaylist(name: string) {
+    const playlist = this.playlists[name];
+    if (!playlist) {
+      throw new Error();
+    }
+
+    return playlist;
+  }
+
+  removePlaylist(name: string) {
+    return this.removePlaylists(name);
+  }
+
+  removePlaylists(names: string | string[]) {
+    const playls = { ...this.__playlists, };
+    if (typeof names === 'string') {
+      delete playls[names];
+    } else {
+      names.forEach((name) => {
+        delete playls[name];
+      });
+    }
+
+    this.__playlists = Object.freeze(playls);
+
+    return this;
+  }
+
+  removeAllPlaylists() {
+    return this.removePlaylists(Object.keys(this.playlists));
+  }
+
+  playPlaylist(name: string) {
+    return this.playPlaylists(name);
+  }
+
+  playPlaylists(names: string | string[]) {
+    const play = (playlistName: string) => {
+      /* TODO: add playlisting logic. */
+      playlistName;
+    };
+
+    if (typeof names === 'string') {
+      play(names);
+    } else {
+      names.forEach(play);
+    }
+
+    return this;
+  }
+
+  stopPlaylist(name: string) {
+    return this.stopPlaylists(name);
+  }
+
+  stopPlaylists(names: string | string[]) {
+    const stop = (playlistName: string) => {
+      /* TODO: add playlisting logic. */
+      playlistName;
+    };
+
+    if (typeof names === 'string') {
+      stop(names);
+    } else {
+      names.forEach(stop);
+    }
+
+    return this;
+  }
+
+  createSound(options: ICreateSoundOptions): Promise<ISound> {
+    const opts = options || {};
     if (this.isWebAudio()) {
-      return createSound(url, {
-        ...options,
+      return createSound({
+        ...opts,
         context: this.getAudioContext(),
         manager: this,
       });
     } else {
-      return createSound(url, {
-        ...options,
+      return createSound({
+        ...opts,
         manager: this,
       });
     }
+  }
+
+  addSound(
+    name: string,
+    options: ICreateSoundOptions,
+    groupName: string = 'default',
+  ): Promise<ISound>
+  {
+    const opts = options || {};
+    return new Promise((resolve) => {
+      this.createSound(opts).then((sound) => {
+        this.addSounds({
+          [name]: sound,
+        }, groupName);
+
+        return resolve(sound);
+      });
+    });
+  }
+
+  addSounds(sounds: ISoundsMap, groupName: string = 'default') {
+    const group = this.getGroup(groupName);
+    group.addSounds(sounds);
+
+    return this;
   }
 
   getSound(name: string, groupName: string = 'default') {
     const group = this.getGroup(groupName);
     return group.getSound(name);
-  }
-
-  addSound(name: string, sound: ISound, groupName: string = 'default') {
-    return this.addSounds({
-      [name]: sound,
-    }, groupName);
-  }
-
-  addSounds(sounds: ISoundsMap, groupName: string = 'default') {
-    if (!(groupName in this.groups)) {
-      throw new Error();
-    }
-
-    this.groups[groupName].addSounds(sounds);
-
-    return this;
   }
 
   removeSound(name: string, groupName: string = 'default') {
@@ -354,15 +491,6 @@ export class SoundManager implements ISoundManager {
       });
     }
 
-    return this;
-  }
-
-  getGroupVolume(name: string = 'default') {
-    return this.getGroup(name).getVolume();
-  }
-
-  setGroupVolume(value: number, groupName: string = 'default') {
-    this.getGroup(groupName).setVolume(value);
     return this;
   }
 

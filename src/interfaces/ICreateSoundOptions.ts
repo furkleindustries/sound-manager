@@ -4,6 +4,7 @@ import {
 
 export interface ICreateSoundOptions {
   manager: ISoundManager;
+  url: string;
   audioElement?: HTMLAudioElement;
   autoplay?: boolean;
   context?: AudioContext;
