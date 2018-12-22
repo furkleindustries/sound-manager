@@ -1,89 +1,73 @@
 import {
   Sound,
 } from '../../src/Sound/Sound';
-import {
-  SoundManager,
-} from '../../src/SoundManager/SoundManager';
 
 const getContext = () => new AudioContext();
-const getManager = (context: AudioContext) => new SoundManager({ context, });
 const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 12000);
 
 describe('Sound unit tests.', () => {
   it('Has an isWebAudio function which returns true if the context and buffer are provided.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     }).isWebAudio()).toBe(true);
   });
   
   it('Has a getInputNode function which returns an instance of AudioNode.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     }).getInputNode()).toBeInstanceOf(AudioNode);
   });
 
   it('Has a getOutputNode function which returns an instance of AudioNode.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     }).getOutputNode()).toBeInstanceOf(AudioNode);
   });
 
   it('Has a getSourceNode function which returns an instance of AudioBufferSourceNode after it is constructed.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     }).getSourceNode()).toBeInstanceOf(AudioBufferSourceNode);
   });
 
   it('Has a getGainNode property which returns an instance of GainNode after it is constructed.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     expect(new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     }).getGainNode()).toBeInstanceOf(GainNode);
   });
 
   it('Has a getVolume function which returns a number.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -93,13 +77,11 @@ describe('Sound unit tests.', () => {
 
   it('Defaults to a volume of 1.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -108,14 +90,12 @@ describe('Sound unit tests.', () => {
 
   it('Allows setting the volume through the options object.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const argVol = 0.4;
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
       volume: argVol,
     });
@@ -125,13 +105,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a getLoop function which returns a boolean.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -140,13 +118,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a getLoop function which returns false by default.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -155,7 +131,6 @@ describe('Sound unit tests.', () => {
 
   it('Allows setting the loop through the options object.', () => {    
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const loop = true;
@@ -164,7 +139,6 @@ describe('Sound unit tests.', () => {
       buffer,
       context,
       loop,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -173,13 +147,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a getTrackPosition function which returns a non-negative numeric value.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -188,13 +160,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a trackPosition which defaults to 0.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -203,7 +173,6 @@ describe('Sound unit tests.', () => {
 
   it('Allows setting the trackPosition through the options object.', () => {    
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const trackPosition = 0.5;
@@ -211,7 +180,6 @@ describe('Sound unit tests.', () => {
     const sound = new Sound({
       buffer,
       context,
-      manager,
       trackPosition,
       getManagerVolume: jest.fn(),
     });
@@ -221,13 +189,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a getPlaying function which returns a boolean.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -236,13 +202,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a playing value which defaults to false.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -251,7 +215,6 @@ describe('Sound unit tests.', () => {
 
   it('Allows setting the playing value through the autoplay property of the options object.', () => {    
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const autoplay = true;
@@ -260,7 +223,6 @@ describe('Sound unit tests.', () => {
       autoplay,
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -269,13 +231,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a getContextCurrentTime function which returns the currentTime property of the AudioContext passed in the options object.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -284,13 +244,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a setVolume function which alters the volume property.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -300,13 +258,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a setLoop function which changes the loop property.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -316,13 +272,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a setTrackPosition function which changes the representation returned by the trackPosition property.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -332,13 +286,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a play function which changes the result of the getPlaying function.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -347,13 +299,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a pause function which changes the playing property but leaves the track position as is.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -368,13 +318,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a stop function which changes the playing property and resets the trackPosition property to 0.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -388,13 +336,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a rewind function which decreases the trackPosition property.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
@@ -408,13 +354,11 @@ describe('Sound unit tests.', () => {
 
   it('Has a fastForward function which increases the trackPosition property.', () => {
     const context = getContext();
-    const manager = getManager(context);
     const buffer = getAudioBuffer(context);
 
     const sound = new Sound({
       buffer,
       context,
-      manager,
       getManagerVolume: jest.fn(),
     });
 
