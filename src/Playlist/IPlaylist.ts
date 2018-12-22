@@ -3,7 +3,8 @@ import {
 } from '../Fade/IFade';
 
 export interface IPlaylist {
-  soundNames: string[];
-  fade: IFade;
-  loop: boolean | number;
+  readonly groupName: string;
+  readonly loop: boolean | number;
+  readonly soundNames: string[];
+  readonly fade?: IFade;
 }
