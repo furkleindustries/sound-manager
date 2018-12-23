@@ -16,7 +16,7 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getManagerVolume(): number;
   getGroupVolume(): number;
   updateAudioElementVolume(): ISound;
-  play(): ISound;
+  play(): Promise<Event>;
   pause(): ISound;
   stop(): ISound;
   rewind(seconds: number): ISound;

@@ -6,23 +6,22 @@ import {
 } from './ISoundOptions';
 
 export class Sound implements ISound {
+  private __audioElement: HTMLAudioElement | null = null;
   private __startedTime: number = 0;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
-
-  private __audioElement: HTMLAudioElement | null = null;
-
   private __panelRegistered: boolean = false;
+  private __promise: Promise<Event> | null = null;
 
   public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;
   public readonly getSourceNode: () => AudioBufferSourceNode;
   public readonly getGainNode: () => GainNode;
   public readonly getManagerVolume: () => number;
-  public getGroupVolume: () => number;
   public readonly updateAudioElementVolume: () => ISound;
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => ISound;
+  public getGroupVolume: () => number;
 
   constructor(options: ISoundOptions) {
     const {
@@ -73,7 +72,7 @@ export class Sound implements ISound {
       this.updateAudioElementVolume = () => this;
     } else if (audioElement) {
       this.__audioElement = audioElement;
-      
+
       this.__audioElement.addEventListener('timeupdate', (/*e*/) => {
         //const tgt = e.target as HTMLAudioElement
         //console.log(tgt.currentTime, tgt.currentTime === tgt.duration ? 'Completed.' : 'Not completed.');
@@ -192,20 +191,32 @@ export class Sound implements ISound {
 
   play() {
     const trackPosition = this.getTrackPosition();
+
+    this.__playing = true;
+    let source: AudioBufferSourceNode | HTMLAudioElement;
     if (this.isWebAudio()) {
-      this.getSourceNode().start(trackPosition);
+      source = this.getSourceNode();
+      source.start(trackPosition);
       this.__startedTime = this.getContextCurrentTime() - trackPosition;
       this.__pausedTime = 0;
-      this.__playing = true;
     } else {
+      source = this.__audioElement!;
       /* Set the actual audio element volume to the product of manager, group,
        * and sound volumes. */
       this.updateAudioElementVolume();
-      this.__audioElement!.currentTime = this.__pausedTime;
-      this.__audioElement!.play();
+      source.currentTime = this.__pausedTime;
+      source.play();
     }
 
-    return this;
+    if (!this.__promise) {
+      this.__promise = new Promise((resolve) => {
+        source.addEventListener('ended', (e) => {
+          return resolve(e);
+        });
+      });
+    }
+
+    return this.__promise;
   }
 
   pause() {

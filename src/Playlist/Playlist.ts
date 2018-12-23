@@ -7,42 +7,58 @@ import {
 import {
   IPlaylistOptions,
 } from './IPlaylistOptions';
+import {
+  ISoundGroupIdentifier,
+} from '../interfaces/ISoundGroupIdentifier';
 
 export class Playlist implements IPlaylist {
   readonly loop: boolean | number = false;
-  readonly groupName: string = 'default';
-  readonly soundNames: string[];
+  readonly soundGroupIdentifiers: ISoundGroupIdentifier[];
   readonly fade?: IFade;
 
   constructor(options?: IPlaylistOptions) {
     const opts: Partial<IPlaylistOptions> = options || {};
     const {
-      groupName,
-      loop,
-      soundNames,
       fade,
+      loop,
+      soundGroupIdentifiers,
     } = opts;
 
-    if (!Array.isArray(soundNames)) {
+    if (!Array.isArray(soundGroupIdentifiers)) {
       throw new Error();
-    } else if (soundNames.length === 0) {
+    } else if (soundGroupIdentifiers.length === 0) {
       throw new Error();
     }
 
-    this.soundNames = soundNames;
+    const soundGroupIds = soundGroupIdentifiers.map((sgi) => {
+      if (typeof sgi === 'string') {
+        const split = sgi.split('.');
+        if (!split.length) {
+          return {
+            groupName: 'default',
+            soundName: split[0],
+          };
+        }
 
-    if (groupName) {
-      this.groupName = groupName;
+        return {
+          groupName: split[0],
+          soundName: split[1],
+        };
+      }
+
+      return sgi;
+    });
+
+    this.soundGroupIdentifiers = soundGroupIds;
+
+    if (fade) {
+      this.fade = fade;
     }
 
     if (typeof loop === 'boolean' ||
         (typeof loop === 'number' && loop >= 1 && loop % 1 === 0))
     {
       this.loop = loop;
-    }
-
-    if (fade) {
-      this.fade = fade;
     }
   }
 }

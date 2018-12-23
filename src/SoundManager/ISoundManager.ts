@@ -43,6 +43,8 @@ export interface ISoundManager extends IWebAudioNode, IAnalysableNode {
   removeGroup(name: string): ISoundManager;
   removeGroups(names: string | string[]): ISoundManager;
   removeAllGroups(): ISoundManager;
+  playGroup(name: string): Promise<Event[]>;
+  playGroups(names: string | string[]): Promise<Event[]>;
   getGroupVolume(name?: string): number;
   setGroupVolume(value: number, groupName?: string): ISoundManager;
   createPlaylist(options: IPlaylistOptions): IPlaylist;
@@ -52,8 +54,8 @@ export interface ISoundManager extends IWebAudioNode, IAnalysableNode {
   removePlaylist(name: string): ISoundManager;
   removePlaylists(names: string | string[]): ISoundManager;
   removeAllPlaylists(): ISoundManager;
-  playPlaylist(name: string): ISoundManager;
-  playPlaylists(names: string | string[]): ISoundManager;
+  playPlaylist(name: string): Promise<Event>;
+  playPlaylists(names: string | string[]): Promise<Event[]>;
   stopPlaylist(name: string): ISoundManager;
   stopPlaylists(names: string | string[]): ISoundManager;
   createSound(options: ICreateSoundOptions): Promise<ISound>;
@@ -63,9 +65,9 @@ export interface ISoundManager extends IWebAudioNode, IAnalysableNode {
   removeSound(name: string, groupName?: string): ISoundManager;
   removeSounds(names: string | string[], groupName?: string): ISoundManager;
   removeAllSounds(groupName?: string): ISoundManager;
-  playSound(name: string, groupName?: string): ISoundManager;
-  playSounds(names: string | string[], groupName?: string): ISoundManager;
-  playAllSounds(groupName?: string): ISoundManager;
+  playSound(name: string, groupName?: string): Promise<Event>;
+  playSounds(names: string | string[], groupName?: string): Promise<Event[]>;
+  playAllSounds(groupName?: string): Promise<Event[]>;
   pauseSound(name: string, groupName?: string): ISoundManager;
   pauseSounds(names: string | string[], groupName?: string): ISoundManager;
   pauseAllSounds(groupName?: string): ISoundManager;

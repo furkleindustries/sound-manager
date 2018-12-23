@@ -161,7 +161,7 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  createGroup(options?: IGroupOptions) {
+  public createGroup(options?: IGroupOptions) {
     if (this.isWebAudio()) {
       return new Group(Object.assign({}, options, {
         context: this.getAudioContext(),
@@ -171,7 +171,7 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  addGroup(name: string, options: IGroupOptions) {
+  public addGroup(name: string, options: IGroupOptions) {
     const group = this.createGroup(options);
     this.addGroups({
       [name]: group,
@@ -180,7 +180,7 @@ export class SoundManager implements ISoundManager {
     return group;
   }
 
-  addGroups(groups: IGroupsMap) {
+  public addGroups(groups: IGroupsMap) {
     const names = Object.keys(groups);
     names.forEach((groupName) => {
       if (groupName in this.groups) {
@@ -206,7 +206,7 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  getGroup(name: string) {
+  public getGroup(name: string) {
     const group = this.groups[name];
     if (!group) {
       throw new Error();
@@ -215,11 +215,11 @@ export class SoundManager implements ISoundManager {
     return group;
   }
 
-  removeGroup(name: string) {
+  public removeGroup(name: string) {
     return this.removeGroups(name);
   }
 
-  removeGroups(names: string | string[]) {
+  public removeGroups(names: string | string[]) {
     const remove = (groupName: string) => {
       const groups = Object.assign(this.groups);
       const group = groups[groupName];
@@ -249,25 +249,47 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  removeAllGroups() {
+  public removeAllGroups() {
     return this.removeGroups(Object.keys(this.groups));
   }
 
-  getGroupVolume(name: string = 'default') {
+  public playGroup(name: string) {
+    return this.getGroup(name).playAllSounds();
+  }
+
+  public playGroups(names: string | string[]): Promise<Event[]> {
+    let arr: string[];
+    if (typeof names === 'string') {
+      arr = [ names, ];
+    } else {
+      arr = names;
+    }
+
+    return new Promise((resolve) => (
+      Promise.all(arr.map((name) => {
+        const group = this.getGroup(name);
+        return group.playAllSounds();
+      })).then((val) => (
+        resolve(val.reduce((prev, curr) => prev.concat(curr)))
+      ))
+    ));
+  }
+
+  public getGroupVolume(name: string = 'default') {
     return this.getGroup(name).getVolume();
   }
 
-  setGroupVolume(value: number, groupName: string = 'default') {
+  public setGroupVolume(value: number, groupName: string = 'default') {
     this.getGroup(groupName).setVolume(value);
     return this;
   }
 
-  createPlaylist(options: IPlaylistOptions) {
+  public createPlaylist(options: IPlaylistOptions) {
     const opts = options || {};
     return new Playlist({ ...opts, });
   }
 
-  addPlaylist(name: string, options: IPlaylistOptions) {
+  public addPlaylist(name: string, options: IPlaylistOptions) {
     const playlist = this.createPlaylist(options);
     this.addPlaylists({
       [name]: playlist,
@@ -276,25 +298,25 @@ export class SoundManager implements ISoundManager {
     return playlist;
   }
 
-  addPlaylists(playlists: IPlaylistsMap) {
+  public addPlaylists(playlists: IPlaylistsMap) {
     const playls = playlists || {};
 
     const names = Object.keys(playls);
-    names.forEach((groupName) => {
-      if (groupName in this.playlists) {
+    names.forEach((playlistName) => {
+      if (playlistName in this.playlists) {
         throw new Error();
       }
     });
 
     this.__playlists = Object.freeze({
-      ...this.__playlists,
+      ...this.playlists,
       ...playls,
     });
 
     return this;
   }
 
-  getPlaylist(name: string) {
+  public getPlaylist(name: string) {
     const playlist = this.playlists[name];
     if (!playlist) {
       throw new Error();
@@ -303,12 +325,12 @@ export class SoundManager implements ISoundManager {
     return playlist;
   }
 
-  removePlaylist(name: string) {
+  public removePlaylist(name: string) {
     return this.removePlaylists(name);
   }
 
-  removePlaylists(names: string | string[]) {
-    const playls = { ...this.__playlists, };
+  public removePlaylists(names: string | string[]) {
+    const playls = { ...this.playlists, };
     if (typeof names === 'string') {
       delete playls[names];
     } else {
@@ -322,34 +344,64 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  removeAllPlaylists() {
+  public removeAllPlaylists() {
     return this.removePlaylists(Object.keys(this.playlists));
   }
 
-  playPlaylist(name: string) {
-    return this.playPlaylists(name);
+  public playPlaylist(name: string): Promise<Event> {
+    return new Promise((resolve) => {
+      this.playPlaylists(name).then((val) => resolve(val[0]));
+    });
   }
 
-  playPlaylists(names: string | string[]) {
-    const play = (playlistName: string) => {
-      /* TODO: add playlisting logic. */
-      playlistName;
-    };
-
+  public playPlaylists(names: string | string[]): Promise<Event[]> {
+    let arr: string[];
     if (typeof names === 'string') {
-      play(names);
+      arr = [ names, ];
     } else {
-      names.forEach(play);
+      arr = names;
     }
 
-    return this;
+    
+    const promises = arr.map((name) => {
+      const playlist = this.getPlaylist(name);
+      const sounds = playlist.soundGroupIdentifiers.map((id) => (
+        this.getSound(id.soundName, id.groupName)
+      ));
+
+      let index = -1;
+      const events: Event[] = [];
+      const play: () => Promise<Event[]> = () => {
+        index += 1;
+        const sound = sounds[index];
+        return new Promise((resolve) => {
+          if (index === sounds.length) {
+            return resolve(events);
+          }
+          
+          const prom = sound.play();
+          prom.then((e) => {
+            events.push(e);
+            return play();
+          });
+        });
+      };
+  
+      return play();
+    });
+
+    return new Promise((resolve) => (
+      Promise.all(promises).then((value) => (
+        resolve(value.reduce((prev, curr) => prev.concat(curr)))
+      ))
+    ));
   }
 
-  stopPlaylist(name: string) {
+  public stopPlaylist(name: string) {
     return this.stopPlaylists(name);
   }
 
-  stopPlaylists(names: string | string[]) {
+  public stopPlaylists(names: string | string[]) {
     const stop = (playlistName: string) => {
       /* TODO: add playlisting logic. */
       playlistName;
@@ -364,7 +416,7 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  createSound(options: ICreateSoundOptions): Promise<ISound> {
+  public createSound(options: ICreateSoundOptions): Promise<ISound> {
     const opts = options || {};
     if (this.isWebAudio()) {
       return createSound({
@@ -380,7 +432,7 @@ export class SoundManager implements ISoundManager {
     }
   }
 
-  addSound(
+  public addSound(
     name: string,
     options: ICreateSoundOptions,
     groupName: string = 'default',
@@ -398,28 +450,28 @@ export class SoundManager implements ISoundManager {
     });
   }
 
-  addSounds(sounds: ISoundsMap, groupName: string = 'default') {
+  public addSounds(sounds: ISoundsMap, groupName: string = 'default') {
     const group = this.getGroup(groupName);
     group.addSounds(sounds);
 
     return this;
   }
 
-  getSound(name: string, groupName: string = 'default') {
+  public getSound(name: string, groupName: string = 'default') {
     const group = this.getGroup(groupName);
     return group.getSound(name);
   }
 
-  removeSound(name: string, groupName: string = 'default') {
+  public removeSound(name: string, groupName: string = 'default') {
     return this.removeSounds(name, groupName);
   }
 
-  removeSounds(names: string | string[], groupName: string = 'default') {
+  public removeSounds(names: string | string[], groupName: string = 'default') {
     this.getGroup(groupName).removeSounds(names);
     return this;
   }
 
-  removeAllSounds(groupName?: string) {
+  public removeAllSounds(groupName?: string) {
     if (groupName) {
       this.getGroup(groupName).removeAllSounds();
     } else {
@@ -431,37 +483,44 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  playSound(name: string, groupName: string = 'default') {
-    return this.playSounds(name, groupName);
+  public playSound(name: string, groupName: string = 'default'): Promise<Event> {
+    return new Promise((resolve) => {
+      this.playSounds(name, groupName).then((val) => resolve(val[0]));
+    });
   }
 
-  playSounds(names: string | string[], groupName: string = 'default') {
-    this.getGroup(groupName).playSounds(names);
-    return this;
+  public playSounds(names: string | string[], groupName: string = 'default') {
+    return this.getGroup(groupName).playSounds(names);
   }
 
-  playAllSounds(groupName?: string) {
+  public playAllSounds(groupName?: string): Promise<Event[]> {
     if (groupName) {
-      this.getGroup(groupName).playAllSounds();
+      return this.getGroup(groupName).playAllSounds();
     } else {
-      Object.keys(this.groups).forEach((groupName) => {
-        this.getGroup(groupName).playAllSounds();
+      return new Promise((resolve) => {
+        Promise.all(
+          Object.keys(this.groups).map((groupName) => (
+            this.getGroup(groupName).playAllSounds()
+          ))
+        ).then((value) => {
+          /* Flatten event response arrays. */
+          const val = value.reduce((prev, curr) => prev.concat(curr));
+          return resolve(val);
+        });
       });
     }
-
-    return this;
   }
 
-  pauseSound(name: string, groupName: string = 'default') {
+  public pauseSound(name: string, groupName: string = 'default') {
     return this.pauseSounds(name, groupName);
   }
 
-  pauseSounds(names: string | string[], groupName: string = 'default') {
+  public pauseSounds(names: string | string[], groupName: string = 'default') {
     this.getGroup(groupName).pauseSounds(names);
     return this;
   }
 
-  pauseAllSounds(groupName?: string) {
+  public pauseAllSounds(groupName?: string) {
     if (groupName) {
       this.getGroup(groupName).pauseAllSounds();
     } else {
@@ -473,16 +532,16 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  stopSound(name: string, groupName: string = 'default') {
+  public stopSound(name: string, groupName: string = 'default') {
     return this.stopSounds(name, groupName);
   }
 
-  stopSounds(names: string | string[], groupName: string = 'default') {
+  public stopSounds(names: string | string[], groupName: string = 'default') {
     this.getGroup(groupName).stopSounds(names);
     return this;
   }
 
-  stopAllSounds(groupName?: string) {
+  public stopAllSounds(groupName?: string) {
     if (groupName) {
       this.getGroup(groupName).stopAllSounds();
     } else {
@@ -494,16 +553,16 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  getSoundVolume(name: string, groupName: string = 'default') {
+  public getSoundVolume(name: string, groupName: string = 'default') {
     return this.getGroup(groupName).getSound(name).getVolume();
   }
 
-  setSoundVolume(name: string, value: number, groupName: string = 'default') {
+  public setSoundVolume(name: string, value: number, groupName: string = 'default') {
     this.getGroup(groupName).getSound(name).setVolume(value);
     return this;
   }
 
-  updateAllAudioElementsVolume() {
+  public updateAllAudioElementsVolume() {
     Object.keys(this.groups).forEach((groupName) => {
       this.getGroup(groupName).updateAllAudioElementsVolume();
     });
@@ -511,22 +570,23 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  generateAudioPanelElement(): HTMLElement {
+  public generateAudioPanelElement(): HTMLElement {
     this.__audioPanelElement = generateAudioPanelElement(this);
     return this.__audioPanelElement;
   }
 
-  updateAudioPanelElement() {
+  public updateAudioPanelElement() {
     if (!this.__audioPanelElement) {
       throw new Error();
     }
 
     const newElem = updateAudioPanelElement(this, this.__audioPanelElement);
     this.__audioPanelElement = newElem;
+
     return this;
   }
 
-  panelRegister(soundOrGroup: ISound | IGroup) {
+  public panelRegister(soundOrGroup: ISound | IGroup) {
     // @ts-ignore
     soundOrGroup.__panelRegistered = true;
     if (this.__audioPanelElement) {
@@ -536,12 +596,13 @@ export class SoundManager implements ISoundManager {
     return this;
   }
 
-  panelDeregister(soundOrGroup: ISound | IGroup) {
+  public panelDeregister(soundOrGroup: ISound | IGroup) {
     // @ts-ignore
     soundOrGroup.__panelRegistered = false;
     if (this.__audioPanelElement) {
       this.updateAudioPanelElement();
     }
+
     return this;
   }
 }
