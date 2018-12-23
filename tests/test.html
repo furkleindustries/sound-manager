@@ -15,15 +15,44 @@
     const manager = new soundManager.SoundManager();
 
     const clicky = document.querySelector('.clicky');
-    manager.createSound('http://www.hyperion-records.co.uk/audiotest/14%20Clementi%20Piano%20Sonata%20in%20D%20major,%20Op%2025%20No%206%20-%20Movement%202%20Un%20poco%20andante.MP3').then((sound) => {
-      manager.addSounds({ test: sound, });
-      manager.panelRegister(sound);
+    Promise.all([
+      manager.addSound(
+        'test1',
+        {
+          url: 'http://www.noiseaddicts.com/samples_1w72b820/280.mp3',
+        },
+      ),
+
+      manager.addSound(
+        'test2',
+        {
+          url: 'http://www.noiseaddicts.com/samples_1w72b820/271.mp3',
+        },
+      ),
+
+      manager.addSound(
+        'test3',
+        {
+          url: 'http://www.noiseaddicts.com/free-samples-mp3?id=272',
+        },
+      ),
+    ]).then((sounds) => {
+      manager.addPlaylist('testPlaylist', {
+        ids: [
+          'test1',
+          'test2',
+          'test3',
+        ],
+      });
+
+
+      manager.panelRegister(sounds[0]);
+      document.body.appendChild(manager.generateAudioPanelElement());
       clicky.addEventListener('click', () => {
-        manager.playSound('test');
+        manager.playPlaylist('testPlaylist');
       });
     });
     
-    document.body.appendChild(manager.generateAudioPanelElement());
     </script>
   </body>
 </html>

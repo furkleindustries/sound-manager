@@ -21,16 +21,16 @@ export class Playlist implements IPlaylist {
     const {
       fade,
       loop,
-      soundGroupIdentifiers,
+      ids,
     } = opts;
 
-    if (!Array.isArray(soundGroupIdentifiers)) {
+    if (!Array.isArray(ids)) {
       throw new Error();
-    } else if (soundGroupIdentifiers.length === 0) {
+    } else if (ids.length === 0) {
       throw new Error();
     }
 
-    const soundGroupIds = soundGroupIdentifiers.map((sgi) => {
+    const soundGroupIds = ids.map((sgi) => {
       if (typeof sgi === 'string') {
         const split = sgi.split('.');
         if (!split.length) {

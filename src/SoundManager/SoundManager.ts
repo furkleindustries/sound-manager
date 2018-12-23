@@ -29,6 +29,9 @@ import {
   ISound,
 } from '../Sound/ISound';
 import {
+  ISoundGroupIdentifier,
+} from '../interfaces/ISoundGroupIdentifier';
+import {
   ISoundManager,
 } from './ISoundManager';
 import {
@@ -289,8 +292,11 @@ export class SoundManager implements ISoundManager {
     return new Playlist({ ...opts, });
   }
 
-  public addPlaylist(name: string, options: IPlaylistOptions) {
-    const playlist = this.createPlaylist(options);
+  public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions) {
+    const playlist = Array.isArray(options) ?
+      this.createPlaylist({ ids: options, }) :
+      this.createPlaylist(options);
+
     this.addPlaylists({
       [name]: playlist,
     });
@@ -362,7 +368,6 @@ export class SoundManager implements ISoundManager {
       arr = names;
     }
 
-    
     const promises = arr.map((name) => {
       const playlist = this.getPlaylist(name);
       const sounds = playlist.soundGroupIdentifiers.map((id) => (
@@ -382,7 +387,7 @@ export class SoundManager implements ISoundManager {
           const prom = sound.play();
           prom.then((e) => {
             events.push(e);
-            return play();
+            play().then(() => resolve(events));
           });
         });
       };
