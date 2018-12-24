@@ -33,7 +33,7 @@
       manager.addSound(
         'test3',
         {
-          url: 'http://www.noiseaddicts.com/free-samples-mp3?id=272',
+          url: 'http://www.noiseaddicts.com/samples_1w72b820/272.mp3',
         },
       ),
     ]).then((sounds) => {
@@ -43,8 +43,11 @@
           'test2',
           'test3',
         ],
+        loop: 2,
+        callback(events) {
+          console.log(events);
+        },
       });
-
 
       manager.panelRegister(sounds[0]);
       document.body.appendChild(manager.generateAudioPanelElement());
@@ -52,7 +55,6 @@
         manager.playPlaylist('testPlaylist');
       });
     });
-    
     </script>
   </body>
 </html>

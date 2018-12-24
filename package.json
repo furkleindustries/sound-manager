@@ -4,7 +4,7 @@
   "description": "A sound library for Twine, Accelerator, and other hypertext fiction frameworks.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "webpack -p",
+    "build": "cross-env NODE_ENV=development webpack",
     "test": "jest",
     "test-coverage": "jest --coverage"
   },
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.15",
+    "cross-env": "^5.2.0",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.5",
     "ts-loader": "^5.3.1",

@@ -7,6 +7,7 @@ import {
 
 export interface IPlaylist {
   readonly loop: boolean | number;
-  readonly soundGroupIdentifiers: ISoundGroupIdentifier[];
+  readonly ids: ISoundGroupIdentifier[];
   readonly fade?: IFade;
+  callback?(events: Event[]): any;
 }

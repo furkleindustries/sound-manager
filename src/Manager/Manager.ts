@@ -32,14 +32,17 @@ import {
   ISoundGroupIdentifier,
 } from '../interfaces/ISoundGroupIdentifier';
 import {
-  ISoundManager,
-} from './ISoundManager';
+  IManager,
+} from './IManager';
 import {
-  ISoundManagerOptions,
-} from './ISoundManagerOptions';
+  IManagerOptions,
+} from './IManagerOptions';
 import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 import {
   Playlist,
 } from '../Playlist/Playlist';
@@ -47,7 +50,11 @@ import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 
-export class SoundManager implements ISoundManager {
+export class Manager implements IManager {
+  get type() {
+    return NodeTypes.Manager;
+  }
+
   private __groups: IGroupsMap = Object.freeze({});
   get groups() {
     return this.__groups;
@@ -62,14 +69,12 @@ export class SoundManager implements ISoundManager {
  
   public readonly isWebAudio: () => boolean;
   public readonly getAudioContext: () => AudioContext;
-  public readonly getInputNode: () => AudioNode;
-  public readonly getOutputNode: () => AudioNode;
   public readonly getGainNode: () => GainNode;
   public readonly getAnalyserNode: () => AnalyserNode;
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => this;
 
-  constructor(options?: ISoundManagerOptions) {
+  constructor(options?: IManagerOptions) {
     const opts = options || {};
     const {
       groups,
@@ -105,9 +110,6 @@ export class SoundManager implements ISoundManager {
       const gainNode = this.getAudioContext().createGain();
       this.getGainNode = () => gainNode;
   
-      this.getInputNode = () => this.getAnalyserNode();
-      this.getOutputNode = () => this.getGainNode();
-
       this.getInputNode().connect(this.getOutputNode());
       this.getOutputNode().connect(this.getAudioContext().destination);
 
@@ -126,14 +128,6 @@ export class SoundManager implements ISoundManager {
       };
 
       this.getGainNode = () => {
-        throw new Error();
-      };
-
-      this.getInputNode = () => {
-        throw new Error();
-      };
-
-      this.getOutputNode = () => {
         throw new Error();
       };
 
@@ -162,6 +156,22 @@ export class SoundManager implements ISoundManager {
     if (typeof masterVolume !== 'undefined') {
       this.setVolume(masterVolume);
     }
+  }
+
+  public getInputNode() {
+    if (!this.isWebAudio()) {
+      throw new Error();
+    }
+
+    return this.getAnalyserNode();
+  }
+  
+  public getOutputNode() {
+    if (!this.isWebAudio()) {
+      throw new Error();
+    }
+
+    return this.getGainNode();
   }
 
   public createGroup(options?: IGroupOptions) {
@@ -223,22 +233,25 @@ export class SoundManager implements ISoundManager {
   }
 
   public removeGroups(names: string | string[]) {
-    const remove = (groupName: string) => {
-      const groups = Object.assign(this.groups);
+    let arr: string[];
+
+    if (typeof names === 'string') {
+      arr = [ names, ];
+    } else {
+      arr = names;
+    }
+
+    const groups = { ...this.groups, };
+    arr.forEach((groupName) => {
       const group = groups[groupName];
       if (group.isWebAudio()) {
         group.getOutputNode().disconnect();
       }
 
       delete groups[groupName];
-      this.__groups = Object.freeze(groups);
-    };
+    });
 
-    if (typeof names === 'string') {
-      remove(names);
-    } else {
-      names.forEach(remove);
-    }
+    this.__groups = Object.freeze(groups);
 
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
@@ -354,13 +367,53 @@ export class SoundManager implements ISoundManager {
     return this.removePlaylists(Object.keys(this.playlists));
   }
 
-  public playPlaylist(name: string): Promise<Event> {
-    return new Promise((resolve) => {
-      this.playPlaylists(name).then((val) => resolve(val[0]));
-    });
+  public async playPlaylist(name: string) {
+    const playlist = this.getPlaylist(name);
+    console.log(`Playing playlist ${name}.`);
+    let events: Event[] = [];
+    let looped = 0;
+    for (let ii = 0; ii < playlist.ids.length; ii += 1) {
+      const id = playlist.ids[ii];
+      const sound = this.getSound(id.soundName, id.groupName);
+
+      console.log(`${id.groupName}.${id.soundName} starting.`);
+
+      const event = await sound.play();
+      events.push(event);
+
+      console.log(`${id.groupName}.${id.soundName} ending.`);
+
+      if (ii === playlist.ids.length -1) {
+        if (playlist.callback) {
+          console.log(`Firing playlist ${name} callback.`);
+          playlist.callback(events);
+        }
+
+        events = [];
+  
+        if (playlist.loop) {
+          console.log(`Looping playlist ${name}.`);
+          /* This value is incremented when the loop begins a new iteration so
+           * it must be -1 rather than 0. */
+          if (typeof playlist.loop === 'number' &&
+              playlist.loop >= 1 &&
+              playlist.loop % 1 === 0)
+          {
+            /* Allow integers to be used for the loop value, causing the
+             * playlist to loop that many times. */
+            if (playlist.loop > looped) {
+              looped += 1;
+              ii = -1;
+            }
+          } else {
+            ii = -1;
+          }
+        }
+      }
+    }
   }
 
-  public playPlaylists(names: string | string[]): Promise<Event[]> {
+  public playPlaylists(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
       arr = [ names, ];
@@ -368,38 +421,7 @@ export class SoundManager implements ISoundManager {
       arr = names;
     }
 
-    const promises = arr.map((name) => {
-      const playlist = this.getPlaylist(name);
-      const sounds = playlist.soundGroupIdentifiers.map((id) => (
-        this.getSound(id.soundName, id.groupName)
-      ));
-
-      let index = -1;
-      const events: Event[] = [];
-      const play: () => Promise<Event[]> = () => {
-        index += 1;
-        const sound = sounds[index];
-        return new Promise((resolve) => {
-          if (index === sounds.length) {
-            return resolve(events);
-          }
-          
-          const prom = sound.play();
-          prom.then((e) => {
-            events.push(e);
-            play().then(() => resolve(events));
-          });
-        });
-      };
-  
-      return play();
-    });
-
-    return new Promise((resolve) => (
-      Promise.all(promises).then((value) => (
-        resolve(value.reduce((prev, curr) => prev.concat(curr)))
-      ))
-    ));
+    arr.forEach(this.playPlaylist);
   }
 
   public stopPlaylist(name: string) {
@@ -407,16 +429,30 @@ export class SoundManager implements ISoundManager {
   }
 
   public stopPlaylists(names: string | string[]) {
-    const stop = (playlistName: string) => {
-      /* TODO: add playlisting logic. */
-      playlistName;
-    };
-
+    let arr: string[] = [];
     if (typeof names === 'string') {
-      stop(names);
+      arr = [ names, ];
     } else {
-      names.forEach(stop);
+      arr = names;
     }
+
+    const stopped: {
+      [key: string]: { [key: string]: true, },
+    } = {};
+
+    arr.forEach((name) => {
+      this.getPlaylist(name).ids.forEach((id) => {
+        if (!stopped[id.groupName]) {
+          stopped[id.groupName] = {};
+        } else if (stopped[id.groupName][id.soundName]) {
+          /* Skip this one as we've already stopped it. */
+          return;
+        }
+
+        this.getSound(id.soundName, id.groupName).stop();
+        stopped[id.groupName][id.soundName] = true;
+      });
+    }, []);
 
     return this;
   }

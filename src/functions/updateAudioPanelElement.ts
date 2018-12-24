@@ -1,11 +1,11 @@
 import {
-  ISoundManager,
-} from '../SoundManager/ISoundManager';
-import {
   generateAudioPanelElement,
 } from './generateAudioPanelElement';
+import {
+  IManager,
+} from '../Manager/IManager';
 
-export const updateAudioPanelElement = (manager: ISoundManager, oldElem: HTMLElement) => {
+export const updateAudioPanelElement = (manager: IManager, oldElem: HTMLElement) => {
   if (!manager) {
     throw new Error();
   } else if (!oldElem) {

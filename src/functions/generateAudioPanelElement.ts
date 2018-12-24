@@ -2,10 +2,10 @@ import {
   generateVolumeInput,
 } from './generateGroupVolumeInput';
 import {
-  ISoundManager,
-} from '../SoundManager/ISoundManager';
+  IManager,
+} from '../Manager/IManager';
 
-export const generateAudioPanelElement = (manager: ISoundManager) => {
+export const generateAudioPanelElement = (manager: IManager) => {
   const audioPanelElement = document.createElement('div');
   audioPanelElement.className = 'sound-manager-panel';
 

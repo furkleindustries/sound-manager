@@ -2,11 +2,10 @@ import {
   EasingCurves,
 } from './EasingCurves';
 import {
-  EasingDirections,
-} from './EasingDirections';
+  IFadeArgumentObject,
+} from './IFadeArgumentObject';
 
 export interface IFade {
-  easingCurve: EasingCurves;
-  easingDirection: EasingDirections;
-  length: number;
+  readonly easingCurve: IFadeArgumentObject<EasingCurves>;
+  readonly length: IFadeArgumentObject<number>;
 }

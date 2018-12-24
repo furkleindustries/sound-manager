@@ -1,17 +1,31 @@
 import {
+  IFade,
+} from '../Fade/IFade';
+import {
   ISound,
 } from './ISound';
 import {
   ISoundOptions,
 } from './ISoundOptions';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
+import { EasingCurves } from '../Fade/EasingCurves';
+import { getFadeValueAtTime } from '../functions/getFadeValueAtTime';
+import { IFadeArgumentObject } from '../Fade/IFadeArgumentObject';
 
 export class Sound implements ISound {
+  get type() {
+    return NodeTypes.Sound;
+  }
+
   private __audioElement: HTMLAudioElement | null = null;
   private __startedTime: number = 0;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
   private __panelRegistered: boolean = false;
   private __promise: Promise<Event> | null = null;
+  private __fade: IFade | null = null;
 
   public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;
@@ -29,6 +43,7 @@ export class Sound implements ISound {
       autoplay,
       buffer,
       context,
+      fade,
       getManagerVolume,
       loop,
       trackPosition,
@@ -73,17 +88,13 @@ export class Sound implements ISound {
     } else if (audioElement) {
       this.__audioElement = audioElement;
 
-      this.__audioElement.addEventListener('timeupdate', (/*e*/) => {
-        //const tgt = e.target as HTMLAudioElement
-        //console.log(tgt.currentTime, tgt.currentTime === tgt.duration ? 'Completed.' : 'Not completed.');
-      });
-
       this.updateAudioElementVolume = () => {
         /* Set the audio element volume to the product of manager, group, and
          * sound volumes. */
         this.__audioElement!.volume =
           this.getManagerVolume() *
           this.getGroupVolume() *
+          this.getFadeVolume() *
           this.getVolume();
 
         return this;
@@ -120,6 +131,10 @@ export class Sound implements ISound {
       this.setLoop(loop);
     }
 
+    if (fade) {
+      this.__fade = fade;
+    }
+
     if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
       this.setTrackPosition(trackPosition);
     }
@@ -135,32 +150,6 @@ export class Sound implements ISound {
 
   getOutputNode() {
     return this.getGainNode();
-  }
-
-  getPlaying() {
-    if (this.isWebAudio()) {
-      return this.__playing;
-    } else {
-      return !this.__audioElement!.paused;
-    }
-  }
-
-  getLoop() {
-    if (this.isWebAudio()) {
-      return this.getSourceNode().loop;
-    } else {
-      return this.__audioElement!.loop;
-    }
-  }
-
-  setLoop(doLoop: boolean) {
-    if (this.isWebAudio()) {
-      this.getSourceNode().loop = doLoop;
-    } else {
-      this.__audioElement!.loop = doLoop;
-    }
-
-    return this;
   }
 
   getTrackPosition() {
@@ -189,7 +178,57 @@ export class Sound implements ISound {
     return this;
   }
 
-  play() {
+  getDuration() {
+    if (this.isWebAudio()) {
+      const source = this.getSourceNode()!;
+      if (source.buffer) {
+        return source.buffer.duration;
+      } else {
+        console.log('No buffer found for sound.');
+      }
+    } else {
+      return this.__audioElement!.duration;
+    }
+
+    return 0;
+  }
+
+  getPlaying() {
+    if (this.isWebAudio()) {
+      return this.__playing;
+    } else {
+      return !this.__audioElement!.paused;
+    }
+  }
+
+  getLoop() {
+    if (this.isWebAudio()) {
+      return this.getSourceNode().loop;
+    } else {
+      return this.__audioElement!.loop;
+    }
+  }
+
+  getFade() {
+    return this.__fade;
+  }
+
+  setFade(fade: IFade | null) {
+    this.__fade = fade;
+    return this;
+  }
+
+  setLoop(doLoop: boolean) {
+    if (this.isWebAudio()) {
+      this.getSourceNode().loop = doLoop;
+    } else {
+      this.__audioElement!.loop = doLoop;
+    }
+
+    return this;
+  }
+
+  play(fadeOverride?: IFade) {
     const trackPosition = this.getTrackPosition();
 
     this.__playing = true;
@@ -209,10 +248,57 @@ export class Sound implements ISound {
     }
 
     if (!this.__promise) {
-      this.__promise = new Promise((resolve) => {
-        source.addEventListener('ended', (e) => {
+      const fade = fadeOverride || this.getFade();
+
+      let timeUpdate: () => void;
+      if (fade) {
+        timeUpdate = () => {
+          const trackPosition = this.getTrackPosition();
+          if (fade.length.in > trackPosition) {
+            this.updateAudioElementVolume();
+          } else if (fade.length.out > duration - trackPosition) {
+            this.updateAudioElementVolume();
+          }
+        };
+
+        const duration = this.getDuration();
+        
+        if (this.isWebAudio()) {
+          const src = source as AudioBufferSourceNode;
+          const gainNode = this.getGainNode();
+          for (let ii = 0; ii < duration * 20; ii += 1) {
+            const time = ii / 20;
+            gainNode.gain.setValueAtTime(this.getFadeValueAtTime(
+              time,
+              duration,
+              fade.easingCurve,
+            ));
+          }
+        } else {
+          source.addEventListener('timeupdate', timeUpdate);
+        }
+      }
+
+      this.__promise = new Promise((resolve) => {  
+        const ended = (e: Event) => {
+          /* Remove the now-fulfilled promise. */
+          this.__promise = null;
+
+          /* Remove the 'ended' event listener. */
+          source.removeEventListener('ended', ended);
+
+          if (timeUpdate) {
+            source.removeEventListener('timeupdate', timeUpdate);
+          }
+
+          /* Reset the track position of the sound after it ends. */
+          this.stop();
+
+          /* Resolve the promise with the ended event. */
           return resolve(e);
-        });
+        };
+
+        source.addEventListener('ended', ended);
       });
     }
 
@@ -220,6 +306,8 @@ export class Sound implements ISound {
   }
 
   pause() {
+    this.__playing = false;
+
     if (this.isWebAudio()) {
       if (this.getPlaying()) {
         this.getSourceNode().stop();
@@ -227,7 +315,6 @@ export class Sound implements ISound {
 
       this.__pausedTime = this.getTrackPosition();
       this.__startedTime = 0;
-      this.__playing = false;
     } else {
       this.__audioElement!.pause();
       this.__pausedTime = this.getTrackPosition();
@@ -237,6 +324,8 @@ export class Sound implements ISound {
   }
 
   stop() {
+    this.__playing = false;
+
     if (this.isWebAudio()) {
       if (this.getPlaying()) {
         this.getSourceNode().stop();
@@ -244,11 +333,11 @@ export class Sound implements ISound {
 
       this.__startedTime = 0;
       this.__pausedTime = 0;
-      this.__playing = false;
     } else {
-      this.__audioElement!.pause();
+      const elem = this.__audioElement!;
+      elem.pause();
+      elem.currentTime = 0;
       this.__pausedTime = 0;
-      this.__audioElement!.currentTime = 0;
     }
 
     return this;
@@ -288,5 +377,34 @@ export class Sound implements ISound {
 
   isPanelRegistered() {
     return this.__panelRegistered;
+  }
+
+  getFadeVolume() {
+    const fade = this.getFade();
+    const trackPosition = this.getTrackPosition();
+    const duration = this.getDuration();
+    if (fade) {
+      if (fade.length.in > trackPosition) {
+        return this.getFadeValueAtTime(
+          trackPosition,
+          0,
+          fade.length.in,
+          fade.easingCurve,
+        );
+      } else if (fade.length.out > duration - trackPosition) {
+        return this.getFadeValueAtTime(
+          trackPosition,
+          duration - fade.length.out,
+          fade.length.out,
+          fade.easingCurve,
+        );
+      }
+    }
+
+    return 1;
+  }
+
+  getFadeValueAtTime(time: number, initial: number, length: number, curves: IFadeArgumentObject<EasingCurves>) {
+    return getFadeValueAtTime(time, initial, length, curves);
   }
 }

@@ -1,7 +1,4 @@
 import {
-  IPanelRegisterableNode,
-} from '../interfaces/IPanelRegisterableNode';
-import {
   IWebAudioNode,
 } from '../interfaces/IWebAudioNode';
 

@@ -5,11 +5,20 @@ import {
   IGroupOptions,
 } from './IGroupOptions';
 import {
+  ISound,
+} from '../Sound/ISound';
+import {
   ISoundsMap,
 } from './ISoundsMap';
-import { ISound } from '../Sound/ISound';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 
 export class Group implements IGroup {
+  get type() {
+    return NodeTypes.Group;
+  }
+
   private __sounds: ISoundsMap = Object.freeze({});
   get sounds() {
     return this.__sounds;

@@ -13,12 +13,14 @@ import {
 
 export class Playlist implements IPlaylist {
   readonly loop: boolean | number = false;
-  readonly soundGroupIdentifiers: ISoundGroupIdentifier[];
+  readonly ids: ISoundGroupIdentifier[];
   readonly fade?: IFade;
+  readonly callback?: (events: Event[]) => any;
 
   constructor(options?: IPlaylistOptions) {
     const opts: Partial<IPlaylistOptions> = options || {};
     const {
+      callback,
       fade,
       loop,
       ids,
@@ -31,9 +33,12 @@ export class Playlist implements IPlaylist {
     }
 
     const soundGroupIds = ids.map((sgi) => {
+      /* Allow 'groupName.soundName' strings and coerce them to
+       * ISoundGroupIdentifiers. Also interpret 'soundName' as
+       * 'default.soundName'. */
       if (typeof sgi === 'string') {
         const split = sgi.split('.');
-        if (!split.length) {
+        if (split.length === 1) {
           return {
             groupName: 'default',
             soundName: split[0],
@@ -49,7 +54,11 @@ export class Playlist implements IPlaylist {
       return sgi;
     });
 
-    this.soundGroupIdentifiers = soundGroupIds;
+    this.ids = soundGroupIds;
+
+    if (callback) {
+      this.callback = callback;
+    }
 
     if (fade) {
       this.fade = fade;

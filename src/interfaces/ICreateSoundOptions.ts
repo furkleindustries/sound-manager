@@ -1,9 +1,9 @@
 import {
-  ISoundManager,
-} from '../SoundManager/ISoundManager';
+  IManager,
+} from '../Manager/IManager';
 
 export interface ICreateSoundOptions {
-  manager: ISoundManager;
+  manager: IManager;
   url: string;
   audioElement?: HTMLAudioElement;
   autoplay?: boolean;

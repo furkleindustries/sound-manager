@@ -1,7 +1,7 @@
-export * from './SoundManager/SoundManager';
-export * from './SoundManager/ISoundManager';
-export * from './SoundManager/ISoundManagerOptions';
-export * from './SoundManager/ISoundManagerOptions';
+export * from './Manager/Manager';
+export * from './Manager/IManager';
+export * from './Manager/IManagerOptions';
+export * from './Manager/IManagerOptions';
 
 export * from './Group/Group';
 export * from './Group/IGroup';
