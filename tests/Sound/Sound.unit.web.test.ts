@@ -294,7 +294,9 @@ describe('Sound unit tests.', () => {
       getManagerVolume: jest.fn(),
     });
 
-    expect(sound.play().getPlaying()).toBe(true);
+    sound.play();
+    
+    expect(sound.getPlaying()).toBe(true);
   });
 
   it('Has a pause function which changes the playing property but leaves the track position as is.', () => {
@@ -312,8 +314,8 @@ describe('Sound unit tests.', () => {
     const trackPosition = sound.getTrackPosition();
     sound.pause();
 
-    expect(sound.getPlaying() === false &&
-           sound.getTrackPosition() === trackPosition).toBe(true);
+    expect(sound.getPlaying()).toBe(false);
+    expect(sound.getTrackPosition()).toBe(trackPosition);
   });
 
   it('Has a stop function which changes the playing property and resets the trackPosition property to 0.', () => {

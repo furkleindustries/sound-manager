@@ -67,20 +67,21 @@ export class Sound implements ISound {
     this.getGroupVolume = () => 1;
 
     if (context) {
-      this.isWebAudio = () => true;
-      this.getContextCurrentTime = () => context.currentTime;
-
-      if (buffer) {
-        this.__sourceNode = context.createBufferSource();
-        this.__sourceNode.buffer = buffer;
-
-        this.__gainNode = context.createGain();
-        this.__sourceNode.connect(this.__gainNode);
-      } else {
+      if (!buffer) {
         throw new Error();
       }
 
-      this.getVolume = () => this.getGainNode()!.gain.value;
+      this.isWebAudio = () => true;
+      this.getContextCurrentTime = () => context.currentTime;
+      
+      this.__sourceNode = context.createBufferSource();
+      this.__sourceNode.buffer = buffer;
+      this.__gainNode = context.createGain();
+      this.__fadeGainNode = context.createGain();
+      this.__sourceNode.connect(this.__fadeGainNode);
+      this.__fadeGainNode.connect(this.__gainNode);
+
+      this.getVolume = () => this.getGainNode().gain.value;
 
       this.setVolume = (value: number) => {
         this.getGainNode().gain.setValueAtTime(
@@ -389,6 +390,10 @@ export class Sound implements ISound {
   }
 
   pause() {
+    /* Must be executed before __playing = false. */
+    this.__pausedTime = this.getTrackPosition();
+
+    /* Must be executed after __pausedTime = ... */
     this.__playing = false;
 
     if (this.isWebAudio()) {
@@ -397,11 +402,9 @@ export class Sound implements ISound {
         this.clearFadeState();
       }
 
-      this.__pausedTime = this.getTrackPosition();
       this.__startedTime = 0;
     } else {
       this.__audioElement!.pause();
-      this.__pausedTime = this.getTrackPosition();
     }
 
     return this;
