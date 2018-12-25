@@ -2,7 +2,7 @@ import {
   IGroupsMap,
 } from './IGroupsMap';
 
-export interface ISoundManagerOptions {
+export interface IManagerOptions {
   context?: AudioContext;
   groups?: IGroupsMap;
   masterVolume?: number;

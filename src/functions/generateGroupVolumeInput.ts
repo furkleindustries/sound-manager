@@ -1,15 +1,9 @@
 import {
-  ISound,
-} from '../Sound/ISound';
-import {
-  IGroup,
-} from '../Group/IGroup';
-import {
-  ISoundManager,
-} from '../SoundManager/ISoundManager';
+  IWebAudioNode,
+} from '../interfaces/IWebAudioNode';
 
 export const generateVolumeInput = (
-  node: ISoundManager | IGroup | ISound,
+  node: IWebAudioNode,
   name?: string,
 ) =>
 {
@@ -22,11 +16,11 @@ export const generateVolumeInput = (
     nodeType = 'sound';
   }
 
-  if (nodeType === 'group' || nodeType === 'sound' && !name) {
+  if ((nodeType === 'group' || nodeType === 'sound') && !name) {
     throw new Error();
   }
 
-  let realName = nodeType === 'manager' ? 'manager' : name;
+  let realName = nodeType === 'manager' ? nodeType : name;
 
   const container = document.createElement('div');
   container.className = 'sm-manager-volumeInput-container ' +
@@ -52,6 +46,7 @@ export const generateVolumeInput = (
   input.min = '0';
   input.max = '1';
   input.step = '0.01';
+
   let evtType = 'input';
   /* Support non-conformant browsers which lack the input event. */
   if (!('oninput' in input)) {
@@ -64,7 +59,6 @@ export const generateVolumeInput = (
   });
 
   container.appendChild(input);
-
 
   return container;
 };

@@ -1,10 +1,13 @@
 import {
   IFade,
 } from '../Fade/IFade';
+import {
+  ISoundGroupIdentifier,
+} from '../interfaces/ISoundGroupIdentifier';
 
 export interface IPlaylist {
-  readonly groupName: string;
+  readonly fade: IFade | null;
   readonly loop: boolean | number;
-  readonly soundNames: string[];
-  readonly fade?: IFade;
+  readonly ids: ISoundGroupIdentifier[];
+  callback?(events: Event[]): any;
 }

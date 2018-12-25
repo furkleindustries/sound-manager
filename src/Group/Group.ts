@@ -5,10 +5,20 @@ import {
   IGroupOptions,
 } from './IGroupOptions';
 import {
+  ISound,
+} from '../Sound/ISound';
+import {
   ISoundsMap,
 } from './ISoundsMap';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 
 export class Group implements IGroup {
+  get type() {
+    return NodeTypes.Group;
+  }
+
   private __sounds: ISoundsMap = Object.freeze({});
   get sounds() {
     return this.__sounds;
@@ -103,6 +113,18 @@ export class Group implements IGroup {
     return sound;
   }
 
+  addSound(sound: ISound, name: string) {
+    if (!name) {
+      throw new Error();
+    } else if (name in this.sounds) {
+      throw new Error();
+    }
+
+    return this.addSounds({
+      [name]: sound,
+    });
+  }
+
   addSounds(sounds: ISoundsMap) {
     const names = Object.keys(sounds);
     names.forEach((soundName) => {
@@ -154,22 +176,21 @@ export class Group implements IGroup {
     return this.removeSounds(Object.keys(this.sounds));
   }
 
+  playSound(name: string): Promise<Event> {
+    return new Promise((resolve) => (
+      this.playSounds(name).then((val) => resolve(val[0])))
+    );
+  }
+
   playSounds(names: string | string[]) {
-    const play = (name: string) => {
-      if (!(name in this.sounds)) {
-        throw new Error();
-      }
-
-      this.sounds[name].play();
-    };
-
+    let arr: string[];
     if (typeof names === 'string') {
-      play(names);
+      arr = [ names, ];
     } else {
-      names.forEach(play);
+      arr = names;
     }
 
-    return this;
+    return Promise.all(arr.map((name) => this.getSound(name).play()));
   }
 
   playAllSounds() {

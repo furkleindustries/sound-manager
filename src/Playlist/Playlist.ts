@@ -1,4 +1,7 @@
 import {
+  Fade,
+} from '../Fade/Fade';
+import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -7,42 +10,72 @@ import {
 import {
   IPlaylistOptions,
 } from './IPlaylistOptions';
+import {
+  ISoundGroupIdentifier,
+} from '../interfaces/ISoundGroupIdentifier';
 
 export class Playlist implements IPlaylist {
   readonly loop: boolean | number = false;
-  readonly groupName: string = 'default';
-  readonly soundNames: string[];
-  readonly fade?: IFade;
+  readonly ids: ISoundGroupIdentifier[];
+  readonly fade: IFade | null = null;
+  readonly callback?: (events: Event[]) => any;
 
-  constructor(options?: IPlaylistOptions) {
-    const opts: Partial<IPlaylistOptions> = options || {};
+  constructor(options: IPlaylistOptions) {
     const {
-      groupName,
-      loop,
-      soundNames,
+      callback,
       fade,
-    } = opts;
+      loop,
+      ids,
+    } = options;
 
-    if (!Array.isArray(soundNames)) {
+    if (!Array.isArray(ids)) {
       throw new Error();
-    } else if (soundNames.length === 0) {
+    } else if (ids.length === 0) {
       throw new Error();
     }
 
-    this.soundNames = soundNames;
+    const soundGroupIds = ids.map((sgi) => {
+      /* Allow 'groupName.soundName' strings and coerce them to
+       * ISoundGroupIdentifiers. Also interpret 'soundName' as
+       * 'default.soundName'. */
+      if (typeof sgi === 'string') {
+        const split = sgi.split('.');
+        if (split.length === 1) {
+          return {
+            groupName: 'default',
+            soundName: split[0],
+          };
+        }
 
-    if (groupName) {
-      this.groupName = groupName;
+        return {
+          groupName: split[0],
+          soundName: split[1],
+        };
+      }
+
+      return sgi;
+    });
+
+    this.ids = soundGroupIds;
+
+    if (callback) {
+      this.callback = callback;
+    }
+
+    if (fade) {
+      if (typeof fade === 'boolean') {
+        this.fade = new Fade();
+      } else if (fade.easingCurve && fade.length) {
+        this.fade = fade as IFade;
+      } else {
+        this.fade = new Fade(fade);
+      }
     }
 
     if (typeof loop === 'boolean' ||
         (typeof loop === 'number' && loop >= 1 && loop % 1 === 0))
     {
       this.loop = loop;
-    }
-
-    if (fade) {
-      this.fade = fade;
     }
   }
 }
