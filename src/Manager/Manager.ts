@@ -5,8 +5,14 @@ import {
   generateAudioPanelElement,
 } from '../functions/generateAudioPanelElement';
 import {
+  Fade,
+} from '../Fade/Fade';
+import {
   Group,
 } from '../Group/Group';
+import {
+  IFadeOptions,
+} from '../Fade/IFadeOptions';
 import {
   IGroup,
 } from '../Group/IGroup';
@@ -300,6 +306,10 @@ export class Manager implements IManager {
     return this;
   }
 
+  public createFade(options?: IFadeOptions) {
+    return new Fade(options);
+  }
+
   public createPlaylist(options: IPlaylistOptions) {
     const opts = options || {};
     return new Playlist({ ...opts, });
@@ -378,7 +388,12 @@ export class Manager implements IManager {
 
       console.log(`${id.groupName}.${id.soundName} starting.`);
 
-      const event = await sound.play();
+      const event = await sound.play(
+        /* Overrides the sound's fade with the playlist fade. This argument is
+         * ignored if it's falsy. */ 
+        playlist.fade,
+      );
+
       events.push(event);
 
       console.log(`${id.groupName}.${id.soundName} ending.`);

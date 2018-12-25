@@ -10,12 +10,13 @@
 
   <body>
     <button class="clicky">clicky</button>
+
     <script>
     const context = new AudioContext();
-    const manager = new soundManager.SoundManager();
-
+    const manager = new soundManager.Manager();
     const clicky = document.querySelector('.clicky');
-    Promise.all([
+
+    const getAnimalTest = () => Promise.all([
       manager.addSound(
         'test1',
         {
@@ -36,14 +37,48 @@
           url: 'http://www.noiseaddicts.com/samples_1w72b820/272.mp3',
         },
       ),
-    ]).then((sounds) => {
+    ]);
+
+    const getNoiseTest = () => Promise.all([
+      manager.addSound(
+        'test1',
+        {
+          url: 'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Tape_Noise_04.mp3',
+        },
+      ),
+
+      manager.addSound(
+        'test2',
+        {
+          url: 'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Crackle_Loop_05.mp3',
+        },
+      ),
+    ]);
+
+    const getMusicTest = () => Promise.all([
+      manager.addSound(
+        'test1',
+        {
+          url: 'http://www.hochmuth.com/mp3/Beethoven_12_Variation.mp3',
+          trackPosition: 600,
+        },
+      ),
+    ]);
+
+    getMusicTest().then((sounds) => {
       manager.addPlaylist('testPlaylist', {
         ids: [
           'test1',
-          'test2',
-          'test3',
+          //'test2',
+          //'test3',
         ],
-        loop: 2,
+
+        fade: {
+          length: 10,
+          curve: 'equalPower',
+        },
+
+        loop: true,
         callback(events) {
           console.log(events);
         },
@@ -52,7 +87,11 @@
       manager.panelRegister(sounds[0]);
       document.body.appendChild(manager.generateAudioPanelElement());
       clicky.addEventListener('click', () => {
-        manager.playPlaylist('testPlaylist');
+        manager.playPlaylist('testPlaylist').then((e) => {
+          console.log(e);
+        }, (err) => {
+          console.log(err);
+        });
       });
     });
     </script>

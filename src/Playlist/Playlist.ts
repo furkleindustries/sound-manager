@@ -1,4 +1,7 @@
 import {
+  Fade,
+} from '../Fade/Fade';
+import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -14,17 +17,16 @@ import {
 export class Playlist implements IPlaylist {
   readonly loop: boolean | number = false;
   readonly ids: ISoundGroupIdentifier[];
-  readonly fade?: IFade;
+  readonly fade: IFade | null = null;
   readonly callback?: (events: Event[]) => any;
 
-  constructor(options?: IPlaylistOptions) {
-    const opts: Partial<IPlaylistOptions> = options || {};
+  constructor(options: IPlaylistOptions) {
     const {
       callback,
       fade,
       loop,
       ids,
-    } = opts;
+    } = options;
 
     if (!Array.isArray(ids)) {
       throw new Error();
@@ -61,7 +63,13 @@ export class Playlist implements IPlaylist {
     }
 
     if (fade) {
-      this.fade = fade;
+      if (typeof fade === 'boolean') {
+        this.fade = new Fade();
+      } else if (fade.easingCurve && fade.length) {
+        this.fade = fade as IFade;
+      } else {
+        this.fade = new Fade(fade);
+      }
     }
 
     if (typeof loop === 'boolean' ||

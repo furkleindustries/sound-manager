@@ -5,6 +5,12 @@ import {
   ICreateSoundOptions,
 } from '../interfaces/ICreateSoundOptions';
 import {
+  IFade,
+} from '../Fade/IFade';
+import {
+  IFadeOptions,
+} from '../Fade/IFadeOptions';
+import {
   IGroup,
 } from '../Group/IGroup';
 import {
@@ -47,6 +53,7 @@ export interface IManager extends IWebAudioNode, IAnalysableNode {
   playGroups(names: string | string[]): Promise<Event[]>;
   getGroupVolume(name?: string): number;
   setGroupVolume(value: number, groupName?: string): IManager;
+  createFade(options?: IFadeOptions): IFade;
   createPlaylist(options: IPlaylistOptions): IPlaylist;
   addPlaylist(name: string, options: IPlaylistOptions): IPlaylist;
   addPlaylists(playlists: IPlaylistsMap): IManager;

@@ -1,6 +1,6 @@
 import {
-  IFade,
-} from '../Fade/IFade';
+  IFadeOptions,
+} from '../Fade/IFadeOptions';
 
 export interface ISoundOptions {
   getManagerVolume(): number;
@@ -8,7 +8,7 @@ export interface ISoundOptions {
   autoplay?: boolean;
   buffer?: AudioBuffer;
   context?: AudioContext;
-  fade?: IFade;
+  fade?: boolean | IFadeOptions;
   loop?: boolean;
   trackPosition?: number;
   volume?: number;

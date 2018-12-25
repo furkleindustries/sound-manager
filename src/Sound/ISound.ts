@@ -13,6 +13,7 @@ import {
 
 export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getSourceNode(): AudioBufferSourceNode;
+  getFadeGainNode(): GainNode;
   getContextCurrentTime(): number;
   getTrackPosition(): number;
   setTrackPosition(seconds: number): ISound;
@@ -21,8 +22,8 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getLoop(): boolean;
   setLoop(doLoop: boolean): ISound;
   getFade(): IFade | null;
-  setFade(options: IFade | null): ISound;
-  play(fadeOverride?: IFade): Promise<Event>;
+  setFade(fade: IFade | null): ISound;
+  play(fadeOverride?: IFade | null): Promise<Event>;
   pause(): ISound;
   stop(): ISound;
   rewind(seconds: number): ISound;
@@ -31,5 +32,12 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): ISound;
-  getFadeValueAtTime(time: number, length: number, curve: EasingCurves): number;
+  getFadeValueAtTime(options: {
+    change: number,
+    curve: EasingCurves
+    duration: number,
+    initial: number,
+    time: number,
+  }): number;
+  clearFadeState(): ISound;
 }
