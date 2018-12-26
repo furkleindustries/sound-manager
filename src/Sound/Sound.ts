@@ -37,6 +37,11 @@ export class Sound implements ISound {
   private __promise: Promise<Event> | null = null;
   private __fade: IFade | null = null;
 
+  private __rejectOnStop: (message?: string) => void = () => {};
+  private __getNewSourceNode: () => AudioBufferSourceNode = () => {
+    throw new Error('Source node factory not initialized.');
+  };
+
   public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;
   public readonly getManagerVolume: () => number;
@@ -44,21 +49,20 @@ export class Sound implements ISound {
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => ISound;
   public getGroupVolume: () => number;
-  private __stopRejection: (message?: string) => void = () => {};
 
-  constructor(options: ISoundOptions) {
-    const {
-      audioElement,
-      autoplay,
-      buffer,
-      context,
-      fade,
-      getManagerVolume,
-      loop,
-      trackPosition,
-      volume,
-    } = options;
-
+  constructor({
+    audioElement,
+    autoplay,
+    buffer,
+    context,
+    fade,
+    getManagerVolume,
+    loop,
+    trackPosition,
+    volume,
+  }: ISoundOptions)
+  {
+    /* Needed to calculate volume for HTML5 audio. */
     if (typeof getManagerVolume !== 'function') {
       throw new Error();
     }
@@ -70,13 +74,24 @@ export class Sound implements ISound {
       if (!buffer) {
         throw new Error();
       }
-
+      
       this.isWebAudio = () => true;
       this.getContextCurrentTime = () => context.currentTime;
       
-      this.__sourceNode = context.createBufferSource();
-      this.__sourceNode.buffer = buffer;
+      /* Keep reference to the necessary context factory method and the buffer
+       * in a private closure available elsewhere in the class. */
+      this.__getNewSourceNode = () => {
+        const node = context.createBufferSource();
+        node.buffer = buffer;
+        return node;
+      };
+
+      /* Generate the first source node. */
+      this.__sourceNode = this.__getNewSourceNode();
+
+      /* Generate the output gain node. */
       this.__gainNode = context.createGain();
+      /* Generate the gain node used for fading volume. */
       this.__fadeGainNode = context.createGain();
       this.__sourceNode.connect(this.__fadeGainNode);
       this.__fadeGainNode.connect(this.__gainNode);
@@ -92,7 +107,9 @@ export class Sound implements ISound {
         return this;
       };
 
-      this.updateAudioElementVolume = () => this;
+      this.updateAudioElementVolume = () => {
+        throw new Error();
+      };
     } else if (audioElement) {
       this.__audioElement = audioElement;
 
@@ -125,7 +142,9 @@ export class Sound implements ISound {
       this.getVolume = () => volume;
       this.setVolume = (value: number) => {
         volume = value;
-        return this.updateAudioElementVolume();
+        this.updateAudioElementVolume();
+
+        return this;
       };
     } else {
       throw new Error();
@@ -219,6 +238,8 @@ export class Sound implements ISound {
     if (this.isWebAudio()) {
       if (this.getPlaying()) {
         this.__startedTime = this.getContextCurrentTime() - seconds;
+        this.pause();
+        this.play();
       } else {
         this.__pausedTime = seconds;
       }
@@ -237,7 +258,7 @@ export class Sound implements ISound {
       if (source.buffer) {
         return source.buffer.duration;
       } else {
-        console.log('No buffer found for sound.');
+        console.warn('No buffer found for sound.');
       }
     } else {
       return this.__audioElement!.duration;
@@ -289,7 +310,7 @@ export class Sound implements ISound {
     if (this.isWebAudio()) {
       source = this.getSourceNode();
 
-      /* Play the source node, respecting possible pauses. */
+      /* Play the source node, respecting a possible pause. */
       source.start(trackPosition);
 
       /* Reset the started time. */
@@ -362,7 +383,7 @@ export class Sound implements ISound {
           }
 
           /* Don't reject the emitted promise. */
-          this.__stopRejection = () => {};
+          this.__rejectOnStop = () => {};
 
           /* Reset the track position of the sound after it ends. Also deletes
            * the old promise. */
@@ -377,7 +398,7 @@ export class Sound implements ISound {
         source.addEventListener('ended', ended);
 
         /* Allow the promise to be rejected if the sound is stopped. */
-        this.__stopRejection = (message?: string) => {
+        this.__rejectOnStop = (message?: string) => {
           return reject(
             message ||
             'The sound was stopped, probably by a user-created script.'
@@ -393,28 +414,32 @@ export class Sound implements ISound {
     /* Must be executed before __playing = false. */
     this.__pausedTime = this.getTrackPosition();
 
-    /* Must be executed after __pausedTime = ... */
-    this.__playing = false;
-
     if (this.isWebAudio()) {
+      /* Must be executed after __pausedTime = ... */
       if (this.getPlaying()) {
-        this.getSourceNode().stop();
-        this.clearFadeState();
+        const sourceNode = this.getSourceNode();
+        sourceNode.stop();
+        this.__sourceNode = this.__getNewSourceNode();
       }
-
+      
       this.__startedTime = 0;
     } else {
       this.__audioElement!.pause();
     }
 
+    /* Must be executed after __pausedTime = ... and this.getPlaying(). */
+    this.__playing = false;
+    
+    this.clearFadeState();
+    
     return this;
   }
-
+  
   stop() {
     this.pause();
 
-    this.__stopRejection('The sound was stopped through the stop() method.');
-    this.__stopRejection = () => {};
+    this.__rejectOnStop('The sound was stopped through the stop() method.');
+    this.__rejectOnStop = () => {};
     delete this.__promise;
 
     this.__pausedTime = 0;
@@ -501,7 +526,9 @@ export class Sound implements ISound {
   })
   {
     const value = getFadeValueAtTime(options);
-    console.log(`Fading ${options.change < 0 ? 'out' : 'in'}:`, value, options);
+    if (0) {
+      console.log(`Fading ${options.change < 0 ? 'out' : 'in'}:`, value, options);
+    }
 
     return value;
   }

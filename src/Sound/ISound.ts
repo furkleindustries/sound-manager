@@ -34,7 +34,7 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   updateAudioElementVolume(): ISound;
   getFadeValueAtTime(options: {
     change: number,
-    curve: EasingCurves
+    curve: EasingCurves,
     duration: number,
     initial: number,
     time: number,
