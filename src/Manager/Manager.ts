@@ -126,7 +126,9 @@ export class Manager implements IManager {
           this.getAudioContext().currentTime,
         );
 
-        return this.updateAllAudioElementsVolume();
+        this.updateAllAudioElementsVolume();
+
+        return this;
       }
     } else {
       this.getAnalyserNode = () => {

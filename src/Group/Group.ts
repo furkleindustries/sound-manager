@@ -34,7 +34,7 @@ export class Group implements IGroup {
   setVolume: (value: number) => this;
 
   constructor(options: IGroupOptions) {
-    const opts = options || {}
+    const opts = options || {};
 
     const {
       context,
