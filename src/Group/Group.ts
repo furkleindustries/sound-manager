@@ -34,7 +34,7 @@ export class Group implements IGroup {
   setVolume: (value: number) => this;
 
   constructor(options: IGroupOptions) {
-    const opts = options || {}
+    const opts = options || {};
 
     const {
       context,
@@ -62,7 +62,9 @@ export class Group implements IGroup {
           this.getContextCurrentTime(),
         );
 
-        return this.updateAllAudioElementsVolume();
+        this.updateAllAudioElementsVolume();
+
+        return this;
       };
     } else {
       this.isWebAudio = () => false;
@@ -83,7 +85,9 @@ export class Group implements IGroup {
       this.getVolume = () => volume;
       this.setVolume = (value: number) => {
         volume = value;
-        return this.updateAllAudioElementsVolume();
+        this.updateAllAudioElementsVolume();
+
+        return this;
       };
     }
 
@@ -240,7 +244,9 @@ export class Group implements IGroup {
   updateAllAudioElementsVolume() {
     Object.keys(this.sounds).forEach((soundName) => {
       const sound = this.getSound(soundName);
-      sound.updateAudioElementVolume();
+      if (!sound.isWebAudio()) {
+        sound.updateAudioElementVolume();
+      }
     });
 
     return this;
