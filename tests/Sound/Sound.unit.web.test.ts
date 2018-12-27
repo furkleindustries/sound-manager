@@ -4,6 +4,7 @@ import {
 import { NodeTypes } from '../../src/enums/NodeTypes';
 import { ISoundOptions } from '../../src/Sound/ISoundOptions';
 import { EasingCurves } from '../../src/Fade/EasingCurves';
+import { IFade } from '../../src/Fade/IFade';
 
 const getContext = () => new AudioContext();
 const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 12000);
@@ -86,7 +87,16 @@ describe('Sound unit tests.', () => {
   it('Has a getGainNode property which returns an instance of GainNode after it is constructed.', () => {
     expect(testSoundFactory().getGainNode()).toBeInstanceOf(GainNode);
   });
-  
+
+  it('Throws if getGainNode is called and __gainNode is falsy.', () => {
+    const sound = testSoundFactory();
+    // @ts-ignore
+    delete sound.__gainNode;
+    const func = () => sound.getGainNode();
+
+    expect(func).toThrow();
+  });
+
   it('Has a getInputNode function which returns an instance of AudioNode.', () => {
     expect(testSoundFactory().getInputNode()).toBeInstanceOf(AudioNode);
   });
@@ -99,8 +109,26 @@ describe('Sound unit tests.', () => {
     expect(testSoundFactory().getSourceNode()).toBeInstanceOf(AudioBufferSourceNode);
   });
 
+  it('Throws if getSourceNode is called and __sourceNode is falsy.', () => {
+    const sound = testSoundFactory();
+    // @ts-ignore
+    delete sound.__sourceNode;
+    const func = () => sound.getSourceNode();
+
+    expect(func).toThrow();
+  });
+
   it('Has a getFadeGainNode function which returns an instance of GainNode.', () => {
     expect(testSoundFactory().getFadeGainNode()).toBeInstanceOf(GainNode);
+  });
+
+  it('Throws if getFadeGainNode is called and __fadeGainNode is falsy.', () => {
+    const sound = testSoundFactory();
+    // @ts-ignore
+    delete sound.__fadeGainNode;
+    const func = () => sound.getFadeGainNode();
+
+    expect(func).toThrow();
   });
 
   it('Has a getContextCurrentTime function which returns the currentTime property of the AudioContext passed in the options object.', () => {
@@ -258,6 +286,160 @@ describe('Sound unit tests.', () => {
     expect(sound.getPlaying()).toBe(true);
   });
 
+  it('Fades on play if the track position is less than the in length of the IFade.', () => {
+    const sound = testSoundFactory();
+    const mock = jest.fn();
+    // @ts-ignore
+    sound.__fadeGainNode = {
+      // @ts-ignore
+      gain: {
+        setValueAtTime: mock,
+      },
+    };
+
+    // @ts-ignore
+    sound.__sourceNode = {
+      start: jest.fn(),
+    };
+
+    sound.play({
+      easingCurve: {
+        in: EasingCurves.Cubic,
+        out: EasingCurves.Cubic,
+      },
+
+      length: {
+        in: 1,
+        out: 1,
+      },
+    });
+
+    expect(mock).toBeCalled();
+  });
+
+  it('Does not fade on play if the track position is greater than the in length of the IFade.', () => {
+    const sound = testSoundFactory();
+    const mock = jest.fn();
+    // @ts-ignore
+    sound.__fadeGainNode = {
+      // @ts-ignore
+      gain: {
+        setValueAtTime: mock,
+      },
+    };
+
+    // @ts-ignore
+    sound.__sourceNode = {
+      start: jest.fn(),
+    };
+
+    // @ts-ignore
+    sound.getDuration = jest.fn(() => 20);
+
+    // @ts-ignore
+    sound.getTrackPosition = jest.fn(() => 10);
+
+    sound.play({
+      easingCurve: {
+        in: EasingCurves.Cubic,
+        out: EasingCurves.Cubic,
+      },
+
+      length: {
+        in: 1,
+        out: 1,
+      },
+    });
+
+    expect(mock).not.toBeCalled();
+  });
+  
+
+  it('Fades on end if the track position is less than the out length of the IFade.', () => {
+    const sound = testSoundFactory();
+    const mock = jest.fn();
+    // @ts-ignore
+    sound.__fadeGainNode = {
+      // @ts-ignore
+      gain: {
+        setValueAtTime: mock,
+      },
+    };
+
+    // @ts-ignore
+    sound.__sourceNode = {
+      start: jest.fn(),
+    };
+
+    // @ts-ignore
+    sound.getDuration = jest.fn(() => 12);
+
+    // @ts-ignore
+    sound.getTrackPosition = jest.fn(() => 10);
+
+    sound.play({
+      easingCurve: {
+        in: EasingCurves.Cubic,
+        out: EasingCurves.Cubic,
+      },
+
+      length: {
+        in: 5,
+        out: 5,
+      },
+    });
+
+    expect(mock).toBeCalled();
+  });
+
+  it('Outputs a promise when played.', () => {
+    expect(testSoundFactory().play()).toBeInstanceOf(Promise);
+  });
+
+  it('Resolves the promise with an event when the sound completes.', () => {
+    expect.assertions(1);
+    const sound = testSoundFactory();
+    const prom = sound.play();
+
+    /* TODO: fix this awful hack around the testing library. */
+    // @ts-ignore
+    sound.getSourceNode().$stateAtTime = jest.fn(() => 'FINISHED');
+    // @ts-ignore
+    sound.getSourceNode().$process();
+
+    return expect(prom).resolves.toBeInstanceOf(Event);
+  });
+
+  it('Rejects the promise with an event when the sound is stopped.', () => {
+    expect.assertions(1);
+    const sound = testSoundFactory();
+    const prom = sound.play();
+    sound.stop();
+
+    return expect(prom).rejects.toBeTruthy();
+  });
+
+  it('Rejects with a custom message if a message is provided to __rejectOnStop.', () => {
+    expect.assertions(1);
+    const sound = testSoundFactory();
+    const message = 'testfoo';
+    const prom = sound.play();
+    // @ts-ignore
+    sound.__rejectOnStop(message);
+
+    return expect(prom).rejects.toBe(message);
+  });
+
+  it('Rejects with a generic message if no message is provided to __rejectOnStop.', () => {
+    expect.assertions(1);
+    const sound = testSoundFactory();
+    const prom = sound.play();
+    // @ts-ignore
+    sound.__rejectOnStop();
+
+    return expect(prom).rejects.toBe('The sound was stopped, probably by a user-created script.');
+  });
+
   it('Has a pause function which changes the playing property but leaves the track position as is.', () => {
     const sound = testSoundFactory();
     sound.setTrackPosition(2);
@@ -301,7 +483,9 @@ describe('Sound unit tests.', () => {
 
   it('Has a getManagerVolume argument which is used as the getManagerVolume method.', () => {
     const getManagerVolume = jest.fn();
-    expect(testSoundFactory({ getManagerVolume, }).getManagerVolume).toBe(getManagerVolume);
+    const sound = testSoundFactory({ getManagerVolume, });
+
+    expect(sound.getManagerVolume).toBe(getManagerVolume);
   });
 
   it('Has a getGroupVolume function which returns a number betweeen 0 and 1 inclusive.', () => {
@@ -314,6 +498,42 @@ describe('Sound unit tests.', () => {
   it('Has a function called updateAudioElementVolume which throws an error if it is used in the web audio mode.', () => {
     const func = () => testSoundFactory().updateAudioElementVolume();
     expect(func).toThrow();
+  });
+
+  it('Has a getFadeVolume function which calls getFadeValueAtTime with args from the destructured fade.', () => {
+    const sound = testSoundFactory();
+    const mock = jest.fn();
+    sound.getFadeValueAtTime = mock;
+    sound.setTrackPosition(0);
+
+    const fade: IFade = {
+      easingCurve: {
+        in: EasingCurves.Cubic,
+        out: EasingCurves.EqualPower,
+      },
+
+      length: {
+        in: 3,
+        out: 3,
+      },
+    };
+
+    // @ts-ignore
+    sound.__fade = fade;
+    sound.getFadeVolume();
+
+    expect(mock).toBeCalledTimes(1);
+    expect(mock).toBeCalledWith({
+      change: 1,
+      curve: fade.easingCurve.in,
+      duration: fade.length.in,
+      initial: 0,
+      time: sound.getTrackPosition(),
+    });
+  });
+
+  it('Returns 1 from getFadeVolume if there is no fade.', () => {
+    expect(testSoundFactory().getFadeVolume()).toBe(1);
   });
 
   it('Has a getFadeValueAtTime method which emits a number.', () => {
@@ -349,5 +569,10 @@ describe('Sound unit tests.', () => {
     sound.clearFadeState();
 
     expect((sound as any).__fadeOverride).toBeUndefined();
+  });
+
+  it('Defaults to an isPanelRegistered() of false.', () => {
+    const sound = testSoundFactory();
+    expect(sound.isPanelRegistered()).toBe(false);
   });
 });
