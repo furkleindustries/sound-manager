@@ -37,7 +37,12 @@ export class Sound implements ISound {
   private __promise: Promise<Event> | null = null;
   private __fade: IFade | null = null;
 
-  private __rejectOnStop: (message?: string) => void = () => {};
+  /* istanbul ignore next */
+  private __rejectOnStop: (message?: string) => void = () => {
+    throw new Error('Rejection handler not initialized.');
+  };
+
+  /* istanbul ignore next */
   private __getNewSourceNode: () => AudioBufferSourceNode = () => {
     throw new Error('Source node factory not initialized.');
   };
@@ -45,7 +50,6 @@ export class Sound implements ISound {
   public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;
   public readonly getManagerVolume: () => number;
-  public readonly updateAudioElementVolume: () => ISound;
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => ISound;
   public getGroupVolume: () => number;
@@ -74,10 +78,10 @@ export class Sound implements ISound {
       if (!buffer) {
         throw new Error();
       }
-      
+
       this.isWebAudio = () => true;
       this.getContextCurrentTime = () => context.currentTime;
-      
+
       /* Keep reference to the necessary context factory method and the buffer
        * in a private closure available elsewhere in the class. */
       this.__getNewSourceNode = () => {
@@ -106,35 +110,11 @@ export class Sound implements ISound {
 
         return this;
       };
-
-      this.updateAudioElementVolume = () => {
-        throw new Error();
-      };
     } else if (audioElement) {
       this.__audioElement = audioElement;
 
-      this.updateAudioElementVolume = () => {
-        /* Set the audio element volume to the product of manager, group, and
-         * fade, and sound volumes. */
-        this.__audioElement!.volume =
-          this.getManagerVolume() *
-          this.getGroupVolume() *
-          this.getFadeVolume() *
-          this.getVolume();
-
-        return this;
-      };
-
       this.isWebAudio = () => false;
       this.getContextCurrentTime = () => {
-        throw new Error();
-      };
-
-      this.getSourceNode = () => {
-        throw new Error();
-      };
-
-      this.getGainNode = () => {
         throw new Error();
       };
 
@@ -223,31 +203,31 @@ export class Sound implements ISound {
   }
 
   getTrackPosition() {
-    if (this.isWebAudio()) {
-      if (this.getPlaying()) {
+    if (this.getPlaying()) {
+      if (this.isWebAudio()) {
         return this.getContextCurrentTime() - this.__startedTime;
       } else {
-        return this.__pausedTime;
+        return this.__audioElement!.currentTime;
       }
     } else {
-      return this.__audioElement!.currentTime;
+      return this.__pausedTime;
     }
   }
 
   setTrackPosition(seconds: number) {
-    if (this.isWebAudio()) {
-      if (this.getPlaying()) {
+    if (this.getPlaying()) {
+      if (this.isWebAudio()) {
         this.__startedTime = this.getContextCurrentTime() - seconds;
         this.pause();
         this.play();
       } else {
-        this.__pausedTime = seconds;
+        this.__audioElement!.currentTime = seconds;
       }
-    } else {
-      this.__audioElement!.currentTime = seconds;
-    }
 
-    this.clearFadeState();
+      this.clearFadeState();
+    } else {
+      this.__pausedTime = seconds;
+    }
 
     return this;
   }
@@ -421,7 +401,7 @@ export class Sound implements ISound {
         sourceNode.stop();
         this.__sourceNode = this.__getNewSourceNode();
       }
-      
+
       this.__startedTime = 0;
     } else {
       this.__audioElement!.pause();
@@ -429,12 +409,11 @@ export class Sound implements ISound {
 
     /* Must be executed after __pausedTime = ... and this.getPlaying(). */
     this.__playing = false;
-    
     this.clearFadeState();
-    
+
     return this;
   }
-  
+
   stop() {
     this.pause();
 
@@ -451,43 +430,31 @@ export class Sound implements ISound {
   }
 
   rewind(seconds: number) {
-    if (this.isWebAudio()) {
-      if (this.getPlaying()) {
-        this.getSourceNode().stop();
-        this.__startedTime += seconds;
-        this.getSourceNode().start(this.getTrackPosition());
-      } else {
-        this.__pausedTime -= seconds;
-      }
-    } else {
-      this.__audioElement!.currentTime -= seconds;
-    }
-
-    this.clearFadeState();
-
-    return this;
+    return this.setTrackPosition(this.getTrackPosition() - seconds);
   }
 
   fastForward(seconds: number) {
-    if (this.isWebAudio()) {
-      if (this.getPlaying()) {
-        this.getSourceNode().stop();
-        this.__startedTime -= seconds;
-        this.getSourceNode().start(this.getTrackPosition());
-      } else {
-        this.__pausedTime += seconds;
-      }
-    } else {
-      this.__audioElement!.currentTime += seconds;
-    }
-
-    this.clearFadeState();
-
-    return this;
+    return this.setTrackPosition(this.getTrackPosition() + seconds);    
   }
 
   isPanelRegistered() {
     return this.__panelRegistered;
+  }
+
+  updateAudioElementVolume() {
+    if (this.isWebAudio()) {
+      throw new Error();
+    }
+
+    /* Set the audio element volume to the product of manager, group, and
+     * fade, and sound volumes. */
+    this.__audioElement!.volume =
+      this.getManagerVolume() *
+      this.getGroupVolume() *
+      this.getFadeVolume() *
+      this.getVolume();
+
+    return this;
   }
 
   getFadeVolume() {
