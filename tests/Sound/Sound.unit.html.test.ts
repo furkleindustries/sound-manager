@@ -8,62 +8,27 @@ import {
   ISoundOptions,
 } from '../../src/Sound/ISoundOptions';
 import {
-  NodeTypes,
-} from '../../src/enums/NodeTypes';
-import {
   Sound,
 } from '../../src/Sound/Sound';
 
-const getContext = () => new AudioContext();
-const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 12000);
 const testSoundFactory = (options?: Partial<ISoundOptions>) => {
-  const context = options ? options.context || getContext() : getContext();
-  const buffer = options ? options.buffer || getAudioBuffer(context) : getAudioBuffer(context);
+  const audioElement = {
+    ...new Audio('./'),
+    play: jest.fn(),
+    pause: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    loop: false,
+  };
+  
   return new Sound({
-    buffer,
-    context,
+    audioElement,
     getManagerVolume: jest.fn(() => 1),
     ...options,
   });
 };
 
-describe('Sound Web Audio unit tests.', () => {
-  /* Constructor tests. */
-  it('Throws an error if the options argument is not provided.', () => {
-    const func = () => (
-      // @ts-ignore
-      new Sound()
-    );
-
-    expect(func).toThrow();
-  });
-
-  it('Throws an error if the getManagerVolume argument property is not a function.', () => {
-    const func = () => (
-      // @ts-ignore
-      new Sound({})
-    );
-
-    expect(func).toThrow();
-  });
-
-  it('Throws an error if the buffer is missing.', () => {
-    const func = () => (
-      new Sound({
-        context: getContext(),
-        getManagerVolume: jest.fn(),
-      })
-    );
-
-    expect(func).toThrow();
-  });
-  /* End constructor tests. */
-
-  it('Has a type of NodeTypes.Sound.', () => {
-    const sound = testSoundFactory();
-    expect(sound.type).toBe(NodeTypes.Sound);
-  });
-
+describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a getVolume function which returns a number.', () => {
     const sound = testSoundFactory();
     const volume = sound.getVolume();
@@ -88,62 +53,38 @@ describe('Sound Web Audio unit tests.', () => {
     expect(testSoundFactory().setVolume(newVol).getVolume()).toBe(newVol);
   });
 
-  it('Has an isWebAudio function which returns true if the context and buffer are provided.', () => {
-    expect(testSoundFactory().isWebAudio()).toBe(true);
+  it('Has an isWebAudio function which returns false if the audio element is provided.', () => {
+    expect(testSoundFactory().isWebAudio()).toBe(false);
   });
 
-  it('Has a getGainNode property which returns an instance of GainNode after it is constructed.', () => {
-    expect(testSoundFactory().getGainNode()).toBeInstanceOf(GainNode);
-  });
-
-  it('Throws if getGainNode is called and __gainNode is falsy.', () => {
-    const sound = testSoundFactory();
-    // @ts-ignore
-    delete sound.__gainNode;
-    const func = () => sound.getGainNode();
-
+  it('Has a getGainNode function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getGainNode();
     expect(func).toThrow();
   });
 
-  it('Has a getInputNode function which returns an instance of AudioNode.', () => {
-    expect(testSoundFactory().getInputNode()).toBeInstanceOf(AudioNode);
-  });
-
-  it('Has a getOutputNode function which returns an instance of AudioNode.', () => {
-    expect(testSoundFactory().getOutputNode()).toBeInstanceOf(AudioNode);
-  });
-
-  it('Has a getSourceNode function which returns an instance of AudioBufferSourceNode after it is constructed.', () => {
-    expect(testSoundFactory().getSourceNode()).toBeInstanceOf(AudioBufferSourceNode);
-  });
-
-  it('Throws if getSourceNode is called and __sourceNode is falsy.', () => {
-    const sound = testSoundFactory();
-    // @ts-ignore
-    delete sound.__sourceNode;
-    const func = () => sound.getSourceNode();
-
+  it('Has a getInputNode function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getInputNode();
     expect(func).toThrow();
   });
 
-  it('Has a getFadeGainNode function which returns an instance of GainNode.', () => {
-    expect(testSoundFactory().getFadeGainNode()).toBeInstanceOf(GainNode);
-  });
-
-  it('Throws if getFadeGainNode is called and __fadeGainNode is falsy.', () => {
-    const sound = testSoundFactory();
-    // @ts-ignore
-    delete sound.__fadeGainNode;
-    const func = () => sound.getFadeGainNode();
-
+  it('Has a getOutputNode function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getOutputNode();
     expect(func).toThrow();
   });
 
-  it('Has a getContextCurrentTime function which returns the currentTime property of the AudioContext passed in the options object.', () => {
-    const context = getContext();
-    const sound = testSoundFactory({ context, });
+  it('Has a getSourceNode function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getSourceNode();
+    expect(func).toThrow();
+  });
 
-    expect(sound.getContextCurrentTime()).toBe(context.currentTime);
+  it('Has a getFadeGainNode function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getFadeGainNode();
+    expect(func).toThrow();
+  });
+
+  it('Has a getContextCurrentTime function which throws when in HTML Audio mode.', () => {
+    const func = () => testSoundFactory().getContextCurrentTime();
+    expect(func).toThrow();
   });
 
   it('Has a getTrackPosition function which returns a non-negative numeric value.', () => {
@@ -166,13 +107,6 @@ describe('Sound Web Audio unit tests.', () => {
     expect(sound.setTrackPosition(newVal).getTrackPosition()).toBe(newVal);
   });
 
-  it('Has a setTrackPosition function which returns the Sound.', () => {
-    const sound = testSoundFactory();
-    const ret = sound.setTrackPosition(0);
-
-    expect(ret).toBe(sound);
-  });
-
   it('Mutates the __startedTime private property if the sound is playing.', () => {
     const sound = testSoundFactory();
     sound.play();
@@ -186,17 +120,11 @@ describe('Sound Web Audio unit tests.', () => {
     expect(beforeStartedTime).toBe(afterStartedTime - difference);
   });
 
-  it('Has a getDuration function which returns the duration of the source buffer.', () => {
+  it('Has a getDuration function which returns the duration of the audio element.', () => {
     const sound = testSoundFactory();
-    expect(sound.getDuration()).toBe(sound.getSourceNode().buffer!.duration);
-  });
-
-  it('Returns 0 if the source buffer can\'t be found.', () => {
-    const sound = testSoundFactory();
-    // @ts-ignore
-    sound.__sourceNode.buffer = null;
-
-    expect(sound.getDuration()).toBe(0);
+    expect(sound.getDuration()).toBe(
+      // @ts-ignore
+      sound.__audioElement.duration);
   });
 
   it('Has a getPlaying function which returns a boolean.', () => {
@@ -220,9 +148,11 @@ describe('Sound Web Audio unit tests.', () => {
     expect(testSoundFactory().getLoop()).toBe(false);
   });
 
-  it('Allows setting the loop through the options object.', () => {    
+  it('Allows setting the loop through the options object.', () => {
     const loop = true;
-    expect(testSoundFactory({ loop, }).getLoop()).toBe(loop);
+    const sound = testSoundFactory({ loop, });
+
+    expect(sound.getLoop()).toBe(loop);
   });
 
   it('Has a setLoop function which changes the loop property.', () => {
@@ -329,17 +259,7 @@ describe('Sound Web Audio unit tests.', () => {
     const sound = testSoundFactory();
     const mock = jest.fn();
     // @ts-ignore
-    sound.__fadeGainNode = {
-      // @ts-ignore
-      gain: {
-        setValueAtTime: mock,
-      },
-    };
-
-    // @ts-ignore
-    sound.__sourceNode = {
-      start: jest.fn(),
-    };
+    sound.updateAudioElementVolume = mock;
 
     sound.play({
       easingCurve: {
@@ -398,17 +318,8 @@ describe('Sound Web Audio unit tests.', () => {
     const sound = testSoundFactory();
     const mock = jest.fn();
     // @ts-ignore
-    sound.__fadeGainNode = {
-      // @ts-ignore
-      gain: {
-        setValueAtTime: mock,
-      },
-    };
+    sound.updateAudioElementVolume = mock;
 
-    // @ts-ignore
-    sound.__sourceNode = {
-      start: jest.fn(),
-    };
 
     // @ts-ignore
     sound.getDuration = jest.fn(() => 12);
@@ -435,19 +346,16 @@ describe('Sound Web Audio unit tests.', () => {
     expect(testSoundFactory().play()).toBeInstanceOf(Promise);
   });
 
-  it('Resolves the promise with an event when the sound completes.', () => {
+  /*it('Resolves the promise with an event when the sound completes.', () => {
     expect.assertions(1);
     const sound = testSoundFactory();
     const prom = sound.play();
 
-    /* TODO: fix this awful hack around the testing library. */
     // @ts-ignore
-    sound.getSourceNode().$stateAtTime = jest.fn(() => 'FINISHED');
-    // @ts-ignore
-    sound.getSourceNode().$process();
+    sound.__audioElement.currentTime = sound.__audioElement.duration;
 
     return expect(prom).resolves.toBeInstanceOf(Event);
-  });
+  });*/
 
   it('Rejects the promise with an event when the sound is stopped.', () => {
     expect.assertions(1);
@@ -509,7 +417,6 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Has a stop function which returns the Sound.', () => {
     const sound = testSoundFactory();
-    sound.play();
     const ret = sound.stop();
 
     expect(ret).toBe(sound);
@@ -563,9 +470,11 @@ describe('Sound Web Audio unit tests.', () => {
     expect(volume).toBeLessThanOrEqual(1);
   });
 
-  it('Has a function called updateAudioElementVolume which throws an error if it is used in the web audio mode.', () => {
-    const func = () => testSoundFactory().updateAudioElementVolume();
-    expect(func).toThrow();
+  it('Has a function called updateAudioElementVolume which returns the sound.', () => {
+    const sound = testSoundFactory();
+    const ret = sound.updateAudioElementVolume();
+
+    expect(ret).toBe(sound);
   });
 
   it('Has a getFadeVolume function which calls getFadeValueAtTime with args from the destructured fade.', () => {
