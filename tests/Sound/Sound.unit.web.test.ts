@@ -47,6 +47,11 @@ describe('Sound Web Audio unit tests.', () => {
     expect(func).toThrow();
   });
 
+  it('Throws an error if neither a context nor an audioElement property were provided.', () => {
+    const func = () => new Sound({ getManagerVolume: jest.fn(), });
+    expect(func).toThrow();
+  });
+
   it('Throws an error if the buffer is missing.', () => {
     const func = () => (
       new Sound({
@@ -175,7 +180,7 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Mutates the __startedTime private property if the sound is playing.', () => {
     const sound = testSoundFactory();
-    sound.play();
+    sound.play().catch(() => {});
     const difference = 5;
     // @ts-ignore
     const beforeStartedTime = sound.__startedTime;
@@ -218,6 +223,15 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Has a getLoop function which returns false by default.', () => {
     expect(testSoundFactory().getLoop()).toBe(false);
+  });
+
+  it('Has a getLoop function which returns from __loopOverride if that property is set.', () => {
+    const sound = testSoundFactory();
+    const loop = true;
+    // @ts-ignore
+    sound.__loopOverride = loop;
+
+    expect(sound.getLoop()).toBe(loop);
   });
 
   it('Allows setting the loop through the options object.', () => {    
@@ -431,6 +445,33 @@ describe('Sound Web Audio unit tests.', () => {
     expect(mock).toBeCalled();
   });
 
+  it('Uses the first argument as a fadeOverride if it is truthy.', () => {
+    const sound = testSoundFactory();
+    const fade = {
+      easingCurve: {
+        in: EasingCurves.Quartic,
+        out: EasingCurves.Quintic,
+      },
+
+      length: {
+        in: 15,
+        out: 15,
+      },
+    };
+
+    sound.play(fade).catch(() => {});
+
+    expect(sound.getFade()).toEqual(fade);
+  });
+
+  it('Uses the second argument as a loop value if it is a boolean.', () => {
+    const sound = testSoundFactory();
+    const loop = true;
+    sound.play(null, loop).catch(() => {});
+
+    expect(sound.getLoop()).toBe(loop);
+  });
+
   it('Outputs a promise when played.', () => {
     expect(testSoundFactory().play()).toBeInstanceOf(Promise);
   });
@@ -500,7 +541,7 @@ describe('Sound Web Audio unit tests.', () => {
   it('Has a stop function which changes the playing property and resets the trackPosition property to 0.', () => {
     const sound = testSoundFactory();
     sound.setTrackPosition(3);
-    sound.play();
+    sound.play().catch(() => {});
     sound.stop();
 
     expect(sound.getPlaying()).toBe(false);
@@ -509,7 +550,7 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Has a stop function which returns the Sound.', () => {
     const sound = testSoundFactory();
-    sound.play();
+    sound.play().catch(() => {});
     const ret = sound.stop();
 
     expect(ret).toBe(sound);
@@ -604,6 +645,16 @@ describe('Sound Web Audio unit tests.', () => {
     expect(testSoundFactory().getFadeVolume()).toBe(1);
   });
 
+  it('Returns 1 from getFadeVolume if there is a fade but it is not during the in or out fading windows.', () => {
+    const sound = testSoundFactory();
+    sound.getFade = jest.fn(() => ({
+      easingCurve: {},
+      length: {},
+    }));
+
+    expect(sound.getFadeVolume()).toBe(1);
+  });
+
   it('Has a getFadeValueAtTime method which emits a number.', () => {
     const fadeOpts = {
       curve: EasingCurves.Linear,
@@ -632,7 +683,7 @@ describe('Sound Web Audio unit tests.', () => {
 
     sound.play(fade);
 
-    expect((sound as any).__fadeOverride).toBe(fade);
+    expect((sound as any).__fadeOverride).toEqual(fade);
 
     sound.clearFadeState();
 

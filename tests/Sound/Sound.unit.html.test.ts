@@ -541,7 +541,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
     sound.play(fade);
 
-    expect((sound as any).__fadeOverride).toBe(fade);
+    expect((sound as any).__fadeOverride).toEqual(fade);
 
     sound.clearFadeState();
 
