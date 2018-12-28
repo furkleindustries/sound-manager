@@ -29,6 +29,7 @@ export class Sound implements ISound {
   private __gainNode: GainNode | null = null;
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
+  private __loopOverride?: boolean;
   private __audioElement: HTMLAudioElement | null = null;
   private __startedTime: number = 0;
   private __pausedTime: number = 0; 
@@ -38,9 +39,7 @@ export class Sound implements ISound {
   private __fade: IFade | null = null;
 
   /* istanbul ignore next */
-  private __rejectOnStop: (message?: string) => void = () => {
-    throw new Error('Rejection handler not initialized.');
-  };
+  private __rejectOnStop: (message?: string) => void = () => {};
 
   /* istanbul ignore next */
   private __getNewSourceNode: () => AudioBufferSourceNode = () => {
@@ -238,7 +237,9 @@ export class Sound implements ISound {
       if (source.buffer) {
         return source.buffer.duration;
       } else {
-        console.warn('No buffer found for sound.');
+        if (0) {
+          console.warn('No buffer found for sound.');
+        }
       }
     } else {
       return this.__audioElement!.duration;
@@ -248,15 +249,13 @@ export class Sound implements ISound {
   }
 
   getPlaying() {
-    if (this.isWebAudio()) {
-      return this.__playing;
-    } else {
-      return !this.__audioElement!.paused;
-    }
+    return this.__playing;
   }
 
   getLoop() {
-    if (this.isWebAudio()) {
+    if (this.__loopOverride) {
+      return this.__loopOverride;
+    } else if (this.isWebAudio()) {
       return this.getSourceNode().loop;
     } else {
       return this.__audioElement!.loop;
@@ -264,7 +263,7 @@ export class Sound implements ISound {
   }
 
   getFade() {
-    return this.__fade;
+    return this.__fadeOverride || this.__fade;
   }
 
   setFade(fade: IFade | null) {
@@ -282,7 +281,7 @@ export class Sound implements ISound {
     return this;
   }
 
-  play(fadeOverride?: IFade | null) {
+  play(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const trackPosition = this.getTrackPosition();
 
     this.__playing = true;
@@ -316,7 +315,11 @@ export class Sound implements ISound {
         this.__fadeOverride = fadeOverride;
       }
 
-      const fade = fadeOverride || this.getFade();
+      if (typeof loopOverride === 'boolean') {
+        this.__loopOverride = loopOverride;
+      }
+
+      const fade = this.getFade();
 
       let timeUpdate: () => void;
       if (fade) {
@@ -420,6 +423,7 @@ export class Sound implements ISound {
     this.__rejectOnStop('The sound was stopped through the stop() method.');
     this.__rejectOnStop = () => {};
     delete this.__promise;
+    delete this.__loopOverride;
 
     this.__pausedTime = 0;
     if (!this.isWebAudio()) {
