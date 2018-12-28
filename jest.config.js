@@ -17,7 +17,7 @@ module.exports = {
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/tests/setup.js',
+    '<rootDir>/tests/setup.js',
   ],
   setupFiles: [
     '<rootDir>/tests/setup.js',

@@ -20,6 +20,8 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
+const DEBUG = false;
+
 export class Sound implements ISound {
   get type() {
     return NodeTypes.Sound;
@@ -237,7 +239,8 @@ export class Sound implements ISound {
       if (source.buffer) {
         return source.buffer.duration;
       } else {
-        if (0) {
+        /* istanbul ignore next */
+        if (DEBUG) {
           console.warn('No buffer found for sound.');
         }
       }
@@ -312,7 +315,7 @@ export class Sound implements ISound {
      * respected and the original promise returned. */
     if (!this.__promise) {
       if (fadeOverride) {
-        this.__fadeOverride = fadeOverride;
+        this.__fadeOverride = { ...fadeOverride, };
       }
 
       if (typeof loopOverride === 'boolean') {
@@ -325,6 +328,7 @@ export class Sound implements ISound {
       if (fade) {
         /* Update the audio element volume on every tick, including fade
          * volume. */
+        /* istanbul ignore next */
         timeUpdate = () => this.updateAudioElementVolume();
 
         const duration = this.getDuration();
@@ -360,6 +364,7 @@ export class Sound implements ISound {
           /* Remove the 'ended' event listener. */
           source.removeEventListener('ended', ended);
 
+          /* istanbul ignore next */
           if (timeUpdate) {
             /* Remove the 'timeupdate' event listener. */
             source.removeEventListener('timeupdate', timeUpdate);
@@ -421,6 +426,7 @@ export class Sound implements ISound {
     this.pause();
 
     this.__rejectOnStop('The sound was stopped through the stop() method.');
+    /* istanbul ignore next */
     this.__rejectOnStop = () => {};
     delete this.__promise;
     delete this.__loopOverride;
@@ -462,7 +468,7 @@ export class Sound implements ISound {
   }
 
   getFadeVolume() {
-    const fade = this.__fadeOverride || this.getFade();
+    const fade = this.getFade();
     const trackPosition = this.getTrackPosition();
     const duration = this.getDuration();
     if (fade) {
@@ -497,7 +503,8 @@ export class Sound implements ISound {
   })
   {
     const value = getFadeValueAtTime(options);
-    if (0) {
+    /* istanbul ignore next */
+    if (DEBUG) {
       console.log(`Fading ${options.change < 0 ? 'out' : 'in'}:`, value, options);
     }
 
