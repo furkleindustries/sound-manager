@@ -6,7 +6,9 @@
   "scripts": {
     "build": "cross-env NODE_ENV=development webpack",
     "test": "jest",
-    "test-coverage": "jest --coverage"
+    "test-watch": "jest --watch",
+    "test-coverage": "jest --coverage",
+    "test-coverage-watch": "jest --coverage --watch"
   },
   "repository": {
     "type": "git",
