@@ -33,15 +33,12 @@ export class Group implements IGroup {
   getVolume: () => number;
   setVolume: (value: number) => this;
 
-  constructor(options: IGroupOptions) {
-    const opts = options || {};
-
-    const {
-      context,
-      sounds,
-      volume,
-    } = opts;
-
+  constructor({
+    context,
+    sounds,
+    volume,
+  }: IGroupOptions)
+  {
     if (context) {
       this.isWebAudio = () => true;
 
@@ -117,35 +114,31 @@ export class Group implements IGroup {
     return sound;
   }
 
-  addSound(sound: ISound, name: string) {
-    if (!name) {
-      throw new Error();
-    } else if (name in this.sounds) {
-      throw new Error();
-    }
-
-    return this.addSounds({
-      [name]: sound,
-    });
+  addSound(name: string, sound: ISound) {
+    return this.addSounds({ [name]: sound, });
   }
 
   addSounds(sounds: ISoundsMap) {
     const names = Object.keys(sounds);
+    const isWebAudio = this.isWebAudio();
     names.forEach((soundName) => {
-      if (soundName in this.sounds) {
+      if (!soundName) {
+        throw new Error();
+      } else if (soundName in this.sounds) {
+        throw new Error();
+      } else if (!sounds[soundName]) {
         throw new Error();
       }
-    });
 
-    if (this.isWebAudio()) {
-      names.forEach((soundName) => {
+      if (isWebAudio) {
         const sound = sounds[soundName];
+        /* istanbul ignore next */
         sound.getGroupVolume = () => this.getVolume();
         if (sound.isWebAudio()) {
           sound.getOutputNode().connect(this.getOutputNode());
         }
-      });
-    }
+      }
+    });
 
     this.__sounds = Object.freeze({
       ...this.sounds,
@@ -153,6 +146,10 @@ export class Group implements IGroup {
     });
 
     return this;
+  }
+
+  removeSound(name: string) {
+    return this.removeSounds(name);
   }
 
   removeSounds(names: string | string[]) {
@@ -201,20 +198,19 @@ export class Group implements IGroup {
     return this.playSounds(Object.keys(this.sounds));
   }
 
+  pauseSound(name: string) {
+    return this.pauseSounds(name);
+  }
+
   pauseSounds(names: string | string[]) {
-    const pause = (name: string) => {
-      if (!(name in this.sounds)) {
-        throw new Error();
-      }
-
-      this.sounds[name].pause();
-    };
-
+    let arr: string[];
     if (typeof names === 'string') {
-      pause(names);
+      arr = [ names, ];
     } else {
-      names.forEach(pause);
+      arr = names;
     }
+
+    arr.forEach((name) => this.getSound(name).pause());
 
     return this;
   }
@@ -223,16 +219,19 @@ export class Group implements IGroup {
     return this.pauseSounds(Object.keys(this.sounds));
   }
 
+  stopSound(name: string) {
+    return this.stopSounds(name);
+  }
+
   stopSounds(names: string | string[]) {
-    const stop = (name: string) => {
-      this.getSound(name).stop();
-    };
-    
+    let arr: string[];
     if (typeof names === 'string') {
-      stop(names);
+      arr = [ names, ];
     } else {
-      names.forEach(stop);
+      arr = names;
     }
+
+    arr.forEach((name) => this.getSound(name).stop());
 
     return this;
   }
