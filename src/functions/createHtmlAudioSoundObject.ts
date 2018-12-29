@@ -5,18 +5,18 @@ import {
   Sound,
 } from '../Sound/Sound';
 
-export const createHtmlAudioSound = (
-  url: string,
-  getManagerVolume: () => number,
-  options: ICreateSoundOptions,
-) =>
-{
+export const createHtmlAudioSoundObject = (options: ICreateSoundOptions) => {
+  const {
+    manager,
+    url,
+  } = options;
+
   const audioElement = new Audio(url);
   audioElement.preload = 'auto';
 
-  return new Sound({
+  return Promise.resolve(new Sound({
     ...options,
+    getManagerVolume: () => manager.getVolume(),
     audioElement,
-    getManagerVolume,
-  });
+  }));
 };

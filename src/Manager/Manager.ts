@@ -17,8 +17,8 @@ import {
   IGroup,
 } from '../Group/IGroup';
 import {
-  ICreateSoundOptions,
-} from '../interfaces/ICreateSoundOptions';
+  IManagerCreateSoundOptions,
+} from '../interfaces/IManagerCreateSoundOptions';
 import {
   IGroupsMap,
 } from './IGroupsMap';
@@ -474,17 +474,16 @@ export class Manager implements IManager {
     return this;
   }
 
-  public createSound(options: ICreateSoundOptions): Promise<ISound> {
-    const opts = options || {};
+  public createSound(options: IManagerCreateSoundOptions): Promise<ISound> {
     if (this.isWebAudio()) {
       return createSound({
-        ...opts,
+        ...options,
         context: this.getAudioContext(),
         manager: this,
       });
     } else {
       return createSound({
-        ...opts,
+        ...options,
         manager: this,
       });
     }
@@ -492,7 +491,7 @@ export class Manager implements IManager {
 
   public addSound(
     name: string,
-    options: ICreateSoundOptions,
+    options: IManagerCreateSoundOptions,
     groupName: string = 'default',
   ): Promise<ISound>
   {

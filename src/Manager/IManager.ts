@@ -2,8 +2,8 @@ import {
   IAnalysableNode,
 } from '../interfaces/IAnalysableNode';
 import {
-  ICreateSoundOptions,
-} from '../interfaces/ICreateSoundOptions';
+  IManagerCreateSoundOptions,
+} from '../interfaces/IManagerCreateSoundOptions';
 import {
   IFade,
 } from '../Fade/IFade';
@@ -65,8 +65,8 @@ export interface IManager extends IWebAudioNode, IAnalysableNode {
   playPlaylists(names: string | string[]): void;
   stopPlaylist(name: string): IManager;
   stopPlaylists(names: string | string[]): IManager;
-  createSound(options: ICreateSoundOptions): Promise<ISound>;
-  addSound(name: string, options: ICreateSoundOptions, groupName?: string): Promise<ISound>;
+  createSound(options: IManagerCreateSoundOptions): Promise<ISound>;
+  addSound(name: string, options: IManagerCreateSoundOptions, groupName?: string): Promise<ISound>;
   addSounds(sounds: ISoundsMap, groupName?: string): IManager;
   getSound(name: string, groupName?: string): ISound;
   removeSound(name: string, groupName?: string): IManager;
