@@ -6,11 +6,10 @@ import {
 } from '../../src/enums/NodeTypes';
 
 const testGroupFactory = (opts = {}) => new Group({
-  context: new AudioContext(),
   ...opts,
 });
 
-describe('Group Web Audio unit tests.', () => {
+describe('Group HTML5 Audio unit tests.', () => {
   it('Has a type property with the value NodeTypes.Group.', () => {
     expect(testGroupFactory().type).toBe(NodeTypes.Group);
   });
@@ -25,40 +24,37 @@ describe('Group Web Audio unit tests.', () => {
   });
 
   it('Allows setting the sounds property through the options object.', () => {
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        connect: jest.fn(),
-      }),
-    } as any;
-
+    const sound = { isWebAudio: jest.fn(), } as any;
     const group = testGroupFactory({
-      sounds: {
-        test: sound,
-      },
+      sounds: { test: sound, },
     });
 
     expect(group.sounds).toEqual({ test: sound, });
   });
 
-  it('Has a getContextCurrentTime function which returns the current AudioContext time.', () => {
-    expect(testGroupFactory().getContextCurrentTime()).toBe(0);
+  it('Has a getContextCurrentTime function which throws when the group is in HTML Audio mode.', () => {
+    const func = () => testGroupFactory().getContextCurrentTime();
+    expect(func).toThrow();
   });
 
-  it('Has a getInputNode property which is an instance of AudioNode.', () => {
-    expect(testGroupFactory().getInputNode()).toBeInstanceOf(AudioNode);
+  it('Has a getInputNode property which throws when the group is in HTML Audio mode.', () => {
+    const func = () => testGroupFactory().getInputNode();
+    expect(func).toThrow();
   });
 
-  it('Has a getOutputNode function which returns an instance of AudioNode.', () => {
-    expect(testGroupFactory().getOutputNode()).toBeInstanceOf(AudioNode);
+  it('Has a getOutputNode function which throws when the group is in HTML Audio mode.', () => {
+    const func = () => testGroupFactory().getOutputNode();
+    expect(func).toThrow();
   });
 
-  it('Has a getAnalyserNode function which returns an instance of AnalyserNode.', () => {
-    expect(testGroupFactory().getAnalyserNode()).toBeInstanceOf(AnalyserNode);
+  it('Has a getAnalyserNode function which throws when the group is in HTML Audio mode.', () => {
+    const func = () => testGroupFactory().getAnalyserNode();
+    expect(func).toThrow();
   });
 
-  it('Has a getGainNode function which returns an instance of GainNode.', () => {
-    expect(testGroupFactory().getGainNode()).toBeInstanceOf(GainNode);
+  it('Has a getGainNode function which throws when the group is HTML Audio mode.', () => {
+    const func = () => testGroupFactory().getGainNode();
+    expect(func).toThrow();
   });
 
   it('Has a getVolume function which returns a number between 0 and 1.', () => {
@@ -158,24 +154,6 @@ describe('Group Web Audio unit tests.', () => {
     });
   });
 
-  it('Has an addSounds function which connects the sound to the output node.', () => {
-    const group = testGroupFactory();
-
-    const mock = jest.fn();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        connect: mock,
-      }),
-    } as any;
-
-    group.addSounds({
-      test: sound,
-    });
-
-    expect(mock).toBeCalledTimes(1);
-  });
-
   it('Has an addSounds function which returns the Group.', () => {
     const group = testGroupFactory();
     expect(group.addSounds({})).toBe(group);
@@ -206,24 +184,6 @@ describe('Group Web Audio unit tests.', () => {
     const func = () => group.addSounds({ one: false, });
 
     expect(func).toThrow();
-  });
-
-  it('Has an addSounds function which does not try to access the output node of a Sound which is in HTML5 Audio mode, even if the group itself is in Web Audio mode.', () => {
-    const group = testGroupFactory();
-    const mock = jest.fn();
-    const mock2 = jest.fn();
-    // @ts-ignore
-    const sounds = {
-      one: {
-        getOutputNode: mock,
-        isWebAudio: mock2,
-      }
-    };
-
-    group.addSounds(sounds as any);
-
-    expect(mock).not.toBeCalled();
-    expect(mock2).toBeCalledTimes(1);
   });
 
   it('Has a removeSound function which removes the sound in the sounds object at the specified key.', () => {
@@ -339,24 +299,6 @@ describe('Group Web Audio unit tests.', () => {
   it('Has a removeSounds function which returns the Group.', () => {
     const group = testGroupFactory();
     expect(group.removeSounds([])).toBe(group);
-  });
-
-  it('Has a removeSounds function which does not try to access the output node of a Sound which is in HTML5 Audio mode, even if the group itself is in Web Audio mode.', () => {
-    const group = testGroupFactory();
-    const mock = jest.fn();
-    const mock2 = jest.fn();
-    // @ts-ignore
-    group.__sounds = {
-      one: {
-        getOutputNode: mock,
-        isWebAudio: mock2,
-      },
-    } as any;
-
-    group.removeSounds('one');
-
-    expect(mock).not.toBeCalled();
-    expect(mock2).toBeCalledTimes(1);
   });
 
   it('Has a clearAllSounds function which passes the entire sounds map to removeSounds.', () => {
@@ -820,7 +762,7 @@ describe('Group Web Audio unit tests.', () => {
     expect(ret).toBe(group);
   });
 
-  it('Has an updateAllAudioElementsVolume function which calls updateAudioElementVolume on all sounds which are in HTML5 Audio mode.', () => {
+  it('Has an updateAllAudioElementsVolume function which calls updateAudioElementVolume on all sounds which are in HTML Audio mode.', () => {
     const group = testGroupFactory();
     const mockOne = jest.fn();
     const mockTwo = jest.fn();
