@@ -1,0 +1,12 @@
+documentation/
+tests/
+.vscode/
+
+*.code-workspace
+*.log
+*.swp
+
+/*.config.js
+/*.json
+/*.md
+/*.yml
