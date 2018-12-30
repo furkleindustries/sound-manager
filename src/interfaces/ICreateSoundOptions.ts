@@ -1,18 +1,11 @@
 import {
-  IFadeOptions,
-} from '../Fade/IFadeOptions';
-import {
   IManager,
 } from '../Manager/IManager';
+import {
+  IManagerCreateSoundOptions,
+} from './IManagerCreateSoundOptions';
 
-export interface ICreateSoundOptions {
+export interface ICreateSoundOptions extends IManagerCreateSoundOptions {
   manager: IManager;
   url: string;
-  audioElement?: HTMLAudioElement;
-  autoplay?: boolean;
-  context?: AudioContext;
-  fade?: IFadeOptions | boolean;
-  loop?: boolean;
-  trackPosition?: number;
-  volume?: number;
 }

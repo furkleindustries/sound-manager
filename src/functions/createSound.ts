@@ -1,6 +1,6 @@
 import {
-  createHtmlAudioSound,
-} from './createHtmlAudioSoundObject';
+  createHtmlAudioSound as createHtmlAudioSound,
+} from './createHtmlAudioSound';
 import {
   createWebAudioSound,
 } from './createWebAudioSound';
@@ -10,65 +10,50 @@ import {
 import {
   ISound,
 } from '../Sound/ISound';
-import {
-  loadAudioBuffer,
-} from './loadAudioBuffer';
 
 export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
+  if (!options) {
+    throw new Error();
+  }
+
   const {
     manager,
-    url,
   } = options;
 
-  const noManagerOpts = { ...options, };
-  delete noManagerOpts.manager;
-  delete noManagerOpts.url;
+  if (!manager) {
+    throw new Error();
+  }
 
-  const noContextOpts = { ...noManagerOpts, };
-  delete noContextOpts.context;
-
-  const getManagerVolume = () => manager.getVolume();
+  const optsClone = { ...options, };
 
   return new Promise((resolve, reject) => {
     if (manager.isWebAudio()) {
-      loadAudioBuffer(url, manager.getAudioContext()).then((buffer) => {
-        return resolve(createWebAudioSound(
-          getManagerVolume,
-          {
-            ...noManagerOpts,
-            buffer,
-          },
-        ));
+      createWebAudioSound(optsClone).then((sound) => {
+        return resolve(sound);
       }, (err) => {
         console.warn(err);
         console.warn('Loading Web Audio failed. Falling back to HTML5 audio.');
 
-        try {
-          return resolve(createHtmlAudioSound(
-            url,
-            getManagerVolume,
-            noContextOpts,
+        createHtmlAudioSound(optsClone).then((sound) => {
+          return resolve(sound);
+        }, (err) => {
+          return reject(new Error(
+            'HTML5 Audio failed too. Cannot construct Sound. Error follows:' +
+            '\n' + err
           ));
-        } catch (e) {
-          console.error('HTML5 Audio failed too. Cannot construct Sound. ' +
-                        'Error follows:');
-          return reject(e);
-        }
+        });
       });
     } else {
-      console.log('Sound Manager is not in Web Audio mode. Falling back to ' +
-                  'HTML5 Audio.');
-      try {
-        return resolve(createHtmlAudioSound(
-          url,
-          getManagerVolume,
-          noContextOpts,
+      console.log('Manager is not in Web Audio mode. Falling back to HTML5 ' +
+                  'Audio.');
+      createHtmlAudioSound(optsClone).then((sound) => {
+        return resolve(sound);
+      }, (err) => {
+        return reject(new Error(
+          'HTML5 Audio failed too. Cannot construct Sound. Error follows:\n' +
+          err
         ));
-      } catch (e) {
-        console.error('HTML5 Audio failed too. Cannot construct Sound. ' +
-                      'Error follows:');
-        return reject(e);
-      }
+      });
     }
   });
 };
