@@ -129,7 +129,7 @@ export class Manager implements IManager {
         this.updateAllAudioElementsVolume();
 
         return this;
-      }
+      };
     } else {
       this.getAnalyserNode = () => {
         throw new Error();
