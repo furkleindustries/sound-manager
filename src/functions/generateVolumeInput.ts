@@ -1,64 +1,70 @@
 import {
   IWebAudioNode,
 } from '../interfaces/IWebAudioNode';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 
 export const generateVolumeInput = (
   node: IWebAudioNode,
   name?: string,
 ) =>
 {
-  let nodeType;
-  if ('groups' in node ) {
-    nodeType = 'manager';
-  } else if ('sounds' in node) {
-    nodeType = 'group';
-  } else {
-    nodeType = 'sound';
-  }
-
-  if ((nodeType === 'group' || nodeType === 'sound') && !name) {
-    throw new Error();
-  }
-
-  let realName = nodeType === 'manager' ? nodeType : name;
-
+  const nodeType = node.type;
+  
   const container = document.createElement('div');
-  container.className = 'sm-manager-volumeInput-container ' +
+  const label = document.createElement('label');
+  const input = document.createElement('input');
+
+  container.appendChild(label);
+  container.appendChild(input);
+  
+  let realName = name;
+  if (nodeType === NodeTypes.Group || nodeType === NodeTypes.Sound) {
+    if (!name) {
+      throw new Error();
+    }
+
+    label.textContent = name[0].toUpperCase() + name.slice(1);
+  } else {
+    /* Node is a manager. */
+    if (name) {
+      label.textContent = name[0].toUpperCase() + name.slice(1);
+    } else {
+      label.textContent = 'Master volume';
+    }
+
+    realName = Math.floor(Math.random() * 100000).toString(16);
+  }
+
+  container.className = 'sm-volumeInput-container ' +
                         `sm-volumeInput-container-${nodeType}`;
+  label.className = 'sm-volumeInput-label';
 
   const uniqueId = `sm-volumeInput-${nodeType}-${realName}`;
-  const label = document.createElement('label');
-  label.className = 'sm-volumeInput-label';
-  if (nodeType === 'group' || nodeType === 'sound') {
-    label.textContent = name![0].toUpperCase() + name!.slice(1);
-  } else {
-    label.textContent = 'Master volume';
-  }
 
   label.setAttribute('for', uniqueId);
-  container.appendChild(label);
 
-  const input = document.createElement('input');
   input.className = 'sm-volumeInput-input';
   input.id = uniqueId;
   input.type = 'range';
-  input.value = node.getVolume().toString();
+  input.value = String(node.getVolume());
   input.min = '0';
   input.max = '1';
   input.step = '0.01';
 
   let evtType = 'input';
   /* Support non-conformant browsers which lack the input event. */
+  /* istanbul ignore next */
   if (!('oninput' in input)) {
     evtType = 'change';
   }
 
+  /* istanbul ignore next */
   input.addEventListener(evtType, (e) => {
     const tgt = e.target as HTMLInputElement;
     node.setVolume(Number(tgt.value));
   });
-
-  container.appendChild(input);
 
   return container;
 };

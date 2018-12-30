@@ -18,6 +18,7 @@ describe('generateAudioPanelElement unit tests.', () => {
       groups: {},
     } as any);
 
+    expect(panel).toBeInstanceOf(HTMLDivElement);
     expect(panel.classList.contains('sound-manager-panel'));
   });
 
