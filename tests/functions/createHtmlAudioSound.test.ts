@@ -1,19 +1,19 @@
 import {
-  createHtmlAudioSoundObject,
-} from '../../src/functions/createHtmlAudioSoundObject';
+  createHtmlAudioSound,
+} from '../../src/functions/createHtmlAudioSound';
 
 import {
   Sound,
 } from '../../src/Sound/Sound';
 jest.mock('../../src/Sound/Sound');
 
-describe('createHtmlAudioSoundObject unit tests.', () => {
+describe('createHtmlAudioSound unit tests.', () => {
   beforeEach(() => {
     (Sound as any).mockClear();
   });
 
   it('Outputs an object of instance Promise.', () => {
-    const prom = createHtmlAudioSoundObject({
+    const prom = createHtmlAudioSound({
       manager: {} as any,
       url: 'whatever',
     });
@@ -23,7 +23,7 @@ describe('createHtmlAudioSoundObject unit tests.', () => {
 
   it('Generates a new Audio element with the src set to the url argument.', () => {
     const url = 'https://foo.bar/fooobar';
-    const prom = createHtmlAudioSoundObject({
+    const prom = createHtmlAudioSound({
       url,
       manager: {} as any,
     });
@@ -39,7 +39,7 @@ describe('createHtmlAudioSoundObject unit tests.', () => {
 
   it('Sets the audio element to preload=auto.', () => {
     const url = 'whatever';
-    const prom = createHtmlAudioSoundObject({
+    const prom = createHtmlAudioSound({
       url,
       manager: {} as any,
     });
@@ -59,7 +59,7 @@ describe('createHtmlAudioSoundObject unit tests.', () => {
       manager: {} as any,
     };
 
-    const prom = createHtmlAudioSoundObject(opts);
+    const prom = createHtmlAudioSound(opts);
 
     return expect(new Promise((resolve) => {
       prom.then(() => {

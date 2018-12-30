@@ -5,7 +5,7 @@ import {
   Sound,
 } from '../Sound/Sound';
 
-export const createHtmlAudioSoundObject = (options: ICreateSoundOptions) => {
+export const createHtmlAudioSound = (options: ICreateSoundOptions) => {
   const {
     manager,
     url,
@@ -16,7 +16,10 @@ export const createHtmlAudioSoundObject = (options: ICreateSoundOptions) => {
 
   return Promise.resolve(new Sound({
     ...options,
-    getManagerVolume: () => manager.getVolume(),
     audioElement,
+    getManagerVolume() {
+      /* istanbul ignore next */
+      return manager.getVolume();
+    },
   }));
 };

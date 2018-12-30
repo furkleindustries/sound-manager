@@ -1,6 +1,6 @@
 import {
-  createHtmlAudioSoundObject,
-} from './createHtmlAudioSoundObject';
+  createHtmlAudioSound as createHtmlAudioSound,
+} from './createHtmlAudioSound';
 import {
   createWebAudioSound,
 } from './createWebAudioSound';
@@ -20,6 +20,10 @@ export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
     manager,
   } = options;
 
+  if (!manager) {
+    throw new Error();
+  }
+
   const optsClone = { ...options, };
 
   return new Promise((resolve, reject) => {
@@ -30,7 +34,7 @@ export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
         console.warn(err);
         console.warn('Loading Web Audio failed. Falling back to HTML5 audio.');
 
-        createHtmlAudioSoundObject(optsClone).then((sound) => {
+        createHtmlAudioSound(optsClone).then((sound) => {
           return resolve(sound);
         }, (err) => {
           return reject(new Error(
@@ -40,12 +44,11 @@ export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
         });
       });
     } else {
-      console.log('Sound Manager is not in Web Audio mode. Falling back to ' +
-                  'HTML5 Audio.');
-      createHtmlAudioSoundObject(optsClone).then((sound) => {
+      console.log('Manager is not in Web Audio mode. Falling back to HTML5 ' +
+                  'Audio.');
+      createHtmlAudioSound(optsClone).then((sound) => {
         return resolve(sound);
       }, (err) => {
-        console.error();
         return reject(new Error(
           'HTML5 Audio failed too. Cannot construct Sound. Error follows:\n' +
           err
