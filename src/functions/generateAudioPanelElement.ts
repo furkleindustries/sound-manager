@@ -1,6 +1,6 @@
 import {
   generateVolumeInput,
-} from './generateGroupVolumeInput';
+} from './generateVolumeInput';
 import {
   IManager,
 } from '../Manager/IManager';
@@ -15,9 +15,7 @@ export const generateAudioPanelElement = (manager: IManager) => {
   audioPanelElement.appendChild(title);
 
   /* Add the master volume slider. */
-  audioPanelElement.appendChild(generateVolumeInput(
-    manager,
-  ));
+  audioPanelElement.appendChild(generateVolumeInput(manager));
 
   Object.keys(manager.groups).forEach((groupName) => {
     const group = manager.getGroup(groupName);
