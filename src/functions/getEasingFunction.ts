@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import {
   EasingCurves,
 } from '../Fade/EasingCurves';
@@ -60,7 +62,7 @@ const funcs = {
     change * (time /= duration) * time * time * time + initial 
   ),
 
-  [EasingCurves.Quintic]:(
+  [EasingCurves.Quintic]: (
     time: number,
     initial: number,
     change: number,
