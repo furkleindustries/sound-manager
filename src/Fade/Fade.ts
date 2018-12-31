@@ -35,40 +35,68 @@ export class Fade implements IFade {
           in: easingCurve as EasingCurves,
           out: easingCurve as EasingCurves,
         };
-      } else if (Array.isArray(easingCurve) && easingCurve.length === 2) {
+      } else if (Array.isArray(easingCurve)) {
+        if (easingCurve.length === 2) {
+          this.easingCurve = {
+            in: easingCurve[0],
+            out: easingCurve[1],
+          };
+        } else {
+          throw new Error();
+        }
+      } else if (typeof easingCurve === 'object') {
         this.easingCurve = {
-          in: easingCurve[0] || null,
-          out: easingCurve[1] || null,
+          in: easingCurve.in,
+          out: easingCurve.out,
         };
-      } else if ('in' in (easingCurve as IFadeArgumentObject<EasingCurves | null>) &&
-                 'out' in (easingCurve as IFadeArgumentObject<EasingCurves | null>))
-      {
-        this.easingCurve = {
-          ...easingCurve as IFadeArgumentObject<EasingCurves | null>,
-        };
+      } else {
+        throw new Error();
       }
     }
 
     if (!this.easingCurve.in && !this.easingCurve.out) {
       throw new Error();      
     }
-    
+
+    /* Coerce all falsy values to null. */
+    this.easingCurve = {
+      in: this.easingCurve.in || null,
+      out: this.easingCurve.out || null,
+    };
+
     if (length) {
       if (typeof length === 'number' && length > 0) {
         this.length = {
           in: length,
           out: length,
         };
-      } else if (Array.isArray(length) && length.length === 2) {
+      } else if (Array.isArray(length)) {
+        if (length.length === 2) {
+          this.length = {
+            in: length[0] || 0,
+            out: length[1] || 0,
+          };
+        } else {
+          throw new Error();
+        }
+      } else if (typeof length === 'object') {
         this.length = {
-          in: length[0] || 0,
-          out: length[1] || 0,
+          in: length.in,
+          out: length.out,
         };
-      } else if ('in' in (length as IFadeArgumentObject<number>) &&
-                 'out' in (length as IFadeArgumentObject<number>))
-      {
-        this.length = { ...length as IFadeArgumentObject<number>, };
+      } else {
+        throw new Error();
       }
     }
+
+    if (!this.length.in && !this.length.out) {
+      throw new Error();
+    }
+
+    /* Coerce all falsy values to 0. */
+    this.length = {
+      in: this.length.in || 0,
+      out: this.length.out || 0,
+    };
   }
 }
