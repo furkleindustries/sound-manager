@@ -73,8 +73,8 @@ export class Fade implements IFade {
       } else if (Array.isArray(length)) {
         if (length.length === 2) {
           this.length = {
-            in: length[0] || 0,
-            out: length[1] || 0,
+            in: length[0],
+            out: length[1],
           };
         } else {
           throw new Error();
