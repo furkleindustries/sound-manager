@@ -16,5 +16,6 @@ export const updateAudioPanelElement = (manager: IManager, oldElem: HTMLElement)
   
   const newElem = generateAudioPanelElement(manager);
   oldElem.parentElement.replaceChild(newElem, oldElem);
+
   return newElem;
 };
