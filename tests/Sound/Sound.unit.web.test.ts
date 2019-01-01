@@ -416,7 +416,6 @@ describe('Sound Web Audio unit tests.', () => {
 
     expect(mock).not.toBeCalled();
   });*/
-  
 
   it('Fades on end if the track position is less than the out length of the IFade.', () => {
     const sound = testSoundFactory();

@@ -22,6 +22,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { initializeSoundForPlay } from './initializeSoundForPlay';
 
 const DEBUG = false;
 
@@ -321,95 +322,20 @@ export class Sound implements ISound {
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
+      /* Sets the overrides. */
+      this.__setOverrides(fadeOverride, loopOverride);
       /* Generates the promise and registers events. */
-      this.__initializeSoundForPlay(fadeOverride, loopOverride);
+      initializeSoundForPlay(this);
     }
 
-    return this.__promise as Promise<Event>;
-  }
-
-  private __initializeSoundForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
-    const source = this.isWebAudio() ? this.getSourceNode() : this.__audioElement!;
-
-    this.__setOverrides(fadeOverride, loopOverride);
-    const fade = this.getFade();
-
-    let timeUpdate: () => void;
-    if (fade) {
-      /* Update the audio element volume on every tick, including fade
-       * volume. */
-      /* istanbul ignore next */
-      timeUpdate = () => this.updateAudioElementVolume();
-      this.__initializeFadeForPlay(fade, timeUpdate);
-    }
-
-    this.__promise = new Promise((resolve, reject) => {  
-      const ended = (e: Event) => {
-        /* Remove the 'ended' event listener. */
-        source.removeEventListener('ended', ended);
-
-        /* istanbul ignore next */
-        if (!this.isWebAudio()) {
-          /* Remove the 'timeupdate' event listener. */
-          source.removeEventListener('timeupdate', timeUpdate);
-        }
-
-        /* Don't reject the emitted promise. */
-        this.__rejectOnStop = () => {};
-
-        /* Reset the track position of the sound after it ends. Also deletes
-         * the old promise. */
-        this.stop();
-
-        /* Resolve the promise with the ended event. */
-        return resolve(e);
-      };
-
-      /* Register the ended function to fire when the audio source emits the
-      * 'ended' event. */
-     source.addEventListener('ended', ended);
-     
-      /* Allow the promise to be rejected if the sound is stopped. */
-      this.__initializeStopRejector(reject);
-    });
-  }
-
-  private __initializeFadeForPlay(fade: IFade, htmlTimeUpdater: () => void) {    
-    if (this.isWebAudio()) {
-      const fadeGainNode = this.getFadeGainNode();
-      doWebAudioFadeIn({
-        fade,
-        fadeGainNode,
-        getFadeVolume: () => this.getFadeVolume(),
-        getContextCurrentTime: () => this.getContextCurrentTime(),
-      });
-
-      doWebAudioFadeOut({
-        fade,
-        fadeGainNode,
-        duration: this.getDuration(),
-        getFadeVolume: () => this.getFadeVolume(),
-        getContextCurrentTime: () => this.getContextCurrentTime(),
-      });
-    } else {
-      this.__audioElement!.addEventListener('timeupdate', htmlTimeUpdater);
-    }
-  }
-
-  private __initializeStopRejector(reject: Function) {
-    this.__rejectOnStop = (message?: string) => {
-      return reject(
-        message ||
-        'The sound was stopped, probably by a user-created script.'
-      );
-    };
+    return this.__promise!;
   }
 
   private __setOverrides(fadeOverride?: IFade | null, loopOverride?: boolean) {
     if (fadeOverride) {
       this.__fadeOverride = { ...fadeOverride, };
     }
-
+  
     if (typeof loopOverride === 'boolean') {
       this.__loopOverride = loopOverride;
     }
