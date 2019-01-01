@@ -329,7 +329,7 @@ export class Sound implements ISound {
   }
 
   private __initializeSoundForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
-    const source = this.getSourceNode();
+    const source = this.isWebAudio() ? this.getSourceNode() : this.__audioElement!;
 
     this.__setOverrides(fadeOverride, loopOverride);
     const fade = this.getFade();
@@ -392,7 +392,7 @@ export class Sound implements ISound {
         getContextCurrentTime: () => this.getContextCurrentTime(),
       });
     } else {
-      this.getSourceNode().addEventListener('timeupdate', htmlTimeUpdater);
+      this.__audioElement!.addEventListener('timeupdate', htmlTimeUpdater);
     }
   }
 

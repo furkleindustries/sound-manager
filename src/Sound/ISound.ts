@@ -1,7 +1,4 @@
 import {
-  EasingCurves,
-} from '../Fade/EasingCurves';
-import {
   IFade,
 } from '../Fade/IFade';
 import {

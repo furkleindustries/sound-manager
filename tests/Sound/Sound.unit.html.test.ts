@@ -11,6 +11,11 @@ import {
   Sound,
 } from '../../src/Sound/Sound';
 
+import {
+  getFadeValueAtTime,
+} from '../../src/functions/getFadeValueAtTime';
+jest.mock('../../src/functions/getFadeValueAtTime');
+
 const testSoundFactory = (options?: Partial<ISoundOptions>) => {
   const audioElement = {
     ...new Audio('./'),
@@ -479,8 +484,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a getFadeVolume function which calls getFadeValueAtTime with args from the destructured fade.', () => {
     const sound = testSoundFactory();
-    const mock = jest.fn();
-    sound.getFadeValueAtTime = mock;
     sound.setTrackPosition(0);
 
     const fade: IFade = {
@@ -499,8 +502,8 @@ describe('Sound HTML5 Audio unit tests.', () => {
     sound.__fade = fade;
     sound.getFadeVolume();
 
-    expect(mock).toBeCalledTimes(1);
-    expect(mock).toBeCalledWith({
+    expect(getFadeValueAtTime).toBeCalledTimes(1);
+    expect(getFadeValueAtTime).toBeCalledWith({
       change: 1,
       curve: fade.easingCurve.in,
       duration: fade.length.in,
@@ -511,18 +514,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Returns 1 from getFadeVolume if there is no fade.', () => {
     expect(testSoundFactory().getFadeVolume()).toBe(1);
-  });
-
-  it('Has a getFadeValueAtTime method which emits a number.', () => {
-    const fadeOpts = {
-      curve: EasingCurves.Linear,
-      change: 1,
-      duration: 2,
-      initial: 0,
-      time: 1,
-    };
-
-    expect(testSoundFactory().getFadeValueAtTime(fadeOpts)).toBe(0.5);
   });
 
   it('Has a clearFadeState function which clears the fade override, cancels the fade volume scheduling, and sets the fade volume to 1.', () => {
