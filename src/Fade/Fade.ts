@@ -59,10 +59,7 @@ export class Fade implements IFade {
     const isValid = (arg: any): arg is T => arg === null || validator(arg);
     if (isValid(arg)) {
       valids = [ true, true ];
-      toReturn = {
-        in: arg,
-        out: arg,
-      };
+      toReturn = this.__structureFadePropFromValue(arg);
     } else if (Array.isArray(arg)) {
       if (arg.length === 2) {
         valids = [
@@ -70,10 +67,7 @@ export class Fade implements IFade {
           isValid(arg[1]),
         ];
 
-        toReturn = {
-          in: valids[0] ? arg[0] : defaultValue,
-          out: valids[1] ? arg[1] : defaultValue,
-        };
+        toReturn = this.__structureFadePropFromArray(arg);
       } else {
         throw new Error();
       }
@@ -84,10 +78,7 @@ export class Fade implements IFade {
         isValid(argObj.out),
       ];
 
-      toReturn = {
-        in: valids[0] ? argObj.in : defaultValue,
-        out: valids[1] ? argObj.out : defaultValue,
-      };
+      toReturn = this.__structureFadePropFromObject(argObj);
     } else {
       throw new Error();
     }
@@ -96,6 +87,30 @@ export class Fade implements IFade {
       throw new Error();
     }
 
-    return toReturn;
+    return {
+      in: valids[0] ? toReturn.in : defaultValue,
+      out: valids[1] ? toReturn.out : defaultValue,
+    };
+  }
+
+  private __structureFadePropFromValue<T>(arg: T) {
+    return {
+      in: arg,
+      out: arg,
+    };
+  }
+
+  private __structureFadePropFromArray<T>(arg: [ T, T ]) {
+    return {
+      in: arg[0],
+      out: arg[1],
+    };
+  }
+
+  private __structureFadePropFromObject<T>(arg: IFadeArgumentObject<T>) {
+    return {
+      in: arg.in,
+      out: arg.out,
+    };
   }
 }
