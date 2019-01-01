@@ -1,4 +1,7 @@
 import {
+  defineProperty,
+} from '../functions/defineProperty';
+import {
   doWebAudioFadeIn,
 } from '../functions/doWebAudioFadeIn';
 import {
@@ -29,37 +32,35 @@ export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioEl
     });
   }
 
-  Object.defineProperty(sound, '__promise', {
-    value: new Promise((resolve, reject) => {  
-      const ended = (e: Event) => {
-        /* Remove the 'ended' event listener. */
-        source.removeEventListener('ended', ended);
+  defineProperty(sound, '__promise', new Promise((resolve, reject) => {  
+    const ended = (e: Event) => {
+      /* Remove the 'ended' event listener. */
+      source.removeEventListener('ended', ended);
 
-        /* istanbul ignore next */
-        if (!sound.isWebAudio()) {
-          /* Remove the 'timeupdate' event listener. */
-          source.removeEventListener('timeupdate', timeUpdate);
-        }
+      /* istanbul ignore next */
+      if (!sound.isWebAudio()) {
+        /* Remove the 'timeupdate' event listener. */
+        source.removeEventListener('timeupdate', timeUpdate);
+      }
 
-        /* Don't reject the emitted promise. */
-        Object.defineProperty(source, '__rejectOnStop', { value: () => {}, });
+      /* Don't reject the emitted promise. */
+      Object.defineProperty(source, '__rejectOnStop', { value: () => {}, });
 
-        /* Reset the track position of the sound after it ends. Also deletes
-          * the old promise. */
-        sound.stop();
+      /* Reset the track position of the sound after it ends. Also deletes
+        * the old promise. */
+      sound.stop();
 
-        /* Resolve the promise with the ended event. */
-        return resolve(e);
-      };
+      /* Resolve the promise with the ended event. */
+      return resolve(e);
+    };
 
-      /* Register the ended export function to fire when the audio source emits the
-       * 'ended' event. */
-      source.addEventListener('ended', ended);
-      
-      /* Allow the promise to be rejected if the sound is stopped. */
-      initializeStopRejector(sound, reject);
-    }),
-  });
+    /* Register the ended export function to fire when the audio source emits the
+      * 'ended' event. */
+    source.addEventListener('ended', ended);
+    
+    /* Allow the promise to be rejected if the sound is stopped. */
+    initializeStopRejector(sound, reject);
+  }));
 }
 
 export function initializeFadeForPlay({
@@ -76,19 +77,17 @@ export function initializeFadeForPlay({
   if (fade) {
     if (sound.isWebAudio()) {
       const fadeGainNode = sound.getFadeGainNode();
-      doWebAudioFadeIn({
+      const opts = {
         fade,
         fadeGainNode,
         getFadeVolume: () => sound.getFadeVolume(),
         getContextCurrentTime: () => sound.getContextCurrentTime(),
-      });
-  
+      };
+
+      doWebAudioFadeIn({ ...opts, });
       doWebAudioFadeOut({
-        fade,
-        fadeGainNode,
+        ...opts,
         duration: sound.getDuration(),
-        getFadeVolume: () => sound.getFadeVolume(),
-        getContextCurrentTime: () => sound.getContextCurrentTime(),
       });
     } else {
       if (!audioElement) {
@@ -101,12 +100,10 @@ export function initializeFadeForPlay({
 }
 
 export function initializeStopRejector(sound: ISound, reject: Function) {
-  Object.defineProperty(sound, '__rejectOnStop',  {
-    value: (message?: string) => {
-      return reject(
-        message ||
-        'The sound was stopped, probably by a user-created script.'
-      );
-    },
-  });
+  defineProperty(sound, '__rejectOnStop',  (message?: string) => (
+    reject(
+      message ||
+      'The sound was stopped, probably by a user-created script.'
+    )
+  ));
 }
