@@ -13,6 +13,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { getOneOrMany } from '../functions/getOneOrMany';
 
 export class Group implements IGroup {
   get type() {
@@ -26,12 +27,12 @@ export class Group implements IGroup {
 
   private __panelRegistered: boolean = false;
 
-  isWebAudio: () => boolean;
-  getContextCurrentTime: () => number;
-  getAnalyserNode: () => AnalyserNode;
-  getGainNode: () => GainNode;
-  getVolume: () => number;
-  setVolume: (value: number) => this;
+  public readonly isWebAudio: () => boolean;
+  public readonly getContextCurrentTime: () => number;
+  public readonly getAnalyserNode: () => AnalyserNode;
+  public readonly getGainNode: () => GainNode;
+  public readonly getVolume: () => number;
+  public readonly setVolume: (value: number) => this;
 
   constructor({
     context,
@@ -44,10 +45,10 @@ export class Group implements IGroup {
 
       this.getContextCurrentTime = () => context.currentTime;
 
-      let analyserNode = context.createAnalyser();
+      const analyserNode = context.createAnalyser();
       this.getAnalyserNode = () => analyserNode;
 
-      let gainNode = context.createGain();
+      const gainNode = context.createGain();
       this.getGainNode = () => gainNode;
 
       this.getInputNode().connect(this.getOutputNode());
@@ -97,28 +98,25 @@ export class Group implements IGroup {
     }
   }
 
-  getInputNode(): AudioNode {
+  public getInputNode(): AudioNode {
     return this.getGainNode();
   }
 
-  getOutputNode(): AudioNode {
+  public getOutputNode(): AudioNode {
     return this.getAnalyserNode();
   }
 
-  getSound(name: string) {
-    const sound = this.sounds[name];
-    if (!sound) {
-      throw new Error();
-    }
-
-    return sound;
+  public getSounds(name: string): ISound;
+  public getSounds(names: string[]): ISound[];
+  public getSounds(names: string | string[]): ISound | ISound[] {
+    return getOneOrMany(names as string, this.sounds);
   }
 
-  addSound(name: string, sound: ISound) {
+  public addSound(name: string, sound: ISound) {
     return this.addSounds({ [name]: sound, });
   }
 
-  addSounds(sounds: ISoundsMap) {
+  public addSounds(sounds: ISoundsMap) {
     const names = Object.keys(sounds);
     const isWebAudio = this.isWebAudio();
     names.forEach((soundName) => {
@@ -148,11 +146,9 @@ export class Group implements IGroup {
     return this;
   }
 
-  removeSound(name: string) {
-    return this.removeSounds(name);
-  }
-
-  removeSounds(names: string | string[]) {
+  public removeSounds(name: string): IGroup;
+  public removeSounds(names: string[]): IGroup;
+  public removeSounds(names: string | string[]) {
     const remove = (soundName: string) => {
       const sounds = Object.assign({}, this.sounds) as any;
       const sound = sounds[soundName];
@@ -173,57 +169,54 @@ export class Group implements IGroup {
     return this;
   }
 
-  removeAllSounds() {
+  public removeAllSounds() {
     return this.removeSounds(Object.keys(this.sounds));
   }
 
-  playSound(name: string): Promise<Event> {
-    return new Promise((resolve) => (
-      this.playSounds(name).then((val) => resolve(val[0])))
-    );
-  }
-
-  playSounds(names: string | string[]) {
-    let arr: string[];
-    if (typeof names === 'string') {
-      arr = [ names, ];
-    } else {
-      arr = names;
+  public playSounds(name: string): Promise<Event>;
+  public playSounds(names: string[]): Promise<Event[]>;
+  public playSounds(names: string | string[]) {
+      if (typeof names === 'string') {
+      return this.getSounds(name).play();
+    } else if (Array.isArray(names)) {
+      return Promise.all(names.map((name) => this.getSounds(name).play()));
     }
-
-    return Promise.all(arr.map((name) => this.getSound(name).play()));
+    
+    throw new Error();
   }
 
-  playAllSounds() {
+  public playAllSounds() {
     return this.playSounds(Object.keys(this.sounds));
   }
 
-  pauseSound(name: string) {
-    return this.pauseSounds(name);
-  }
-
-  pauseSounds(names: string | string[]) {
+  public pauseSounds(name: string): IGroup;
+  public pauseSounds(names: string[]): IGroup;
+  public pauseSounds(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
       arr = [ names, ];
-    } else {
+    } else if (Array.isArray(names)) {
       arr = names;
+    } else {
+      throw new Error();
     }
 
-    arr.forEach((name) => this.getSound(name).pause());
+    arr.forEach((name) => this.getSounds(name).pause());
 
     return this;
   }
 
-  pauseAllSounds() {
+  public pauseAllSounds() {
     return this.pauseSounds(Object.keys(this.sounds));
   }
 
-  stopSound(name: string) {
+  public stopSound(name: string) {
     return this.stopSounds(name);
   }
 
-  stopSounds(names: string | string[]) {
+  public stopSounds(name: string): IGroup;
+  public stopSounds(names: string[]): IGroup;
+  public stopSounds(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
       arr = [ names, ];
@@ -231,18 +224,18 @@ export class Group implements IGroup {
       arr = names;
     }
 
-    arr.forEach((name) => this.getSound(name).stop());
+    arr.forEach((name) => this.getSounds(name).stop());
 
     return this;
   }
 
-  stopAllSounds() {
+  public stopAllSounds() {
     return this.stopSounds(Object.keys(this.sounds));
   }
 
-  updateAllAudioElementsVolume() {
+  public updateAllAudioElementsVolume() {
     Object.keys(this.sounds).forEach((soundName) => {
-      const sound = this.getSound(soundName);
+      const sound = this.getSounds(soundName);
       if (!sound.isWebAudio()) {
         sound.updateAudioElementVolume();
       }

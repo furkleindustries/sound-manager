@@ -17,20 +17,21 @@ import {
 export interface IGroup extends IWebAudioNode, IAnalysableNode, IPanelRegisterableNode {
   readonly sounds: ISoundsMap;
   getContextCurrentTime(): number;
-  getSound(name: string): ISound;
+  getSounds(name: string): ISound;
+  getSounds(names: string[]): ISound[];
   addSound(name: string, sound: ISound): IGroup;
   addSounds(sounds: ISoundsMap): IGroup;
-  removeSound(name: string): IGroup;
-  removeSounds(names: string | string[]): IGroup;
+  removeSounds(names: string): IGroup;
+  removeSounds(names: string[]): IGroup;
   removeAllSounds(): IGroup;
-  playSound(name: string): Promise<Event>;
-  playSounds(names: string | string[]): Promise<Event[]>;
+  playSounds(name: string): Promise<Event>;
+  playSounds(names: string[]): Promise<Event[]>;
   playAllSounds(): Promise<Event[]>;
-  pauseSound(name: string): IGroup;
-  pauseSounds(names: string | string[]): IGroup;
+  pauseSounds(name: string): IGroup;
+  pauseSounds(names: string[]): IGroup;
   pauseAllSounds(): IGroup;
-  stopSound(name: string): IGroup;
-  stopSounds(names: string | string[]): IGroup;
+  stopSounds(name: string): IGroup;
+  stopSounds(names: string[]): IGroup;
   stopAllSounds(): IGroup;
   updateAllAudioElementsVolume(): IGroup;
 }
