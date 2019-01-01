@@ -335,8 +335,8 @@ export class Sound implements ISound {
 
         if (this.isWebAudio()) {
           const fadeGainNode = this.getFadeGainNode();
-          if (fade.length.in >= this.getTrackPosition()) {
-            for (let ii = 0; ii <= fade.length.in * 20; ii += 1) {
+          if (Number(fade.length.in) >= this.getTrackPosition()) {
+            for (let ii = 0; ii <= Number(fade.length.in) * 20; ii += 1) {
               const time = ii / 20;
               fadeGainNode.gain.setValueAtTime(
                 this.getFadeVolume(),
@@ -345,8 +345,8 @@ export class Sound implements ISound {
             }
           }
 
-          if (fade.length.out >= this.getDuration() - this.getTrackPosition()) {
-            for (let ii = 0; ii < fade.length.out * 20; ii += 1) {
+          if (Number(fade.length.out) >= this.getDuration() - this.getTrackPosition()) {
+            for (let ii = 0; ii < Number(fade.length.out) * 20; ii += 1) {
               const time = ii / 20;
               fadeGainNode.gain.setValueAtTime(
                 this.getFadeVolume(),
@@ -472,21 +472,23 @@ export class Sound implements ISound {
     const trackPosition = this.getTrackPosition();
     const duration = this.getDuration();
     if (fade) {
-      if (fade.easingCurve.in && fade.length.in >= trackPosition) {
+      const inLen = Number(fade.length.in);
+      const outLen = Number(fade.length.out);
+      if (fade.easingCurve.in && inLen >= trackPosition) {
         return this.getFadeValueAtTime({
           change: 1,
           curve: fade.easingCurve.in,
-          duration: fade.length.in,
+          duration: inLen,
           initial: 0,
           time: trackPosition,
         });
-      } else if (fade.easingCurve.out && fade.length.out >= duration - trackPosition) {
+      } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
         return this.getFadeValueAtTime({
           change: -1,
           curve: fade.easingCurve.out,
-          duration: fade.length.out,
+          duration: outLen,
           initial: 1,
-          time: fade.length.out - (duration - trackPosition),
+          time: outLen - (duration - trackPosition),
         });
       }
     }
