@@ -10,16 +10,22 @@ import {
 import {
   IFadeOptions,
 } from './IFadeOptions';
+import {
+  TFadeArg,
+} from './TFadeArg';
 
 export class Fade implements IFade {
-  public readonly easingCurve: IFadeArgumentObject<EasingCurves | null> = {
-    in: EasingCurves.Quadratic,
-    out: EasingCurves.Quadratic,
+  public static readonly defaultCurve: EasingCurves = EasingCurves.Quadratic;
+  public static readonly defaultLength: number = 2;
+
+  public readonly easingCurve: IFadeArgumentObject<EasingCurves> = {
+    in: Fade.defaultCurve,
+    out: Fade.defaultCurve,
   };
 
   public readonly length: IFadeArgumentObject<number> = {
-    in: 2,
-    out: 2,
+    in: Fade.defaultLength,
+    out: Fade.defaultLength,
   };
 
   constructor(options?: IFadeOptions) {
@@ -30,73 +36,65 @@ export class Fade implements IFade {
     } = opts;
 
     if (easingCurve) {
-      if (Object.values(EasingCurves).includes(easingCurve)) {
-        this.easingCurve = {
-          in: easingCurve as EasingCurves,
-          out: easingCurve as EasingCurves,
-        };
-      } else if (Array.isArray(easingCurve)) {
-        if (easingCurve.length === 2) {
-          this.easingCurve = {
-            in: easingCurve[0],
-            out: easingCurve[1],
-          };
-        } else {
-          throw new Error();
-        }
-      } else if (typeof easingCurve === 'object') {
-        this.easingCurve = {
-          in: easingCurve.in,
-          out: easingCurve.out,
-        };
-      } else {
-        throw new Error();
-      }
+      this.easingCurve = this.__argToProp(
+        easingCurve,
+        Fade.defaultCurve,
+        (arg: any) => Object.values(EasingCurves).indexOf(arg) !== -1,
+      );
     }
-
-    if (!this.easingCurve.in && !this.easingCurve.out) {
-      throw new Error();      
-    }
-
-    /* Coerce all falsy values to null. */
-    this.easingCurve = {
-      in: this.easingCurve.in || null,
-      out: this.easingCurve.out || null,
-    };
 
     if (length) {
-      if (typeof length === 'number' && length > 0) {
-        this.length = {
-          in: length,
-          out: length,
-        };
-      } else if (Array.isArray(length)) {
-        if (length.length === 2) {
-          this.length = {
-            in: length[0],
-            out: length[1],
-          };
-        } else {
+      this.length = this.__argToProp(
+        length,
+        Fade.defaultLength,
+        (arg: any) => arg > 0,
+      ) 
+    }
+  }
+
+  private __argToProp<T>(arg: TFadeArg<T>, defaultValue: T, validator: (arg: T) => boolean): IFadeArgumentObject<T> {
+    const isValid = (arg: any): arg is T => arg === null || validator(arg);
+    const tArg = arg as T
+    if (isValid(tArg)) {
+      return {
+        in: tArg,
+        out: tArg,
+      };
+    } else if (Array.isArray(arg)) {
+      if (arg.length === 2) {
+        const valids = [
+          isValid(arg[0]),
+          isValid(arg[1]),
+        ];
+
+        if (!valids.length) {
           throw new Error();
         }
-      } else if (typeof length === 'object') {
-        this.length = {
-          in: length.in,
-          out: length.out,
+
+        return {
+          in: valids[0] ? arg[0] : defaultValue,
+          out: valids[1] ? arg[1] : defaultValue,
         };
       } else {
         throw new Error();
       }
+    } else if (typeof arg === 'object') {
+      const argObj = arg as IFadeArgumentObject<T>;
+      const valids = [
+        isValid(argObj.in),
+        isValid(argObj.out),
+      ];
+
+      if (!valids.length) {
+        throw new Error();
+      }
+
+      return {
+        in: valids[0] ? argObj.in : defaultValue,
+        out: valids[1] ? argObj.out : defaultValue,
+      };
     }
 
-    if (!this.length.in && !this.length.out) {
-      throw new Error();
-    }
-
-    /* Coerce all falsy values to 0. */
-    this.length = {
-      in: this.length.in || 0,
-      out: this.length.out || 0,
-    };
+    throw new Error();
   }
 }

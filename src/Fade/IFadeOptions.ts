@@ -6,6 +6,6 @@ import {
 } from './TFadeArg';
 
 export interface IFadeOptions {
-  easingCurve?: TFadeArg<EasingCurves | null>;
+  easingCurve?: TFadeArg<EasingCurves>;
   length?: TFadeArg<number>;
 }

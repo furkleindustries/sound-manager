@@ -6,6 +6,6 @@ import {
 } from './IFadeArgumentObject';
 
 export interface IFade {
-  readonly easingCurve: IFadeArgumentObject<EasingCurves | null>;
+  readonly easingCurve: IFadeArgumentObject<EasingCurves>;
   readonly length: IFadeArgumentObject<number>;
 }
