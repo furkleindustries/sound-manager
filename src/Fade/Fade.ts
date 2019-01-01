@@ -87,10 +87,7 @@ export class Fade implements IFade {
       throw new Error();
     }
 
-    return {
-      in: valids[0] ? toReturn.in : defaultValue,
-      out: valids[1] ? toReturn.out : defaultValue,
-    };
+    return this.__normalizeFadeProp(toReturn, valids, defaultValue);
   }
 
   private __structureFadePropFromValue<T>(arg: T) {
@@ -111,6 +108,18 @@ export class Fade implements IFade {
     return {
       in: arg.in,
       out: arg.out,
+    };
+  }
+
+  private __normalizeFadeProp<T>(
+    arg: IFadeArgumentObject<any>,
+    valids: [ boolean, boolean ],
+    defaultValue: T | null,
+  ): IFadeArgumentObject<T>
+  {
+    return {
+      in: valids[0] ? arg.in : defaultValue,
+      out: valids[1] ? arg.out : defaultValue,
     };
   }
 }
