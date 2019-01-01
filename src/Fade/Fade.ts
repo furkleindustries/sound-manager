@@ -65,7 +65,11 @@ export class Fade implements IFade {
     return this.__normalizeFadeProp(value, valids, defaultValue);
   }
 
-  private __argToPropHelper<T>(arg: TFadeArg<T>, validator: (arg: T) => boolean): { valids: [ boolean, boolean ], value: IFadeArgumentObject<T>, } {
+  private __argToPropHelper<T>(
+    arg: TFadeArg<T>,
+    validator: (arg: T) => boolean
+  ): { valids: [ boolean, boolean ], value: IFadeArgumentObject<T>, }
+  {
     if (this.__validatorWrapper<T>(arg, validator)) {
       return {
         valids: [ true, true ],
@@ -78,24 +82,21 @@ export class Fade implements IFade {
             this.__validatorWrapper(arg[0], validator),
             this.__validatorWrapper(arg[1], validator),
           ],
-  
+
           value: this.__structureFadePropFromArray(arg),
         };
       }
-
-      throw new Error();
     } else if (typeof arg === 'object') {
-      const argObj = arg as IFadeArgumentObject<T>;
       return {
         valids: [
-          this.__validatorWrapper(argObj.in, validator),
-          this.__validatorWrapper(argObj.out, validator),
+          this.__validatorWrapper(arg.in, validator),
+          this.__validatorWrapper(arg.out, validator),
         ],
 
-        value: this.__structureFadePropFromObject(argObj),
+        value: this.__structureFadePropFromObject(arg),
       };
     }
-    
+
     throw new Error();
   }
 
