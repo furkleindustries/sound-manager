@@ -1,7 +1,4 @@
 import {
-  EasingCurves,
-} from '../Fade/EasingCurves';
-import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -32,12 +29,5 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): ISound;
-  getFadeValueAtTime(options: {
-    change: number,
-    curve: EasingCurves,
-    duration: number,
-    initial: number,
-    time: number,
-  }): number;
   clearFadeState(): ISound;
 }

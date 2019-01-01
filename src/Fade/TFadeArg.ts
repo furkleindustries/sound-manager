@@ -1,5 +1,5 @@
 import {
-  IFadeArgumentObject,
-} from './IFadeArgumentObject';
+  IFadeProperty,
+} from './IFadeProperty';
 
-export type TFadeArg<T> = T | [ T, T ] | IFadeArgumentObject<T>;
+export type TFadeArg<T> = T | [ T, T ] | IFadeProperty<T>;

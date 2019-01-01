@@ -1,6 +1,9 @@
 import {
-  EasingCurves,
-} from '../Fade/EasingCurves';
+  doWebAudioFadeIn,
+} from '../functions/doWebAudioFadeIn';
+import {
+  doWebAudioFadeOut,
+} from '../functions/doWebAudioFadeOut';
 import {
   Fade,
 } from '../Fade/Fade';
@@ -82,35 +85,19 @@ export class Sound implements ISound {
 
       this.isWebAudio = () => true;
       this.getContextCurrentTime = () => context.currentTime;
-
-      /* Keep reference to the necessary context factory method and the buffer
-       * in a private closure available elsewhere in the class. */
-      this.__getNewSourceNode = () => {
-        const node = context.createBufferSource();
-        node.buffer = buffer;
-        return node;
-      };
-
-      /* Generate the first source node. */
-      this.__sourceNode = this.__getNewSourceNode();
-
-      /* Generate the output gain node. */
-      this.__gainNode = context.createGain();
-      /* Generate the gain node used for fading volume. */
-      this.__fadeGainNode = context.createGain();
-      this.__sourceNode.connect(this.__fadeGainNode);
-      this.__fadeGainNode.connect(this.__gainNode);
-
+  
       this.getVolume = () => this.getGainNode().gain.value;
-
+  
       this.setVolume = (value: number) => {
         this.getGainNode().gain.setValueAtTime(
           value,
           this.getContextCurrentTime(),
         );
-
+  
         return this;
       };
+
+      this.__initializeForWebAudio(context, buffer);
     } else if (audioElement) {
       this.__audioElement = audioElement;
 
@@ -154,6 +141,26 @@ export class Sound implements ISound {
     if (autoplay === true) {
       this.play();
     }
+  }
+
+  private __initializeForWebAudio(context: AudioContext, buffer: AudioBuffer) {
+    /* Keep reference to the necessary context factory method and the buffer
+     * in a private closure available elsewhere in the class. */
+    this.__getNewSourceNode = () => {
+      const node = context.createBufferSource();
+      node.buffer = buffer;
+      return node;
+    };
+
+    /* Generate the first source node. */
+    this.__sourceNode = this.__getNewSourceNode();
+
+    /* Generate the output gain node. */
+    this.__gainNode = context.createGain();
+    /* Generate the gain node used for fading volume. */
+    this.__fadeGainNode = context.createGain();
+    this.__sourceNode.connect(this.__fadeGainNode);
+    this.__fadeGainNode.connect(this.__gainNode);
   }
 
   getInputNode() {
@@ -314,88 +321,98 @@ export class Sound implements ISound {
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
-      if (fadeOverride) {
-        this.__fadeOverride = { ...fadeOverride, };
-      }
-
-      if (typeof loopOverride === 'boolean') {
-        this.__loopOverride = loopOverride;
-      }
-
-      const fade = this.getFade();
-
-      let timeUpdate: () => void;
-      if (fade) {
-        /* Update the audio element volume on every tick, including fade
-         * volume. */
-        /* istanbul ignore next */
-        timeUpdate = () => this.updateAudioElementVolume();
-
-        const duration = this.getDuration();
-
-        if (this.isWebAudio()) {
-          const fadeGainNode = this.getFadeGainNode();
-          if (fade.length.in >= this.getTrackPosition()) {
-            for (let ii = 0; ii <= fade.length.in * 20; ii += 1) {
-              const time = ii / 20;
-              fadeGainNode.gain.setValueAtTime(
-                this.getFadeVolume(),
-                this.getContextCurrentTime() + time,
-              );
-            }
-          }
-
-          if (fade.length.out >= this.getDuration() - this.getTrackPosition()) {
-            for (let ii = 0; ii < fade.length.out * 20; ii += 1) {
-              const time = ii / 20;
-              fadeGainNode.gain.setValueAtTime(
-                this.getFadeVolume(),
-                this.getContextCurrentTime() + duration - time,
-              );
-            }
-          }
-        } else {
-          source.addEventListener('timeupdate', timeUpdate);
-        }
-      }
-
-      this.__promise = new Promise((resolve, reject) => {  
-        const ended = (e: Event) => {
-          /* Remove the 'ended' event listener. */
-          source.removeEventListener('ended', ended);
-
-          /* istanbul ignore next */
-          if (timeUpdate) {
-            /* Remove the 'timeupdate' event listener. */
-            source.removeEventListener('timeupdate', timeUpdate);
-          }
-
-          /* Don't reject the emitted promise. */
-          this.__rejectOnStop = () => {};
-
-          /* Reset the track position of the sound after it ends. Also deletes
-           * the old promise. */
-          this.stop();
-
-          /* Resolve the promise with the ended event. */
-          return resolve(e);
-        };
-
-        /* Register the ended function to fire when the audio source emits the
-         * 'ended' event. */
-        source.addEventListener('ended', ended);
-
-        /* Allow the promise to be rejected if the sound is stopped. */
-        this.__rejectOnStop = (message?: string) => {
-          return reject(
-            message ||
-            'The sound was stopped, probably by a user-created script.'
-          );
-        };
-      });
+      /* Generates the promise and registers events. */
+      this.__initializeSoundForPlay(fadeOverride, loopOverride);
     }
 
-    return this.__promise;
+    return this.__promise as Promise<Event>;
+  }
+
+  private __initializeSoundForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
+    const source = this.isWebAudio() ? this.getSourceNode() : this.__audioElement!;
+
+    this.__setOverrides(fadeOverride, loopOverride);
+    const fade = this.getFade();
+
+    let timeUpdate: () => void;
+    if (fade) {
+      /* Update the audio element volume on every tick, including fade
+       * volume. */
+      /* istanbul ignore next */
+      timeUpdate = () => this.updateAudioElementVolume();
+      this.__initializeFadeForPlay(fade, timeUpdate);
+    }
+
+    this.__promise = new Promise((resolve, reject) => {  
+      const ended = (e: Event) => {
+        /* Remove the 'ended' event listener. */
+        source.removeEventListener('ended', ended);
+
+        /* istanbul ignore next */
+        if (!this.isWebAudio()) {
+          /* Remove the 'timeupdate' event listener. */
+          source.removeEventListener('timeupdate', timeUpdate);
+        }
+
+        /* Don't reject the emitted promise. */
+        this.__rejectOnStop = () => {};
+
+        /* Reset the track position of the sound after it ends. Also deletes
+         * the old promise. */
+        this.stop();
+
+        /* Resolve the promise with the ended event. */
+        return resolve(e);
+      };
+
+      /* Register the ended function to fire when the audio source emits the
+      * 'ended' event. */
+     source.addEventListener('ended', ended);
+     
+      /* Allow the promise to be rejected if the sound is stopped. */
+      this.__initializeStopRejector(reject);
+    });
+  }
+
+  private __initializeFadeForPlay(fade: IFade, htmlTimeUpdater: () => void) {    
+    if (this.isWebAudio()) {
+      const fadeGainNode = this.getFadeGainNode();
+      doWebAudioFadeIn({
+        fade,
+        fadeGainNode,
+        getFadeVolume: () => this.getFadeVolume(),
+        getContextCurrentTime: () => this.getContextCurrentTime(),
+      });
+
+      doWebAudioFadeOut({
+        fade,
+        fadeGainNode,
+        duration: this.getDuration(),
+        getFadeVolume: () => this.getFadeVolume(),
+        getContextCurrentTime: () => this.getContextCurrentTime(),
+      });
+    } else {
+      this.__audioElement!.addEventListener('timeupdate', htmlTimeUpdater);
+    }
+  }
+
+  private __initializeStopRejector(reject: Function) {
+    this.__rejectOnStop = (message?: string) => {
+      return reject(
+        message ||
+        'The sound was stopped, probably by a user-created script.'
+      );
+    };
+  }
+
+  private __setOverrides(fadeOverride?: IFade | null, loopOverride?: boolean) {
+    if (fadeOverride) {
+      this.__fadeOverride = { ...fadeOverride, };
+    }
+
+    if (typeof loopOverride === 'boolean') {
+      this.__loopOverride = loopOverride;
+    }
   }
 
   pause() {
@@ -472,43 +489,28 @@ export class Sound implements ISound {
     const trackPosition = this.getTrackPosition();
     const duration = this.getDuration();
     if (fade) {
-      if (fade.easingCurve.in && fade.length.in >= trackPosition) {
-        return this.getFadeValueAtTime({
+      const inLen = Number(fade.length.in);
+      const outLen = Number(fade.length.out);
+      if (fade.easingCurve.in && inLen >= trackPosition) {
+        return getFadeValueAtTime({
           change: 1,
           curve: fade.easingCurve.in,
-          duration: fade.length.in,
+          duration: inLen,
           initial: 0,
           time: trackPosition,
         });
-      } else if (fade.easingCurve.out && fade.length.out >= duration - trackPosition) {
-        return this.getFadeValueAtTime({
+      } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
+        return getFadeValueAtTime({
           change: -1,
           curve: fade.easingCurve.out,
-          duration: fade.length.out,
+          duration: outLen,
           initial: 1,
-          time: fade.length.out - (duration - trackPosition),
+          time: outLen - (duration - trackPosition),
         });
       }
     }
 
     return 1;
-  }
-
-  getFadeValueAtTime(options: {
-    change: number,
-    curve: EasingCurves,
-    initial: number,
-    duration: number,
-    time: number,
-  })
-  {
-    const value = getFadeValueAtTime(options);
-    /* istanbul ignore next */
-    if (DEBUG) {
-      console.log(`Fading ${options.change < 0 ? 'out' : 'in'}:`, value, options);
-    }
-
-    return value;
   }
 
   clearFadeState() {
