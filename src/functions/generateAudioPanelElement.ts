@@ -18,7 +18,7 @@ export const generateAudioPanelElement = (manager: IManager) => {
   audioPanelElement.appendChild(generateVolumeInput(manager));
 
   Object.keys(manager.groups).forEach((groupName) => {
-    const group = manager.getGroup(groupName);
+    const group = manager.getGroups(groupName);
     if (group.isPanelRegistered()) {
       /* Add registered group sliders. */
       audioPanelElement.appendChild(generateVolumeInput(
@@ -28,7 +28,7 @@ export const generateAudioPanelElement = (manager: IManager) => {
     }
 
     Object.keys(group.sounds).forEach((soundName) => {
-      const sound = group.getSound(soundName);
+      const sound = group.getSounds(soundName);
       if (sound.isPanelRegistered()) {
         /* Add registered sound sliders. */
         audioPanelElement.appendChild(generateVolumeInput(
