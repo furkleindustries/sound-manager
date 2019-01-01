@@ -2,6 +2,10 @@ language: node_js
 node_js:
   - "11"
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=f7a931d3400b372b2fc3684a94ee19d22acf99c643d75ec28e2bdcf2b3b7c420
+
 branches:
   only:
     - master
@@ -13,9 +17,13 @@ cache:
 install:
   - npm install
   - npm install codecov -g
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
 script:
   - npm run test-coverage
 
 after_success:
   - codecov
+  - ./cc-test-reporter after-build

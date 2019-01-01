@@ -8,6 +8,9 @@ import {
   Fade,
 } from '../Fade/Fade';
 import {
+  getOneOrMany,
+} from '../functions/getOneOrMany';
+import {
   Group,
 } from '../Group/Group';
 import {
@@ -44,8 +47,14 @@ import {
   IManagerOptions,
 } from './IManagerOptions';
 import {
+  IPlaylist,
+} from '../Playlist/IPlaylist';
+import {
   ISoundsMap,
 } from '../Group/ISoundsMap';
+import {
+  ISubmanagerMap,
+} from './ISubmanagerMap';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
@@ -69,6 +78,11 @@ export class Manager implements IManager {
   private __playlists: IPlaylistsMap = Object.freeze({});
   get playlists() {
     return this.__playlists;
+  }
+
+  private __submanagers: ISubmanagerMap = Object.freeze({});
+  get submanagers() {
+    return this.__submanagers;
   }
 
   private __audioPanelElement: HTMLElement | null = null;
@@ -227,20 +241,15 @@ export class Manager implements IManager {
     return this;
   }
 
-  public getGroup(name: string) {
-    const group = this.groups[name];
-    if (!group) {
-      throw new Error();
-    }
-
-    return group;
+  public getGroups(name: string): IGroup;
+  public getGroups(names: string[]): IGroup[];
+  public getGroups(nameOrNames: string | string[]): IGroup | IGroup[] {
+    return getOneOrMany(nameOrNames as string, this.groups);
   }
 
-  public removeGroup(name: string) {
-    return this.removeGroups(name);
-  }
-
-  public removeGroups(names: string | string[]) {
+  public removeGroups(name: string): IManager;
+  public removeGroups(name: string[]): IManager;
+  public removeGroups(names: string | string[]): IManager {
     let arr: string[];
 
     if (typeof names === 'string') {
@@ -277,10 +286,8 @@ export class Manager implements IManager {
     return this.removeGroups(Object.keys(this.groups));
   }
 
-  public playGroup(name: string) {
-    return this.getGroup(name).playAllSounds();
-  }
-
+  public playGroups(name: string): Promise<Event[]>;
+  public playGroups(name: string[]): Promise<Event[]>;
   public playGroups(names: string | string[]): Promise<Event[]> {
     let arr: string[];
     if (typeof names === 'string') {
@@ -290,21 +297,20 @@ export class Manager implements IManager {
     }
 
     return new Promise((resolve) => (
-      Promise.all(arr.map((name) => {
-        const group = this.getGroup(name);
-        return group.playAllSounds();
-      })).then((val) => (
+      Promise.all(arr.map((name) => (
+        this.getGroups(name).playAllSounds()
+      ))).then((val) => (
         resolve(val.reduce((prev, curr) => prev.concat(curr)))
       ))
     ));
   }
 
   public getGroupVolume(name: string = 'default') {
-    return this.getGroup(name).getVolume();
+    return this.getGroups(name).getVolume();
   }
 
   public setGroupVolume(value: number, groupName: string = 'default') {
-    this.getGroup(groupName).setVolume(value);
+    this.getGroups(groupName).setVolume(value);
     return this;
   }
 
@@ -347,20 +353,15 @@ export class Manager implements IManager {
     return this;
   }
 
-  public getPlaylist(name: string) {
-    const playlist = this.playlists[name];
-    if (!playlist) {
-      throw new Error();
-    }
-
-    return playlist;
+  public getPlaylists(name: string): IPlaylist;
+  public getPlaylists(names: string[]): IPlaylist[];
+  public getPlaylists(names: string | string[]): IPlaylist | IPlaylist[] {
+    return getOneOrMany(names as string[], this.playlists);
   }
 
-  public removePlaylist(name: string) {
-    return this.removePlaylists(name);
-  }
-
-  public removePlaylists(names: string | string[]) {
+  public removePlaylists(name: string): IManager;
+  public removePlaylists(names: string[]): IManager;
+  public removePlaylists(names: string | string[]): IManager {
     const playls = { ...this.playlists, };
     if (typeof names === 'string') {
       delete playls[names];
@@ -380,13 +381,13 @@ export class Manager implements IManager {
   }
 
   public async playPlaylist(name: string) {
-    const playlist = this.getPlaylist(name);
+    const playlist = this.getPlaylists(name);
     console.log(`Playing playlist ${name}.`);
     let events: Event[] = [];
     let looped = 0;
     for (let ii = 0; ii < playlist.ids.length; ii += 1) {
       const id = playlist.ids[ii];
-      const sound = this.getSound(id.soundName, id.groupName);
+      const sound = this.getSounds(id.soundName, id.groupName);
 
       console.log(`${id.groupName}.${id.soundName} starting.`);
 
@@ -430,22 +431,25 @@ export class Manager implements IManager {
     }
   }
 
-  public playPlaylists(names: string | string[]) {
-    let arr: string[];
+  public playPlaylists(name: string): Promise<void>;
+  public playPlaylists(names: string[]): Promise<void>;
+  public playPlaylists(names: string | string[]): Promise<void> {
     if (typeof names === 'string') {
-      arr = [ names, ];
-    } else {
-      arr = names;
+      return this.playPlaylist(names);
+    } else if (Array.isArray(names)) {
+      return new Promise((resolve) => {
+        Promise.all(names.map((name) => this.playPlaylist(name))).then(() => (
+          resolve()
+        ));
+      });
     }
 
-    arr.forEach(this.playPlaylist);
+    throw new Error();
   }
 
-  public stopPlaylist(name: string) {
-    return this.stopPlaylists(name);
-  }
-
-  public stopPlaylists(names: string | string[]) {
+  public stopPlaylists(name: string): IManager;
+  public stopPlaylists(names: string[]): IManager;
+  public stopPlaylists(names: string | string[]): IManager {
     let arr: string[] = [];
     if (typeof names === 'string') {
       arr = [ names, ];
@@ -454,11 +458,13 @@ export class Manager implements IManager {
     }
 
     const stopped: {
-      [key: string]: { [key: string]: true, },
+      [key: string]: {
+        [key: string]: true,
+      },
     } = {};
 
     arr.forEach((name) => {
-      this.getPlaylist(name).ids.forEach((id) => {
+      this.getPlaylists(name).ids.forEach((id) => {
         if (!stopped[id.groupName]) {
           stopped[id.groupName] = {};
         } else if (stopped[id.groupName][id.soundName]) {
@@ -466,7 +472,7 @@ export class Manager implements IManager {
           return;
         }
 
-        this.getSound(id.soundName, id.groupName).stop();
+        this.getSounds(id.soundName, id.groupName).stop();
         stopped[id.groupName][id.soundName] = true;
       });
     }, []);
@@ -508,56 +514,53 @@ export class Manager implements IManager {
   }
 
   public addSounds(sounds: ISoundsMap, groupName: string = 'default') {
-    const group = this.getGroup(groupName);
-    group.addSounds(sounds);
-
+    this.getGroups(groupName).addSounds(sounds);
     return this;
   }
 
-  public getSound(name: string, groupName: string = 'default') {
-    const group = this.getGroup(groupName);
-    return group.getSound(name);
+  public getSounds(name: string, groupName?: string): ISound;
+  public getSounds(names: string[], groupName?: string): ISound[];
+  public getSounds(names: string | string[], groupName: string = 'default'): ISound | ISound[] {
+    return this.getGroups(groupName).getSounds(names as string);
   }
 
   public removeSound(name: string, groupName: string = 'default') {
     return this.removeSounds(name, groupName);
   }
 
-  public removeSounds(names: string | string[], groupName: string = 'default') {
-    this.getGroup(groupName).removeSounds(names);
+  public removeSounds(name: string, groupName?: string): IManager;
+  public removeSounds(names: string[], groupName?: string): IManager;
+  public removeSounds(names: string | string[], groupName: string = 'default'): IManager {
+    this.getGroups(groupName).removeSounds(names as string);
     return this;
   }
 
   public removeAllSounds(groupName?: string) {
     if (groupName) {
-      this.getGroup(groupName).removeAllSounds();
+      this.getGroups(groupName).removeAllSounds();
     } else {
-      Object.keys(this.groups).forEach((groupName) => {
-        this.getGroup(groupName).removeAllSounds();
-      });
+      this.getGroups(Object.keys(this.groups)).forEach((group) => (
+        group.removeAllSounds()
+      ));
     }
 
     return this;
   }
 
-  public playSound(name: string, groupName: string = 'default'): Promise<Event> {
-    return new Promise((resolve) => {
-      this.playSounds(name, groupName).then((val) => resolve(val[0]));
-    });
-  }
-
-  public playSounds(names: string | string[], groupName: string = 'default') {
-    return this.getGroup(groupName).playSounds(names);
+  public playSounds(name: string, groupName?: string): Promise<Event>;
+  public playSounds(names: string[], groupName?: string): Promise<Event[]>;
+  public playSounds(names: string | string[], groupName: string = 'default'): Promise<Event> | Promise<Event[]> {
+    return this.getGroups(groupName).playSounds(names as string);
   }
 
   public playAllSounds(groupName?: string): Promise<Event[]> {
     if (groupName) {
-      return this.getGroup(groupName).playAllSounds();
+      return this.getGroups(groupName).playAllSounds();
     } else {
       return new Promise((resolve) => {
         Promise.all(
-          Object.keys(this.groups).map((groupName) => (
-            this.getGroup(groupName).playAllSounds()
+          this.getGroups(Object.keys(this.groups)).map((group) => (
+            group.playAllSounds()
           ))
         ).then((value) => {
           /* Flatten event response arrays. */
@@ -568,42 +571,38 @@ export class Manager implements IManager {
     }
   }
 
-  public pauseSound(name: string, groupName: string = 'default') {
-    return this.pauseSounds(name, groupName);
-  }
-
-  public pauseSounds(names: string | string[], groupName: string = 'default') {
-    this.getGroup(groupName).pauseSounds(names);
+  public pauseSounds(name: string, groupName?: string): IManager;
+  public pauseSounds(names: string[], groupName?: string): IManager;
+  public pauseSounds(names: string | string[], groupName: string = 'default'): IManager {
+    this.getGroups(groupName).pauseSounds(names as string);
     return this;
   }
 
   public pauseAllSounds(groupName?: string) {
     if (groupName) {
-      this.getGroup(groupName).pauseAllSounds();
+      this.getGroups(groupName).pauseAllSounds();
     } else {
-      Object.keys(this.groups).forEach((groupName) => {
-        this.getGroup(groupName).pauseAllSounds();
+      this.getGroups(Object.keys(this.groups)).forEach((group) => {
+        group.pauseAllSounds();
       });
     }
 
     return this;
   }
 
-  public stopSound(name: string, groupName: string = 'default') {
-    return this.stopSounds(name, groupName);
-  }
-
-  public stopSounds(names: string | string[], groupName: string = 'default') {
-    this.getGroup(groupName).stopSounds(names);
+  public stopSounds(name: string, groupName?: string): IManager;
+  public stopSounds(names: string[]): IManager;
+  public stopSounds(names: string | string[], groupName: string = 'default'): IManager {
+    this.getGroups(groupName).stopSounds(names as string);
     return this;
   }
 
   public stopAllSounds(groupName?: string) {
     if (groupName) {
-      this.getGroup(groupName).stopAllSounds();
+      this.getGroups(groupName).stopAllSounds();
     } else {
-      Object.keys(this.groups).forEach((groupName) => {
-        this.getGroup(groupName).stopAllSounds();
+      this.getGroups(Object.keys(this.groups)).forEach((group) => {
+        group.stopAllSounds();
       });
     }
 
@@ -611,17 +610,17 @@ export class Manager implements IManager {
   }
 
   public getSoundVolume(name: string, groupName: string = 'default') {
-    return this.getGroup(groupName).getSound(name).getVolume();
+    return this.getGroups(groupName).getSounds(name).getVolume();
   }
 
   public setSoundVolume(name: string, value: number, groupName: string = 'default') {
-    this.getGroup(groupName).getSound(name).setVolume(value);
+    this.getGroups(groupName).getSounds(name).setVolume(value);
     return this;
   }
 
   public updateAllAudioElementsVolume() {
-    Object.keys(this.groups).forEach((groupName) => {
-      this.getGroup(groupName).updateAllAudioElementsVolume();
+    this.getGroups(Object.keys(this.groups)).forEach((group) => {
+      group.updateAllAudioElementsVolume();
     });
 
     return this;
@@ -643,19 +642,15 @@ export class Manager implements IManager {
     return this;
   }
 
-  public panelRegister(soundOrGroup: ISound | IGroup) {
-    // @ts-ignore
-    soundOrGroup.__panelRegistered = true;
-    if (this.__audioPanelElement) {
-      this.updateAudioPanelElement();
+  public updatePanelRegistration(sound: ISound, value: boolean): IManager;
+  public updatePanelRegistration(group: IGroup, value: boolean): IManager;
+  public updatePanelRegistration(soundOrGroup: ISound | IGroup, value: boolean): IManager {
+    if (typeof value !== 'boolean') {
+      throw new Error();
     }
 
-    return this;
-  }
-
-  public panelDeregister(soundOrGroup: ISound | IGroup) {
     // @ts-ignore
-    soundOrGroup.__panelRegistered = false;
+    soundOrGroup.__panelRegistered = true;
     if (this.__audioPanelElement) {
       this.updateAudioPanelElement();
     }

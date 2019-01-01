@@ -92,11 +92,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     expect(group.sounds.test === sym as any);
   });
 
-  it('Has a getSound function which throws if a non-existent sound name is referenced.', () => {
-    const func = () => testGroupFactory().getSound('foo');
-    expect(func).toThrow();
-  });
-
   it('Has an addSound function which puts the sound in the sounds object at the specified key.', () => {
     const group = testGroupFactory();
     const sound = {
@@ -184,39 +179,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     const func = () => group.addSounds({ one: false, });
 
     expect(func).toThrow();
-  });
-
-  it('Has a removeSound function which removes the sound in the sounds object at the specified key.', () => {
-    const group = testGroupFactory();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-      })),
-    };
-
-    const key = 'test';
-    group.addSound(key, sound as any);
-    group.removeSound(key);
-
-    expect(group.sounds).toEqual({});
-  });
-
-  it('Has a removeSound function which returns the Group.', () => {
-    const group = testGroupFactory();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-      })),
-    };
-
-    group.addSound('test1', sound as any);
-    const ret = group.removeSound('test1');
-
-    expect(ret).toBe(group);
   });
 
   it('Has a removeSounds function which removes the provided string from the sounds map.', () => {
@@ -331,41 +293,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     expect(group.removeSounds).toHaveBeenCalledWith(Object.keys(sounds));
   });
 
-  it('Has a playSound function which returns a promise.', () => {
-    const group = testGroupFactory();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-      })),
-    };
-
-    const key = 'test';
-    group.addSound(key, sound as any);
-    const prom = group.playSound(key);
-
-    expect(prom).toBeInstanceOf(Promise);
-  });
-
-  it('Has a playSound function which plays the named sound.', () => {
-    const group = testGroupFactory();
-    const mock = jest.fn();
-    const sound = {
-      play: mock,
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
-    };
-
-    const key = 'test';
-    group.addSound(key, sound as any);
-    group.playSound(key);
-
-    expect(mock).toBeCalledTimes(1);
-  });
-
   it('Has a playSounds function which returns a promise.', () => {
     const group = testGroupFactory();
     const mockOne = jest.fn();
@@ -472,42 +399,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     group.addSounds(sounds as any);
 
     expect(group.playAllSounds()).toBeInstanceOf(Promise);
-  });
-
-  it('Has a pauseSound function which calls pause on the named function.', () => {
-    const group = testGroupFactory();
-    const mock = jest.fn();
-    const sound = {
-      pause: mock,
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
-    };
-
-    const key = 'test';
-    group.addSound(key, sound as any);
-    group.pauseSound(key);
-
-    expect(mock).toHaveBeenCalledTimes(1);
-  });
-
-  it('Has a pauseSound function which returns the Group.', () => {
-    const group = testGroupFactory();
-    const mock = jest.fn();
-    const sound = {
-      pause: mock,
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
-    };
-
-    const key = 'test';
-    group.addSound(key, sound as any);
-    const ret = group.pauseSound(key);
-
-    expect(ret).toBe(group);
   });
 
   it('Has a pauseSounds function which calls pause on all listed sounds.', () => {
