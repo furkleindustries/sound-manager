@@ -38,7 +38,7 @@ export class Fade implements IFade {
     if (easingCurve) {
       this.easingCurve = this.__argToProp(
         easingCurve,
-        Fade.defaultCurve,
+        null,
         (arg: any) => Object.values(EasingCurves).indexOf(arg) !== -1,
       );
     }
@@ -46,31 +46,31 @@ export class Fade implements IFade {
     if (length) {
       this.length = this.__argToProp(
         length,
-        Fade.defaultLength,
-        (arg: any) => arg > 0,
+        0,
+        (arg: any) => typeof arg === 'number' && arg > 0,
       ) 
     }
   }
 
-  private __argToProp<T>(arg: TFadeArg<T>, defaultValue: T, validator: (arg: T) => boolean): IFadeArgumentObject<T> {
+  private __argToProp<T>(arg: TFadeArg<T>, defaultValue: T | null, validator: (arg: T) => boolean): IFadeArgumentObject<T> {
+    let toReturn: IFadeArgumentObject<T>;
+    let valids: [ boolean, boolean ];
+
     const isValid = (arg: any): arg is T => arg === null || validator(arg);
     if (isValid(arg)) {
-      return {
+      valids = [ true, true ];
+      toReturn = {
         in: arg,
         out: arg,
       };
     } else if (Array.isArray(arg)) {
       if (arg.length === 2) {
-        const valids = [
+        valids = [
           isValid(arg[0]),
           isValid(arg[1]),
         ];
 
-        if (!valids.length) {
-          throw new Error();
-        }
-
-        return {
+        toReturn = {
           in: valids[0] ? arg[0] : defaultValue,
           out: valids[1] ? arg[1] : defaultValue,
         };
@@ -79,21 +79,23 @@ export class Fade implements IFade {
       }
     } else if (typeof arg === 'object') {
       const argObj = arg as IFadeArgumentObject<T>;
-      const valids = [
+      valids = [
         isValid(argObj.in),
         isValid(argObj.out),
       ];
 
-      if (!valids.length) {
-        throw new Error();
-      }
-
-      return {
+      toReturn = {
         in: valids[0] ? argObj.in : defaultValue,
         out: valids[1] ? argObj.out : defaultValue,
       };
+    } else {
+      throw new Error();
     }
 
-    throw new Error();
+    if (!valids[0] && !valids[1]) {
+      throw new Error();
+    }
+
+    return toReturn;
   }
 }
