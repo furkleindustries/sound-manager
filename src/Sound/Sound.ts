@@ -378,7 +378,8 @@ export class Sound implements ISound {
     if (this.isWebAudio()) {
       const fadeGainNode = this.getFadeGainNode();
       const inLength = Number(fade.length.in);
-      if (inLength >= this.getTrackPosition()) {
+      const trackPosition = this.getTrackPosition();
+      if (inLength >= trackPosition) {
         doWebAudioFadeIn({
           fade,
           fadeGainNode,
@@ -388,7 +389,7 @@ export class Sound implements ISound {
       }
 
       const outLength = Number(fade.length.out);
-      if (outLength >= this.getDuration() - this.getTrackPosition()) {
+      if (outLength >= this.getDuration() - trackPosition) {
         doWebAudioFadeOut({
           duration,
           fade,
