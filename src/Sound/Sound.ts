@@ -84,35 +84,19 @@ export class Sound implements ISound {
 
       this.isWebAudio = () => true;
       this.getContextCurrentTime = () => context.currentTime;
-
-      /* Keep reference to the necessary context factory method and the buffer
-       * in a private closure available elsewhere in the class. */
-      this.__getNewSourceNode = () => {
-        const node = context.createBufferSource();
-        node.buffer = buffer;
-        return node;
-      };
-
-      /* Generate the first source node. */
-      this.__sourceNode = this.__getNewSourceNode();
-
-      /* Generate the output gain node. */
-      this.__gainNode = context.createGain();
-      /* Generate the gain node used for fading volume. */
-      this.__fadeGainNode = context.createGain();
-      this.__sourceNode.connect(this.__fadeGainNode);
-      this.__fadeGainNode.connect(this.__gainNode);
-
+  
       this.getVolume = () => this.getGainNode().gain.value;
-
+  
       this.setVolume = (value: number) => {
         this.getGainNode().gain.setValueAtTime(
           value,
           this.getContextCurrentTime(),
         );
-
+  
         return this;
       };
+
+      this.__initializeForWebAudio(context, buffer);
     } else if (audioElement) {
       this.__audioElement = audioElement;
 
@@ -156,6 +140,26 @@ export class Sound implements ISound {
     if (autoplay === true) {
       this.play();
     }
+  }
+
+  private __initializeForWebAudio(context: AudioContext, buffer: AudioBuffer) {
+    /* Keep reference to the necessary context factory method and the buffer
+     * in a private closure available elsewhere in the class. */
+    this.__getNewSourceNode = () => {
+      const node = context.createBufferSource();
+      node.buffer = buffer;
+      return node;
+    };
+
+    /* Generate the first source node. */
+    this.__sourceNode = this.__getNewSourceNode();
+
+    /* Generate the output gain node. */
+    this.__gainNode = context.createGain();
+    /* Generate the gain node used for fading volume. */
+    this.__fadeGainNode = context.createGain();
+    this.__sourceNode.connect(this.__fadeGainNode);
+    this.__fadeGainNode.connect(this.__gainNode);
   }
 
   getInputNode() {
@@ -317,23 +321,16 @@ export class Sound implements ISound {
      * respected and the original promise returned. */
     if (!this.__promise) {
       /* Generates the promise and registers events. */
-      this.__initializeForPlay(fadeOverride, loopOverride);
+      this.__initializeSoundForPlay(fadeOverride, loopOverride);
     }
 
     return this.__promise as Promise<Event>;
   }
 
-  private __initializeForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
+  private __initializeSoundForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const source = this.getSourceNode();
 
-    if (fadeOverride) {
-      this.__fadeOverride = { ...fadeOverride, };
-    }
-
-    if (typeof loopOverride === 'boolean') {
-      this.__loopOverride = loopOverride;
-    }
-
+    this.__setOverrides(fadeOverride, loopOverride);
     const fade = this.getFade();
 
     let timeUpdate: () => void;
@@ -342,34 +339,7 @@ export class Sound implements ISound {
        * volume. */
       /* istanbul ignore next */
       timeUpdate = () => this.updateAudioElementVolume();
-
-      const duration = this.getDuration();
-
-      if (this.isWebAudio()) {
-        const fadeGainNode = this.getFadeGainNode();
-        const inLength = Number(fade.length.in);
-        if (inLength >= this.getTrackPosition()) {
-          doWebAudioFadeIn({
-            fade,
-            fadeGainNode,
-            getFadeVolume: () => this.getFadeVolume(),
-            getContextCurrentTime: () => this.getContextCurrentTime(),
-          });
-        }
-
-        const outLength = Number(fade.length.out);
-        if (outLength >= this.getDuration() - this.getTrackPosition()) {
-          doWebAudioFadeOut({
-            duration,
-            fade,
-            fadeGainNode,
-            getFadeVolume: () => this.getFadeVolume(),
-            getContextCurrentTime: () => this.getContextCurrentTime(),
-          });
-        }
-      } else {
-        source.addEventListener('timeupdate', timeUpdate);
-      }
+      this.__initializeFadeForPlay(fade, timeUpdate);
     }
 
     this.__promise = new Promise((resolve, reject) => {  
@@ -378,7 +348,7 @@ export class Sound implements ISound {
         source.removeEventListener('ended', ended);
 
         /* istanbul ignore next */
-        if (timeUpdate) {
+        if (!this.isWebAudio()) {
           /* Remove the 'timeupdate' event listener. */
           source.removeEventListener('timeupdate', timeUpdate);
         }
@@ -395,17 +365,60 @@ export class Sound implements ISound {
       };
 
       /* Register the ended function to fire when the audio source emits the
-       * 'ended' event. */
-      source.addEventListener('ended', ended);
-
+      * 'ended' event. */
+     source.addEventListener('ended', ended);
+     
       /* Allow the promise to be rejected if the sound is stopped. */
-      this.__rejectOnStop = (message?: string) => {
-        return reject(
-          message ||
-          'The sound was stopped, probably by a user-created script.'
-        );
-      };
+      this.__initializeStopRejector(reject);
     });
+  }
+
+  private __initializeFadeForPlay(fade: IFade, htmlTimeUpdater: () => void) {    
+    const duration = this.getDuration();
+    if (this.isWebAudio()) {
+      const fadeGainNode = this.getFadeGainNode();
+      const inLength = Number(fade.length.in);
+      if (inLength >= this.getTrackPosition()) {
+        doWebAudioFadeIn({
+          fade,
+          fadeGainNode,
+          getFadeVolume: () => this.getFadeVolume(),
+          getContextCurrentTime: () => this.getContextCurrentTime(),
+        });
+      }
+
+      const outLength = Number(fade.length.out);
+      if (outLength >= this.getDuration() - this.getTrackPosition()) {
+        doWebAudioFadeOut({
+          duration,
+          fade,
+          fadeGainNode,
+          getFadeVolume: () => this.getFadeVolume(),
+          getContextCurrentTime: () => this.getContextCurrentTime(),
+        });
+      }
+    } else {
+      this.getSourceNode().addEventListener('timeupdate', htmlTimeUpdater);
+    }
+  }
+
+  private __initializeStopRejector(reject: Function) {
+    this.__rejectOnStop = (message?: string) => {
+      return reject(
+        message ||
+        'The sound was stopped, probably by a user-created script.'
+      );
+    };
+  }
+
+  private __setOverrides(fadeOverride?: IFade | null, loopOverride?: boolean) {
+    if (fadeOverride) {
+      this.__fadeOverride = { ...fadeOverride, };
+    }
+
+    if (typeof loopOverride === 'boolean') {
+      this.__loopOverride = loopOverride;
+    }
   }
 
   pause() {
@@ -485,7 +498,7 @@ export class Sound implements ISound {
       const inLen = Number(fade.length.in);
       const outLen = Number(fade.length.out);
       if (fade.easingCurve.in && inLen >= trackPosition) {
-        return this.getFadeValueAtTime({
+        return getFadeValueAtTime({
           change: 1,
           curve: fade.easingCurve.in,
           duration: inLen,
@@ -493,7 +506,7 @@ export class Sound implements ISound {
           time: trackPosition,
         });
       } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
-        return this.getFadeValueAtTime({
+        return getFadeValueAtTime({
           change: -1,
           curve: fade.easingCurve.out,
           duration: outLen,
@@ -504,23 +517,6 @@ export class Sound implements ISound {
     }
 
     return 1;
-  }
-
-  getFadeValueAtTime(options: {
-    change: number,
-    curve: EasingCurves,
-    initial: number,
-    duration: number,
-    time: number,
-  })
-  {
-    const value = getFadeValueAtTime(options);
-    /* istanbul ignore next */
-    if (DEBUG) {
-      console.log(`Fading ${options.change < 0 ? 'out' : 'in'}:`, value, options);
-    }
-
-    return value;
   }
 
   clearFadeState() {
