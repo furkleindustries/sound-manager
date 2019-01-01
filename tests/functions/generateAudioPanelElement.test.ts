@@ -42,7 +42,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroup: mock,
+      getGroups: mock,
     } as any;
 
     generateAudioPanelElement(manager);
@@ -73,7 +73,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroup: jest.fn((name) => manager.groups[name]),
+      getGroups: jest.fn((name) => manager.groups[name]),
     } as any;
 
     generateAudioPanelElement(manager);
@@ -99,7 +99,7 @@ describe('generateAudioPanelElement unit tests.', () => {
     const manager = {
       groups: {
         one: {
-          getSound: jest.fn((name) => manager.getGroup('one').sounds[name]),
+          getSounds: jest.fn((name) => manager.getGroups('one').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s1: {
@@ -109,7 +109,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
 
         two: {
-          getSound: jest.fn((name) => manager.getGroup('two').sounds[name]),
+          getSounds: jest.fn((name) => manager.getGroups('two').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s2: {
@@ -119,7 +119,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
 
         three: {
-          getSound: jest.fn((name) => manager.getGroup('three').sounds[name]),
+          getSounds: jest.fn((name) => manager.getGroups('three').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s3: {
@@ -129,7 +129,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroup: jest.fn((name) => manager.groups[name]),
+      getGroups: jest.fn((name) => manager.groups[name]),
     } as any;
 
     generateAudioPanelElement(manager);
