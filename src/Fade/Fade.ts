@@ -54,11 +54,10 @@ export class Fade implements IFade {
 
   private __argToProp<T>(arg: TFadeArg<T>, defaultValue: T, validator: (arg: T) => boolean): IFadeArgumentObject<T> {
     const isValid = (arg: any): arg is T => arg === null || validator(arg);
-    const tArg = arg as T
-    if (isValid(tArg)) {
+    if (isValid(arg)) {
       return {
-        in: tArg,
-        out: tArg,
+        in: arg,
+        out: arg,
       };
     } else if (Array.isArray(arg)) {
       if (arg.length === 2) {
