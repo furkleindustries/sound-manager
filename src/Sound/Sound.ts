@@ -374,30 +374,22 @@ export class Sound implements ISound {
   }
 
   private __initializeFadeForPlay(fade: IFade, htmlTimeUpdater: () => void) {    
-    const duration = this.getDuration();
     if (this.isWebAudio()) {
       const fadeGainNode = this.getFadeGainNode();
-      const inLength = Number(fade.length.in);
-      const trackPosition = this.getTrackPosition();
-      if (inLength >= trackPosition) {
-        doWebAudioFadeIn({
-          fade,
-          fadeGainNode,
-          getFadeVolume: () => this.getFadeVolume(),
-          getContextCurrentTime: () => this.getContextCurrentTime(),
-        });
-      }
+      doWebAudioFadeIn({
+        fade,
+        fadeGainNode,
+        getFadeVolume: () => this.getFadeVolume(),
+        getContextCurrentTime: () => this.getContextCurrentTime(),
+      });
 
-      const outLength = Number(fade.length.out);
-      if (outLength >= this.getDuration() - trackPosition) {
-        doWebAudioFadeOut({
-          duration,
-          fade,
-          fadeGainNode,
-          getFadeVolume: () => this.getFadeVolume(),
-          getContextCurrentTime: () => this.getContextCurrentTime(),
-        });
-      }
+      doWebAudioFadeOut({
+        duration: this.getDuration(),
+        fade,
+        fadeGainNode,
+        getFadeVolume: () => this.getFadeVolume(),
+        getContextCurrentTime: () => this.getContextCurrentTime(),
+      });
     } else {
       this.getSourceNode().addEventListener('timeupdate', htmlTimeUpdater);
     }
