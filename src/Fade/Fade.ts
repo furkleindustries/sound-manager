@@ -53,40 +53,50 @@ export class Fade implements IFade {
   }
 
   private __argToProp<T>(arg: TFadeArg<T>, defaultValue: T | null, validator: (arg: T) => boolean): IFadeArgumentObject<T> {
-    let toReturn: IFadeArgumentObject<T>;
-    let valids: [ boolean, boolean ];
-
-    if (this.__validatorWrapper<T>(arg, validator)) {
-      valids = [ true, true ];
-      toReturn = this.__structureFadePropFromValue(arg);
-    } else if (Array.isArray(arg)) {
-      if (arg.length === 2) {
-        valids = [
-          this.__validatorWrapper(arg[0], validator),
-          this.__validatorWrapper(arg[1], validator),
-        ];
-
-        toReturn = this.__structureFadePropFromArray(arg);
-      } else {
-        throw new Error();
-      }
-    } else if (typeof arg === 'object') {
-      const argObj = arg as IFadeArgumentObject<T>;
-      valids = [
-        this.__validatorWrapper(argObj.in, validator),
-        this.__validatorWrapper(argObj.out, validator),
-      ];
-
-      toReturn = this.__structureFadePropFromObject(argObj);
-    } else {
-      throw new Error();
-    }
+    const {
+      valids,
+      value,
+    } = this.__argToPropHelper(arg, validator);
 
     if (!valids[0] && !valids[1]) {
       throw new Error();
     }
 
-    return this.__normalizeFadeProp(toReturn, valids, defaultValue);
+    return this.__normalizeFadeProp(value, valids, defaultValue);
+  }
+
+  private __argToPropHelper<T>(arg: TFadeArg<T>, validator: (arg: T) => boolean): { valids: [ boolean, boolean ], value: IFadeArgumentObject<T>, } {
+    if (this.__validatorWrapper<T>(arg, validator)) {
+      return {
+        valids: [ true, true ],
+        value: this.__structureFadePropFromValue(arg),
+      };
+    } else if (Array.isArray(arg)) {
+      if (arg.length === 2) {
+        return {
+          valids: [
+            this.__validatorWrapper(arg[0], validator),
+            this.__validatorWrapper(arg[1], validator),
+          ],
+  
+          value: this.__structureFadePropFromArray(arg),
+        };
+      }
+
+      throw new Error();
+    } else if (typeof arg === 'object') {
+      const argObj = arg as IFadeArgumentObject<T>;
+      return {
+        valids: [
+          this.__validatorWrapper(argObj.in, validator),
+          this.__validatorWrapper(argObj.out, validator),
+        ],
+
+        value: this.__structureFadePropFromObject(argObj),
+      };
+    }
+    
+    throw new Error();
   }
 
   private __validatorWrapper<T>(arg: any, validator: (arg: any) => boolean): arg is T {
