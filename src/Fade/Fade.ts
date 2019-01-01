@@ -48,7 +48,7 @@ export class Fade implements IFade {
         length,
         0,
         (arg: any) => typeof arg === 'number' && arg > 0,
-      ) 
+      );
     }
   }
 
@@ -56,15 +56,14 @@ export class Fade implements IFade {
     let toReturn: IFadeArgumentObject<T>;
     let valids: [ boolean, boolean ];
 
-    const isValid = (arg: any): arg is T => arg === null || validator(arg);
-    if (isValid(arg)) {
+    if (this.__validatorWrapper<T>(arg, validator)) {
       valids = [ true, true ];
       toReturn = this.__structureFadePropFromValue(arg);
     } else if (Array.isArray(arg)) {
       if (arg.length === 2) {
         valids = [
-          isValid(arg[0]),
-          isValid(arg[1]),
+          this.__validatorWrapper(arg[0], validator),
+          this.__validatorWrapper(arg[1], validator),
         ];
 
         toReturn = this.__structureFadePropFromArray(arg);
@@ -74,8 +73,8 @@ export class Fade implements IFade {
     } else if (typeof arg === 'object') {
       const argObj = arg as IFadeArgumentObject<T>;
       valids = [
-        isValid(argObj.in),
-        isValid(argObj.out),
+        this.__validatorWrapper(argObj.in, validator),
+        this.__validatorWrapper(argObj.out, validator),
       ];
 
       toReturn = this.__structureFadePropFromObject(argObj);
@@ -88,6 +87,10 @@ export class Fade implements IFade {
     }
 
     return this.__normalizeFadeProp(toReturn, valids, defaultValue);
+  }
+
+  private __validatorWrapper<T>(arg: any, validator: (arg: any) => boolean): arg is T {
+    return arg === null || validator(arg);
   }
 
   private __structureFadePropFromValue<T>(arg: T) {
