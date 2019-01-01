@@ -1,6 +1,9 @@
 import {
-  EasingCurves,
-} from '../Fade/EasingCurves';
+  doWebAudioFadeIn,
+} from '../functions/doWebAudioFadeIn';
+import {
+  doWebAudioFadeOut,
+} from '../functions/doWebAudioFadeOut';
 import {
   Fade,
 } from '../Fade/Fade';
@@ -19,8 +22,6 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import { doWebAudioFadeIn } from '../functions/doWebAudioFadeIn';
-import { doWebAudioFadeOut } from '../functions/doWebAudioFadeOut';
 
 const DEBUG = false;
 
@@ -384,9 +385,9 @@ export class Sound implements ISound {
       });
 
       doWebAudioFadeOut({
-        duration: this.getDuration(),
         fade,
         fadeGainNode,
+        duration: this.getDuration(),
         getFadeVolume: () => this.getFadeVolume(),
         getContextCurrentTime: () => this.getContextCurrentTime(),
       });
