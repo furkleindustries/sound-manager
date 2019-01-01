@@ -19,6 +19,8 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { doWebAudioFadeIn } from '../functions/doWebAudioFadeIn';
+import { doWebAudioFadeOut } from '../functions/doWebAudioFadeOut';
 
 const DEBUG = false;
 
@@ -314,88 +316,96 @@ export class Sound implements ISound {
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
-      if (fadeOverride) {
-        this.__fadeOverride = { ...fadeOverride, };
-      }
-
-      if (typeof loopOverride === 'boolean') {
-        this.__loopOverride = loopOverride;
-      }
-
-      const fade = this.getFade();
-
-      let timeUpdate: () => void;
-      if (fade) {
-        /* Update the audio element volume on every tick, including fade
-         * volume. */
-        /* istanbul ignore next */
-        timeUpdate = () => this.updateAudioElementVolume();
-
-        const duration = this.getDuration();
-
-        if (this.isWebAudio()) {
-          const fadeGainNode = this.getFadeGainNode();
-          if (Number(fade.length.in) >= this.getTrackPosition()) {
-            for (let ii = 0; ii <= Number(fade.length.in) * 20; ii += 1) {
-              const time = ii / 20;
-              fadeGainNode.gain.setValueAtTime(
-                this.getFadeVolume(),
-                this.getContextCurrentTime() + time,
-              );
-            }
-          }
-
-          if (Number(fade.length.out) >= this.getDuration() - this.getTrackPosition()) {
-            for (let ii = 0; ii < Number(fade.length.out) * 20; ii += 1) {
-              const time = ii / 20;
-              fadeGainNode.gain.setValueAtTime(
-                this.getFadeVolume(),
-                this.getContextCurrentTime() + duration - time,
-              );
-            }
-          }
-        } else {
-          source.addEventListener('timeupdate', timeUpdate);
-        }
-      }
-
-      this.__promise = new Promise((resolve, reject) => {  
-        const ended = (e: Event) => {
-          /* Remove the 'ended' event listener. */
-          source.removeEventListener('ended', ended);
-
-          /* istanbul ignore next */
-          if (timeUpdate) {
-            /* Remove the 'timeupdate' event listener. */
-            source.removeEventListener('timeupdate', timeUpdate);
-          }
-
-          /* Don't reject the emitted promise. */
-          this.__rejectOnStop = () => {};
-
-          /* Reset the track position of the sound after it ends. Also deletes
-           * the old promise. */
-          this.stop();
-
-          /* Resolve the promise with the ended event. */
-          return resolve(e);
-        };
-
-        /* Register the ended function to fire when the audio source emits the
-         * 'ended' event. */
-        source.addEventListener('ended', ended);
-
-        /* Allow the promise to be rejected if the sound is stopped. */
-        this.__rejectOnStop = (message?: string) => {
-          return reject(
-            message ||
-            'The sound was stopped, probably by a user-created script.'
-          );
-        };
-      });
+      /* Generates the promise and registers events. */
+      this.__initializeForPlay(fadeOverride, loopOverride);
     }
 
-    return this.__promise;
+    return this.__promise as Promise<Event>;
+  }
+
+  private __initializeForPlay(fadeOverride?: IFade | null, loopOverride?: boolean) {
+    const source = this.getSourceNode();
+
+    if (fadeOverride) {
+      this.__fadeOverride = { ...fadeOverride, };
+    }
+
+    if (typeof loopOverride === 'boolean') {
+      this.__loopOverride = loopOverride;
+    }
+
+    const fade = this.getFade();
+
+    let timeUpdate: () => void;
+    if (fade) {
+      /* Update the audio element volume on every tick, including fade
+       * volume. */
+      /* istanbul ignore next */
+      timeUpdate = () => this.updateAudioElementVolume();
+
+      const duration = this.getDuration();
+
+      if (this.isWebAudio()) {
+        const fadeGainNode = this.getFadeGainNode();
+        const inLength = Number(fade.length.in);
+        if (inLength >= this.getTrackPosition()) {
+          doWebAudioFadeIn({
+            fade,
+            fadeGainNode,
+            getFadeVolume: () => this.getFadeVolume(),
+            getContextCurrentTime: () => this.getContextCurrentTime(),
+          });
+        }
+
+        const outLength = Number(fade.length.out);
+        if (outLength >= this.getDuration() - this.getTrackPosition()) {
+          doWebAudioFadeOut({
+            duration,
+            fade,
+            fadeGainNode,
+            getFadeVolume: () => this.getFadeVolume(),
+            getContextCurrentTime: () => this.getContextCurrentTime(),
+          });
+        }
+      } else {
+        source.addEventListener('timeupdate', timeUpdate);
+      }
+    }
+
+    this.__promise = new Promise((resolve, reject) => {  
+      const ended = (e: Event) => {
+        /* Remove the 'ended' event listener. */
+        source.removeEventListener('ended', ended);
+
+        /* istanbul ignore next */
+        if (timeUpdate) {
+          /* Remove the 'timeupdate' event listener. */
+          source.removeEventListener('timeupdate', timeUpdate);
+        }
+
+        /* Don't reject the emitted promise. */
+        this.__rejectOnStop = () => {};
+
+        /* Reset the track position of the sound after it ends. Also deletes
+         * the old promise. */
+        this.stop();
+
+        /* Resolve the promise with the ended event. */
+        return resolve(e);
+      };
+
+      /* Register the ended function to fire when the audio source emits the
+       * 'ended' event. */
+      source.addEventListener('ended', ended);
+
+      /* Allow the promise to be rejected if the sound is stopped. */
+      this.__rejectOnStop = (message?: string) => {
+        return reject(
+          message ||
+          'The sound was stopped, probably by a user-created script.'
+        );
+      };
+    });
   }
 
   pause() {
