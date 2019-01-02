@@ -22,6 +22,7 @@ import {
 import {
   updateSoundTimes,
 } from './updateSoundTimes';
+import { playAudioSource } from './playAudioSource';
 
 const DEBUG = false;
 
@@ -35,7 +36,6 @@ export class Sound implements ISound {
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
-  private __audioElement: HTMLAudioElement | null = null;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
   private __fade: IFade | null = null;
@@ -43,6 +43,7 @@ export class Sound implements ISound {
   public __promise: Promise<Event> | null = null;
   public __startedTime: number = 0;
   public __panelRegistered: boolean = false;
+  public __audioElement: HTMLAudioElement | null = null;
   public __rejectOnStop: (message?: string) => void = () => {};
   
   /* istanbul ignore next */
@@ -294,17 +295,16 @@ export class Sound implements ISound {
 
   play(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const isWebAudio = this.isWebAudio();
-    const trackPosition = this.getTrackPosition();
     updateSoundTimes(this, this.__audioElement!);
-
+    
     /* If play() is called when the sound is already playing (and thus has
-     * already emitted a promise), the emitted promise (and events) will be
+      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
       /* Sets the private override properties e.g. if this sound is part of a
-       * playlist. */
-      this.__setOverrides(fadeOverride, loopOverride);
-      /* Generates the promise and registers events. */
+      * playlist. */
+     this.__setOverrides(fadeOverride, loopOverride);
+     /* Generates the promise and registers events. */
       if (isWebAudio) {
         initializeSoundForPlay(this);
       } else {
@@ -312,22 +312,16 @@ export class Sound implements ISound {
       }
     }
 
-    if (isWebAudio) {
-      /* Play the source node, respecting a possible pause. */
-      this.getSourceNode().start(trackPosition);
+    playAudioSource(this);
 
-      /* Reset the paused time. */
-      this.__pausedTime = 0;
-    } else {
-      /* Set the actual audio element volume to the product of manager, group,
-       * and sound volumes. */
-      this.updateAudioElementVolume();
-      /* Starts the audio element. This may involve buffering. */
-      this.__audioElement!.play();
-    }
+    /* Reset the paused time. */
+    this.__pausedTime = 0;
 
+    /* Ensure the sound knows it's playing. */
     this.__playing = true;
 
+    /* Emit the promise that was either just generated or emitted on previous
+     * unfinished plays. */
     return this.__promise!;
   }
 
