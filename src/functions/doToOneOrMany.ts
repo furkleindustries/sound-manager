@@ -1,6 +1,8 @@
 import {
   ICollection,
 } from '../interfaces/ICollection';
+import { assert } from '../assertions/assert';
+import { assertType } from '../assertions/assertType';
 
 export function doToOneOrMany<T>(
   collection: ICollection<T>,
@@ -25,7 +27,6 @@ export function doToOne<T>(
   ...args: any[]
 )
 {
-  if (typeof collection[propName][functionName] === 'function') {
-    (collection[propName][functionName] as any as Function)(...args);
-  }
+  assert(typeof collection[propName][functionName] === 'function');
+  (collection[propName][functionName] as any as Function)(...args);
 }

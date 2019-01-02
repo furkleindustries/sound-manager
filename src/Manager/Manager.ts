@@ -68,6 +68,7 @@ import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 import { doToOneOrMany } from '../functions/doToOneOrMany';
+import { nameOrAllKeys } from '../functions/oneKeyOrAllKeys';
 
 export class Manager implements IManager {
   get type() {
@@ -522,7 +523,7 @@ export class Manager implements IManager {
   }
 
   public removeAllSounds(groupName?: string) {
-    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
     doToOneOrMany(this.groups, oneOrMany, 'removeAllSounds');
 
     return this;
@@ -560,7 +561,7 @@ export class Manager implements IManager {
   }
 
   public pauseAllSounds(groupName?: string) {
-    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
     doToOneOrMany(this.groups, oneOrMany, 'pauseAllSounds');
 
     return this;
@@ -574,7 +575,7 @@ export class Manager implements IManager {
   }
 
   public stopAllSounds(groupName?: string) {
-    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
     doToOneOrMany(this.groups, oneOrMany, 'stopAllSounds');
 
     return this;
