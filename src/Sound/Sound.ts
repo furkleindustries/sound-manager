@@ -20,9 +20,11 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
+  playAudioSource,
+} from './playAudioSource';
+import {
   updateSoundTimes,
 } from './updateSoundTimes';
-import { playAudioSource } from './playAudioSource';
 
 const DEBUG = false;
 
