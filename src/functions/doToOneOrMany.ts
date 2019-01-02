@@ -1,8 +1,9 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   ICollection,
 } from '../interfaces/ICollection';
-import { assert } from '../assertions/assert';
-import { assertType } from '../assertions/assertType';
 
 export function doToOneOrMany<T>(
   collection: ICollection<T>,
