@@ -231,6 +231,9 @@ export class Sound implements ISound {
     let duration: number;
     if (this.isWebAudio()) {
       duration = (this.getSourceNode().buffer || {} as any).duration;
+      if (DEBUG) {
+        console.warn('Audio buffer not found for Sound.');
+      }
     } else {
       duration = this.__audioElement!.duration;
     }
