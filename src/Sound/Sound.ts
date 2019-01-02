@@ -1,10 +1,4 @@
 import {
-  doWebAudioFadeIn,
-} from '../functions/doWebAudioFadeIn';
-import {
-  doWebAudioFadeOut,
-} from '../functions/doWebAudioFadeOut';
-import {
   Fade,
 } from '../Fade/Fade';
 import {
@@ -20,9 +14,11 @@ import {
   ISoundOptions,
 } from './ISoundOptions';
 import {
+  initializeSoundForPlay,
+} from './initializeSoundForPlay';
+import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import { initializeSoundForPlay } from './initializeSoundForPlay';
 
 const DEBUG = false;
 

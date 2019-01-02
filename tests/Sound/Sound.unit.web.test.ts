@@ -380,7 +380,7 @@ describe('Sound Web Audio unit tests.', () => {
     expect(mock).toBeCalled();
   });
 
-  /*it('Does not fade on play if the track position is greater than the in length of the IFade.', () => {
+  it('Does not fade on play if the track position is greater than the in length of the IFade.', () => {
     const sound = testSoundFactory();
     const mock = jest.fn();
     // @ts-ignore
@@ -415,7 +415,7 @@ describe('Sound Web Audio unit tests.', () => {
     });
 
     expect(mock).not.toBeCalled();
-  });*/
+  });
 
   it('Fades on end if the track position is less than the out length of the IFade.', () => {
     const sound = testSoundFactory();
