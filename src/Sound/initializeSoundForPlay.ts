@@ -17,7 +17,7 @@ export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioEl
   let timeUpdate: () => void;
   if (fade) {
     /* Update the audio element volume on every tick, including fade
-      * volume. */
+     * volume. */
     /* istanbul ignore next */
     timeUpdate = () => sound.updateAudioElementVolume();
     initializeFadeForPlay({
@@ -25,11 +25,9 @@ export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioEl
       sound,
       htmlTimeUpdater: timeUpdate,
     });
-
-    initializePromiseForPlay(sound, audioElement, timeUpdate);
-  } else {
-    initializePromiseForPlay(sound);
   }
+
+  initializePromiseForPlay(sound, audioElement, timeUpdate!);
 }
 
 export function initializeFadeForPlay({
@@ -73,28 +71,28 @@ export function initializePromiseForPlay(
   timeUpdate?: () => void,
 )
 {
-  defineProperty(sound, '__promise', new Promise((resolve, reject) => {
-    const source = sound.isWebAudio() ? sound.getSourceNode() : audioElement;
+  const isWebAudio = sound.isWebAudio();
+  const source = isWebAudio ? sound.getSourceNode() : audioElement;
+  if (!source) {
+    throw new Error();
+  }
 
-    if (!source) {
-      throw new Error();
-    }
-  
+  defineProperty(sound, '__promise', new Promise((resolve, reject) => {
     const ended = (e: Event) => {
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
 
       /* istanbul ignore next */
-      if (!sound.isWebAudio() && typeof timeUpdate === 'function') {
+      if (!isWebAudio && typeof timeUpdate === 'function') {
         /* Remove the 'timeupdate' event listener. */
         source.removeEventListener('timeupdate', timeUpdate);
       }
 
       /* Don't reject the emitted promise. */
-      defineProperty(source, '__rejectOnStop', () => {});
+      defineProperty(sound, '__rejectOnStop', () => {});
 
       /* Reset the track position of the sound after it ends. Also deletes
-        * the old promise. */
+       * the old promise. */
       sound.stop();
 
       /* Resolve the promise with the ended event. */

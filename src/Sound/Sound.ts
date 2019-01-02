@@ -214,9 +214,9 @@ export class Sound implements ISound {
       } else {
         return this.__audioElement!.currentTime;
       }
-    } else {
-      return this.__pausedTime;
     }
+
+    return this.__pausedTime;
   }
 
   setTrackPosition(seconds: number) {
@@ -289,40 +289,50 @@ export class Sound implements ISound {
   }
 
   play(fadeOverride?: IFade | null, loopOverride?: boolean) {
+    const isWebAudio = this.isWebAudio();
     const trackPosition = this.getTrackPosition();
-
-    this.__playing = true;
-    let source: AudioBufferSourceNode | HTMLAudioElement;
-    if (this.isWebAudio()) {
-      source = this.getSourceNode();
-
-      /* Play the source node, respecting a possible pause. */
-      source.start(trackPosition);
-
+    if (isWebAudio) {
       /* Reset the started time. */
       this.__startedTime = this.getContextCurrentTime() - trackPosition;
-
-      /* Reset the paused time. */
-      this.__pausedTime = 0;
     } else {
-      source = this.__audioElement!;
-      /* Set the actual audio element volume to the product of manager, group,
-       * and sound volumes. */
-      this.updateAudioElementVolume();
+      if (!this.__audioElement) {
+        throw new Error();
+      }
+
       /* Set the current time to the track position. */
-      source.currentTime = trackPosition;
-      source.play();
+      this.__audioElement.currentTime = trackPosition;
     }
 
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
-      /* Sets the overrides. */
+      /* Sets the private override properties e.g. if this sound is part of a
+       * playlist. */
       this.__setOverrides(fadeOverride, loopOverride);
       /* Generates the promise and registers events. */
-      initializeSoundForPlay(this);
+      if (isWebAudio) {
+        initializeSoundForPlay(this);
+      } else {
+        initializeSoundForPlay(this, this.__audioElement!);
+      }
     }
+
+    if (isWebAudio) {
+      /* Play the source node, respecting a possible pause. */
+      this.getSourceNode().start(trackPosition);
+
+      /* Reset the paused time. */
+      this.__pausedTime = 0;
+    } else {
+      /* Set the actual audio element volume to the product of manager, group,
+       * and sound volumes. */
+      this.updateAudioElementVolume();
+      /* Starts the audio element. This may involve buffering. */
+      this.__audioElement!.play();
+    }
+
+    this.__playing = true;
 
     return this.__promise!;
   }

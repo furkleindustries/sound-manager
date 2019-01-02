@@ -486,7 +486,6 @@ describe('Sound Web Audio unit tests.', () => {
   });
 
   it('Resolves the promise with an event when the sound completes.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const prom = sound.play();
 
@@ -509,7 +508,6 @@ describe('Sound Web Audio unit tests.', () => {
   });
 
   it('Rejects with a custom message if a message is provided to __rejectOnStop.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const message = 'testfoo';
     const prom = sound.play();

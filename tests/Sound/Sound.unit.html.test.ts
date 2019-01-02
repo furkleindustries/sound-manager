@@ -372,7 +372,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
   });
 
   it('Rejects with a custom message if a message is provided to __rejectOnStop.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const message = 'testfoo';
     const prom = sound.play();
