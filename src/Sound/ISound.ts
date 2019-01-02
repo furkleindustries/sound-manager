@@ -30,4 +30,8 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getFadeVolume(): number;
   updateAudioElementVolume(): ISound;
   clearFadeState(): ISound;
+  __startedTime: number;
+  __promise: Promise<Event> | null;
+  __audioElement: HTMLAudioElement | null;
+  __rejectOnStop: () => void;
 }

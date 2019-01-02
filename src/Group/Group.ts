@@ -1,4 +1,7 @@
 import {
+  getOneOrMany,
+} from '../functions/getOneOrMany';
+import {
   IGroup,
 } from './IGroup';
 import {
@@ -13,7 +16,6 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import { getOneOrMany } from '../functions/getOneOrMany';
 
 export class Group implements IGroup {
   get type() {
@@ -25,7 +27,7 @@ export class Group implements IGroup {
     return this.__sounds;
   }
 
-  private __panelRegistered: boolean = false;
+  public __panelRegistered: boolean = false;
 
   public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;

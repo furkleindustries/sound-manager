@@ -380,7 +380,7 @@ describe('Sound Web Audio unit tests.', () => {
     expect(mock).toBeCalled();
   });
 
-  /*it('Does not fade on play if the track position is greater than the in length of the IFade.', () => {
+  it('Does not fade on play if the track position is greater than the in length of the IFade.', () => {
     const sound = testSoundFactory();
     const mock = jest.fn();
     // @ts-ignore
@@ -415,8 +415,7 @@ describe('Sound Web Audio unit tests.', () => {
     });
 
     expect(mock).not.toBeCalled();
-  });*/
-  
+  });
 
   it('Fades on end if the track position is less than the out length of the IFade.', () => {
     const sound = testSoundFactory();
@@ -487,7 +486,6 @@ describe('Sound Web Audio unit tests.', () => {
   });
 
   it('Resolves the promise with an event when the sound completes.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const prom = sound.play();
 
@@ -510,7 +508,6 @@ describe('Sound Web Audio unit tests.', () => {
   });
 
   it('Rejects with a custom message if a message is provided to __rejectOnStop.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const message = 'testfoo';
     const prom = sound.play();
