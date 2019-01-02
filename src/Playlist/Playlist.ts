@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   Fade,
 } from '../Fade/Fade';
 import {
@@ -28,12 +31,8 @@ export class Playlist implements IPlaylist {
       ids,
     } = options;
 
-    if (!Array.isArray(ids)) {
-      throw new Error();
-    } else if (ids.length === 0) {
-      throw new Error();
-    }
-
+    assert(Array.isArray(ids));
+    assert(ids.length === 0);
     const soundGroupIds = ids.map((sgi) => {
       /* Allow 'groupName.soundName' strings and coerce them to
        * ISoundGroupIdentifiers. Also interpret 'soundName' as

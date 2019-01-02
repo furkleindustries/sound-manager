@@ -15,7 +15,7 @@ export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
   getTrackPosition(): number;
   setTrackPosition(seconds: number): ISound;
   getDuration(): number;
-  getPlaying(): boolean;
+  isPlaying(): boolean;
   getLoop(): boolean;
   setLoop(doLoop: boolean): ISound;
   getFade(): IFade | null;

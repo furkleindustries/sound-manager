@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   createSound,
 } from '../functions/createSound';
 import {
@@ -181,18 +184,10 @@ export class Manager implements IManager {
   }
 
   public getInputNode() {
-    if (!this.isWebAudio()) {
-      throw new Error();
-    }
-
     return this.getAnalyserNode();
   }
-  
-  public getOutputNode() {
-    if (!this.isWebAudio()) {
-      throw new Error();
-    }
 
+  public getOutputNode() {
     return this.getGainNode();
   }
 
@@ -217,12 +212,7 @@ export class Manager implements IManager {
 
   public addGroups(groups: IGroupsMap) {
     const names = Object.keys(groups);
-    names.forEach((groupName) => {
-      if (groupName in this.groups) {
-        throw new Error();
-      }
-    });
-
+    names.forEach((groupName) => assert(!(groupName in this.groups)));
     if (this.isWebAudio()) {
       names.forEach((groupName) => {
         const group = groups[groupName];
@@ -337,13 +327,8 @@ export class Manager implements IManager {
 
   public addPlaylists(playlists: IPlaylistsMap) {
     const playls = playlists || {};
-
     const names = Object.keys(playls);
-    names.forEach((playlistName) => {
-      if (playlistName in this.playlists) {
-        throw new Error();
-      }
-    });
+    names.forEach((playlistName) => assert(!(playlistName in this.playlists)));
 
     this.__playlists = Object.freeze({
       ...this.playlists,
@@ -632,11 +617,8 @@ export class Manager implements IManager {
   }
 
   public updateAudioPanelElement() {
-    if (!this.__audioPanelElement) {
-      throw new Error();
-    }
-
-    const newElem = updateAudioPanelElement(this, this.__audioPanelElement);
+    assert(this.__audioPanelElement);
+    const newElem = updateAudioPanelElement(this, this.__audioPanelElement!);
     this.__audioPanelElement = newElem;
 
     return this;
@@ -645,10 +627,7 @@ export class Manager implements IManager {
   public updatePanelRegistration(sound: ISound, value: boolean): IManager;
   public updatePanelRegistration(group: IGroup, value: boolean): IManager;
   public updatePanelRegistration(soundOrGroup: ISound | IGroup, value: boolean): IManager {
-    if (typeof value !== 'boolean') {
-      throw new Error();
-    }
-
+    assert(typeof value === 'boolean');
     soundOrGroup.__panelRegistered = true;
     if (this.__audioPanelElement) {
       this.updateAudioPanelElement();

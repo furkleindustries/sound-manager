@@ -1,13 +1,15 @@
 import {
+  assertType,
+} from '../assertions/assertType';
+import {
+  IFade,
+} from './IFade';
+import {
   ISound,
 } from '../Sound/ISound';
 
 export function scheduleWebAudioFadeIn(sound: ISound) {
-  const fade = sound.getFade();
-  if (!fade) {
-    throw new Error();
-  }
-
+  const fade = assertType<IFade>(sound.getFade(), Boolean);
   const inLength = Number(fade.length.in);
   for (let ii = 0; ii <= inLength * 20; ii += 1) {
     const time = ii / 20;

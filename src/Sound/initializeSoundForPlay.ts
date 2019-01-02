@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   ISound,
 } from './ISound';
 import {
@@ -7,6 +10,7 @@ import {
 import {
   scheduleHtmlAudioFades,
 } from '../Fade/scheduleHtmlAudioFades';
+import { assertType } from '../assertions/assertType';
 
 export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioElement) {
   const fade = sound.getFade();
@@ -40,11 +44,8 @@ export function initializeFadeForPlay({
   if (sound.isWebAudio()) {
     scheduleWebAudioFades(sound);
   } else {
-    if (!audioElement) {
-      throw new Error();      
-    }
-
-    scheduleHtmlAudioFades(audioElement, htmlTimeUpdater);
+    assert(audioElement);
+    scheduleHtmlAudioFades(audioElement!, htmlTimeUpdater);
   }
 }
 
@@ -79,10 +80,10 @@ export function initializeEventsForPlay(
 )
 {
   const isWebAudio = sound.isWebAudio();
-  const source = isWebAudio ? sound.getSourceNode() : audioElement;
-  if (!source) {
-    throw new Error();
-  }
+  const source = assertType<AudioBufferSourceNode | HTMLAudioElement>(
+    isWebAudio ? sound.getSourceNode() : audioElement,
+    Boolean,
+  );
 
   const ended = (e: Event) => {
     /* Remove the 'ended' event listener. */

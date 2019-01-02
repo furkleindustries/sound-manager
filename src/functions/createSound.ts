@@ -1,5 +1,8 @@
 import {
-  createHtmlAudioSound as createHtmlAudioSound,
+  assert,
+} from '../assertions/assert';
+import {
+  createHtmlAudioSound,
 } from './createHtmlAudioSound';
 import {
   createWebAudioSound,
@@ -12,17 +15,13 @@ import {
 } from '../Sound/ISound';
 
 export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
-  if (!options) {
-    throw new Error();
-  }
+  assert(options);
 
   const {
     manager,
   } = options;
 
-  if (!manager) {
-    throw new Error();
-  }
+  assert(manager);
 
   const optsClone = { ...options, };
 

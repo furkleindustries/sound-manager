@@ -1,4 +1,10 @@
 import {
+  assertType,
+} from '../assertions/assertType';
+import {
+  IFade,
+} from './IFade';
+import {
   ISound,
 } from '../Sound/ISound';
 import {
@@ -9,11 +15,7 @@ import {
 } from './scheduleWebAudioFadeOut';
 
 export function scheduleWebAudioFades(sound: ISound) {
-  const fade = sound.getFade();
-  if (!fade) {
-    throw new Error();
-  }
-
+  const fade = assertType<IFade>(sound.getFade(), Boolean);
   const trackPosition = sound.getTrackPosition();
   const duration = sound.getDuration();
   const inLength = Number(fade.length.in);

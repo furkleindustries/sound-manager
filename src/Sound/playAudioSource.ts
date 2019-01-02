@@ -9,9 +9,9 @@ export function playAudioSource(sound: ISound) {
     sound.getSourceNode().start(trackPosition);
   } else {
     /* Set the actual audio element volume to the product of manager, group,
-    * and sound volumes. */
-   sound.updateAudioElementVolume();
-   /* Starts the audio element. This may involve buffering. */
-   sound.__audioElement!.play();
+     * and sound volumes. */
+    sound.updateAudioElementVolume();
+    /* Starts the audio element. This may involve buffering. */
+    sound.__audioElement!.play();
   }
 }

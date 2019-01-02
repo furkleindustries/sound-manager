@@ -4,6 +4,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { assertType } from '../assertions/assertType';
 
 export const generateVolumeInput = (
   node: IWebAudioNode,
@@ -21,11 +22,8 @@ export const generateVolumeInput = (
   
   let realName = name;
   if (nodeType === NodeTypes.Group || nodeType === NodeTypes.Sound) {
-    if (!name) {
-      throw new Error();
-    }
-
-    label.textContent = name[0].toUpperCase() + name.slice(1);
+    const checkedName = assertType<string>(name, Boolean);
+    label.textContent = checkedName[0].toUpperCase() + checkedName.slice(1);
   } else {
     /* Node is a manager. */
     if (name) {

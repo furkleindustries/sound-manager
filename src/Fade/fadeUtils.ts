@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   IFadeProperty,
 } from './IFadeProperty';
 import {
@@ -11,9 +14,7 @@ export function fadeArgumentToFadeProperty<T>(arg: TFadeArg<T>, defaultValue: T 
     value,
   } = argToPropHelper(arg, validator);
 
-  if (!valids[0] && !valids[1]) {
-    throw new Error();
-  }
+  assert(valids[0] || valids[1]);
 
   return normalizeFadeProp(value, valids, defaultValue);
 }
