@@ -37,11 +37,6 @@ export function initializeFadeForPlay({
   htmlTimeUpdater: () => void,
 })
 {
-  const fade = sound.getFade();
-  if (!fade) {
-    throw new Error();
-  }
-
   if (sound.isWebAudio()) {
     scheduleWebAudioFades(sound);
   } else {
@@ -68,39 +63,49 @@ export function initializePromiseForPlay(
   timeUpdate?: () => void,
 )
 {
+  sound.__promise = new Promise((resolve, reject) => {
+    initializeEventsForPlay(sound, resolve, audioElement, timeUpdate);
+
+    /* Allow the promise to be rejected if the sound is stopped. */
+    initializeStopRejector(sound, reject);
+  });
+}
+
+export function initializeEventsForPlay(
+  sound: ISound,
+  resolver: (arg: Event) => void,
+  audioElement?: HTMLAudioElement,
+  timeUpdate?: () => void,
+)
+{
   const isWebAudio = sound.isWebAudio();
   const source = isWebAudio ? sound.getSourceNode() : audioElement;
   if (!source) {
     throw new Error();
   }
 
-  sound.__promise = new Promise((resolve, reject) => {
-    const ended = (e: Event) => {
-      /* Remove the 'ended' event listener. */
-      source.removeEventListener('ended', ended);
+  const ended = (e: Event) => {
+    /* Remove the 'ended' event listener. */
+    source.removeEventListener('ended', ended);
 
-      /* istanbul ignore next */
-      if (!isWebAudio && typeof timeUpdate === 'function') {
-        /* Remove the 'timeupdate' event listener. */
-        source.removeEventListener('timeupdate', timeUpdate);
-      }
+    /* istanbul ignore next */
+    if (!isWebAudio && typeof timeUpdate === 'function') {
+      /* Remove the 'timeupdate' event listener. */
+      source.removeEventListener('timeupdate', timeUpdate);
+    }
 
-      /* Don't reject the emitted promise. */
-      sound.__rejectOnStop = () => {};
+    /* Don't reject the emitted promise. */
+    sound.__rejectOnStop = () => {};
 
-      /* Reset the track position of the sound after it ends. Also deletes
-       * the old promise. */
-      sound.stop();
+    /* Reset the track position of the sound after it ends. Also deletes
+     * the old promise. */
+    sound.stop();
 
-      /* Resolve the promise with the ended event. */
-      return resolve(e);
-    };
+    /* Resolve the promise with the ended event. */
+    return resolver(e);
+  }
 
-    /* Register the ended export function to fire when the audio source emits the
-     * 'ended' event. */
-    source.addEventListener('ended', ended);
-
-    /* Allow the promise to be rejected if the sound is stopped. */
-    initializeStopRejector(sound, reject);
-  });
+  /* Register the ended export function to fire when the audio source emits the
+   * 'ended' event. */
+  source.addEventListener('ended', ended);
 }
