@@ -116,8 +116,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     const sound = testSoundFactory();
     sound.play();
     const difference = 5;
-    // @ts-ignore
-    const beforeStartedTime = sound.__startedTime;
+    const beforeStartedTime = sound.getTrackPosition();
     sound.setTrackPosition(sound.getTrackPosition() + difference);
     const afterStartedTime = sound.getTrackPosition();
     sound.stop();
@@ -382,7 +381,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
   });
 
   it('Rejects with a generic message if no message is provided to __rejectOnStop.', () => {
-    expect.assertions(1);
     const sound = testSoundFactory();
     const prom = sound.play();
     // @ts-ignore

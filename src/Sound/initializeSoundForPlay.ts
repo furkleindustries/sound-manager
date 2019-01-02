@@ -1,7 +1,4 @@
 import {
-  defineProperty,
-} from '../functions/defineProperty';
-import {
   ISound,
 } from './ISound';
 import {
@@ -57,12 +54,12 @@ export function initializeFadeForPlay({
 }
 
 export function initializeStopRejector(sound: ISound, reject: Function) {
-  defineProperty(sound, '__rejectOnStop',  (message?: string) => (
+  sound.__rejectOnStop = (message?: string) => (
     reject(
       message ||
       'The sound was stopped, probably by a user-created script.'
     )
-  ));
+  );
 }
 
 export function initializePromiseForPlay(
@@ -77,7 +74,7 @@ export function initializePromiseForPlay(
     throw new Error();
   }
 
-  defineProperty(sound, '__promise', new Promise((resolve, reject) => {
+  sound.__promise = new Promise((resolve, reject) => {
     const ended = (e: Event) => {
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
@@ -89,7 +86,7 @@ export function initializePromiseForPlay(
       }
 
       /* Don't reject the emitted promise. */
-      defineProperty(sound, '__rejectOnStop', () => {});
+      sound.__rejectOnStop = () => {};
 
       /* Reset the track position of the sound after it ends. Also deletes
        * the old promise. */
@@ -105,5 +102,5 @@ export function initializePromiseForPlay(
 
     /* Allow the promise to be rejected if the sound is stopped. */
     initializeStopRejector(sound, reject);
-  }));
+  });
 }

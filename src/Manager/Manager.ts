@@ -649,7 +649,6 @@ export class Manager implements IManager {
       throw new Error();
     }
 
-    // @ts-ignore
     soundOrGroup.__panelRegistered = true;
     if (this.__audioPanelElement) {
       this.updateAudioPanelElement();

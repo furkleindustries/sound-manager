@@ -19,6 +19,9 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import {
+  updateSoundTimes,
+} from './updateSoundTimes';
 
 const DEBUG = false;
 
@@ -33,15 +36,16 @@ export class Sound implements ISound {
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
   private __audioElement: HTMLAudioElement | null = null;
-  private __startedTime: number = 0;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
-  private __panelRegistered: boolean = false;
-  private __promise: Promise<Event> | null = null;
   private __fade: IFade | null = null;
-
+  
+  public __promise: Promise<Event> | null = null;
+  public __startedTime: number = 0;
+  public __panelRegistered: boolean = false;
+  public __rejectOnStop: (message?: string) => void = () => {};
+  
   /* istanbul ignore next */
-  private __rejectOnStop: (message?: string) => void = () => {};
 
   /* istanbul ignore next */
   private __getNewSourceNode: () => AudioBufferSourceNode = () => {
@@ -291,17 +295,7 @@ export class Sound implements ISound {
   play(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const isWebAudio = this.isWebAudio();
     const trackPosition = this.getTrackPosition();
-    if (isWebAudio) {
-      /* Reset the started time. */
-      this.__startedTime = this.getContextCurrentTime() - trackPosition;
-    } else {
-      if (!this.__audioElement) {
-        throw new Error();
-      }
-
-      /* Set the current time to the track position. */
-      this.__audioElement.currentTime = trackPosition;
-    }
+    updateSoundTimes(this, this.__audioElement!);
 
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
