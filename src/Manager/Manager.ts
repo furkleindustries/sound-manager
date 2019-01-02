@@ -67,6 +67,7 @@ import {
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
+import { doToOneOrMany } from '../functions/doToOneOrMany';
 
 export class Manager implements IManager {
   get type() {
@@ -521,13 +522,8 @@ export class Manager implements IManager {
   }
 
   public removeAllSounds(groupName?: string) {
-    if (groupName) {
-      this.getGroups(groupName).removeAllSounds();
-    } else {
-      this.getGroups(Object.keys(this.groups)).forEach((group) => (
-        group.removeAllSounds()
-      ));
-    }
+    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'removeAllSounds');
 
     return this;
   }
@@ -564,13 +560,8 @@ export class Manager implements IManager {
   }
 
   public pauseAllSounds(groupName?: string) {
-    if (groupName) {
-      this.getGroups(groupName).pauseAllSounds();
-    } else {
-      this.getGroups(Object.keys(this.groups)).forEach((group) => {
-        group.pauseAllSounds();
-      });
-    }
+    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'pauseAllSounds');
 
     return this;
   }
@@ -583,13 +574,8 @@ export class Manager implements IManager {
   }
 
   public stopAllSounds(groupName?: string) {
-    if (groupName) {
-      this.getGroups(groupName).stopAllSounds();
-    } else {
-      this.getGroups(Object.keys(this.groups)).forEach((group) => {
-        group.stopAllSounds();
-      });
-    }
+    const oneOrMany = groupName ? groupName : Object.keys(this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'stopAllSounds');
 
     return this;
   }
@@ -604,9 +590,11 @@ export class Manager implements IManager {
   }
 
   public updateAllAudioElementsVolume() {
-    this.getGroups(Object.keys(this.groups)).forEach((group) => {
-      group.updateAllAudioElementsVolume();
-    });
+    doToOneOrMany(
+      this.groups,
+      Object.keys(this.groups),
+      'updateAllAudioElementsVolume',
+    );
 
     return this;
   }
