@@ -2,11 +2,14 @@ import {
   defineProperty,
 } from '../functions/defineProperty';
 import {
+  ISound,
+} from './ISound';
+import {
   scheduleWebAudioFades,
 } from '../Fade/scheduleWebAudioFades';
 import {
-  ISound,
-} from './ISound';
+  scheduleHtmlAudioFades,
+} from '../Fade/scheduleHtmlAudioFades';
 
 export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioElement) {
   const fade = sound.getFade();
@@ -40,16 +43,18 @@ export function initializeFadeForPlay({
 })
 {
   const fade = sound.getFade();
-  if (fade) {
-    if (sound.isWebAudio()) {
-      scheduleWebAudioFades(sound);
-    } else {
-      if (!audioElement) {
-        throw new Error();      
-      }
+  if (!fade) {
+    throw new Error();
+  }
 
-      audioElement.addEventListener('timeupdate', htmlTimeUpdater);
+  if (sound.isWebAudio()) {
+    scheduleWebAudioFades(sound);
+  } else {
+    if (!audioElement) {
+      throw new Error();      
     }
+
+    scheduleHtmlAudioFades(audioElement, htmlTimeUpdater);
   }
 }
 
