@@ -16,6 +16,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { assert } from '../assertions/assert';
 
 export class Group implements IGroup {
   get type() {
@@ -122,14 +123,9 @@ export class Group implements IGroup {
     const names = Object.keys(sounds);
     const isWebAudio = this.isWebAudio();
     names.forEach((soundName) => {
-      if (!soundName) {
-        throw new Error();
-      } else if (soundName in this.sounds) {
-        throw new Error();
-      } else if (!sounds[soundName]) {
-        throw new Error();
-      }
-
+      assert(soundName)
+      assert(!(soundName in this.sounds));
+      assert(sounds[soundName]);
       if (isWebAudio) {
         const sound = sounds[soundName];
         /* istanbul ignore next */
@@ -178,7 +174,7 @@ export class Group implements IGroup {
   public playSounds(name: string): Promise<Event>;
   public playSounds(names: string[]): Promise<Event[]>;
   public playSounds(names: string | string[]) {
-      if (typeof names === 'string') {
+    if (typeof names === 'string') {
       return this.getSounds(name).play();
     } else if (Array.isArray(names)) {
       return Promise.all(names.map((name) => this.getSounds(name).play()));

@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   generateAudioPanelElement,
 } from './generateAudioPanelElement';
 import {
@@ -6,16 +9,12 @@ import {
 } from '../Manager/IManager';
 
 export const updateAudioPanelElement = (manager: IManager, oldElem: HTMLElement) => {
-  if (!manager) {
-    throw new Error();
-  } else if (!oldElem) {
-    throw new Error();
-  } else if (!oldElem.parentElement) {
-    throw new Error();
-  }
+  assert(manager);
+  assert(oldElem);
+  assert(oldElem.parentElement);
 
   const newElem = generateAudioPanelElement(manager);
-  oldElem.parentElement.replaceChild(newElem, oldElem);
+  oldElem.parentElement!.replaceChild(newElem, oldElem);
 
   return newElem;
 };

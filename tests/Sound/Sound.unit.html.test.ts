@@ -131,17 +131,17 @@ describe('Sound HTML5 Audio unit tests.', () => {
       sound.__audioElement.duration);
   });
 
-  it('Has a getPlaying function which returns a boolean.', () => {
-    expect(typeof testSoundFactory().getPlaying()).toBe('boolean');
+  it('Has a isPlaying function which returns a boolean.', () => {
+    expect(typeof testSoundFactory().isPlaying()).toBe('boolean');
   });
 
   it('Has a playing value which defaults to false.', () => {
-    expect(testSoundFactory().getPlaying()).toBe(false);
+    expect(testSoundFactory().isPlaying()).toBe(false);
   });
 
   it('Allows setting the playing value through the autoplay property of the options object.', () => {    
     const autoplay = true;
-    expect(testSoundFactory({ autoplay, }).getPlaying()).toBe(autoplay);
+    expect(testSoundFactory({ autoplay, }).isPlaying()).toBe(autoplay);
   });
 
   it('Has a getLoop function which returns a boolean.', () => {
@@ -252,11 +252,11 @@ describe('Sound HTML5 Audio unit tests.', () => {
     expect(ret).toBe(sound);
   });
 
-  it('Has a play function which changes the result of the getPlaying function.', () => {
+  it('Has a play function which changes the result of the isPlaying function.', () => {
     const sound = testSoundFactory();
     sound.play();
 
-    expect(sound.getPlaying()).toBe(true);
+    expect(sound.isPlaying()).toBe(true);
   });
 
   it('Fades on play if the track position is less than the in length of the IFade.', () => {
@@ -396,7 +396,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     const trackPosition = sound.getTrackPosition();
     sound.pause();
 
-    expect(sound.getPlaying()).toBe(false);
+    expect(sound.isPlaying()).toBe(false);
     expect(sound.getTrackPosition()).toBe(trackPosition);
   });
 
@@ -413,7 +413,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     sound.play();
     sound.stop();
 
-    expect(sound.getPlaying()).toBe(false);
+    expect(sound.isPlaying()).toBe(false);
     expect(sound.getTrackPosition()).toBe(0);
   });
 
