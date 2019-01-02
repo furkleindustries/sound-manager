@@ -228,21 +228,14 @@ export class Sound implements ISound {
   }
 
   getDuration() {
+    let duration: number;
     if (this.isWebAudio()) {
-      const source = this.getSourceNode()!;
-      if (source.buffer) {
-        return source.buffer.duration;
-      } else {
-        /* istanbul ignore next */
-        if (DEBUG) {
-          console.warn('No buffer found for sound.');
-        }
-      }
+      duration = (this.getSourceNode().buffer || {} as any).duration;
     } else {
-      return this.__audioElement!.duration;
+      duration = this.__audioElement!.duration;
     }
 
-    return 0;
+    return duration || 0;
   }
 
   isPlaying() {
