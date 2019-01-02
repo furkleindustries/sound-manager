@@ -126,9 +126,9 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a getDuration function which returns the duration of the audio element.', () => {
     const sound = testSoundFactory();
-    expect(sound.getDuration()).toBe(
-      // @ts-ignore
-      sound.__audioElement.duration);
+    const dur = 12;
+    Object.assign(sound.__audioElement, { duration: dur, });
+    expect(sound.getDuration()).toBe(dur);
   });
 
   it('Has a isPlaying function which returns a boolean.', () => {
