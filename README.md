@@ -1,6 +1,6 @@
 # Sound Manager
 
-[![Build Status](https://travis-ci.com/furkleindustries/sound-manager.svg?branch=master)](https://travis-ci.com/furkleindustries/sound-manager) [![codecov](https://codecov.io/gh/furkleindustries/sound-manager/branch/master/graph/badge.svg)](https://codecov.io/gh/furkleindustries/sound-manager) [![Total alerts](https://img.shields.io/lgtm/alerts/g/furkleindustries/sound-manager.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/furkleindustries/sound-manager/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/furkleindustries/sound-manager.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/furkleindustries/sound-manager/context:javascript)
+[![Build Status](https://travis-ci.com/furkleindustries/sound-manager.svg?branch=master)](https://travis-ci.com/furkleindustries/sound-manager) [![Test Coverage](https://api.codeclimate.com/v1/badges/593d48d6cb6e981eb227/test_coverage)](https://codeclimate.com/github/furkleindustries/sound-manager/test_coverage) [![Maintainability](https://api.codeclimate.com/v1/badges/593d48d6cb6e981eb227/maintainability)](https://codeclimate.com/github/furkleindustries/sound-manager/maintainability) [![Total alerts](https://img.shields.io/lgtm/alerts/g/furkleindustries/sound-manager.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/furkleindustries/sound-manager/alerts/)
 
 ## Introduction
 
