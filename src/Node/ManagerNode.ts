@@ -33,21 +33,20 @@ export class ManagerNode implements IManagerNode {
       context,
     } = opts;
 
-    this.__isWebAudio = true;
+    this.__isWebAudio = false;
     if (context) {
       this.__audioContext = context;
-    } else if (
-      AudioContext ||
-      // @ts-ignore
-      webkitAudioContext)
-    {
-      this.__audioContext = new (
+      this.__isWebAudio = true;
+    } else {
+      const ctor = 
         AudioContext ||
         // @ts-ignore
-        webkitAudioContext
-      )();
-    } else {
-      this.__isWebAudio = false;
+        webkitAudioContext;
+
+      if (ctor) {
+        this.__audioContext = new ctor();
+        this.__isWebAudio = true;
+      }
     }
 
     if (this.isWebAudio()) {
