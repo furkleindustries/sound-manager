@@ -40,13 +40,10 @@ export function generateVolumeLabelComponent(node: IAudioNode, uniqueName: strin
   if (nodeType === NodeTypes.Group || nodeType === NodeTypes.Sound) {
     const checkedName = assertValid<string>(name);
     label.textContent = checkedName[0].toUpperCase() + checkedName.slice(1);
+  } else if (name) {
+    label.textContent = name[0].toUpperCase() + name.slice(1);
   } else {
-    /* Node is a manager. */
-    if (name) {
-      label.textContent = name[0].toUpperCase() + name.slice(1);
-    } else {
-      label.textContent = 'Master volume';
-    }
+    label.textContent = 'Master volume';
   }
 
   const forAttr = `sm-volumeInput-${nodeType}-${uniqueName}`;

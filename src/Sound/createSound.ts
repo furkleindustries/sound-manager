@@ -14,9 +14,16 @@ import {
   ISound,
 } from './ISound';
 
+export const strings = {
+  WEB_AUDIO_FAILED: 'Loading Web Audio failed. Falling back to HTML5 audio.',
+  FALLBACK_WARNING:
+    'Manager is not in Web Audio mode. Falling back to HTML5 Audio.',
+  BOTH_FAILED: 'Generating HTML5 Audio failed too. Cannot construct Sound.',
+  HTML_AUDIO_FAILED: 'Generating HTML5 Audio failed. Cannot construct Sound.',
+};
+
 export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
   assert(options);
-
   const {
     manager,
   } = options;
@@ -24,38 +31,25 @@ export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
   assert(manager);
 
   const optsClone = { ...options, };
-
+  const optsNoContext = { ...optsClone, };
+  delete optsNoContext.context;
   return new Promise((resolve, reject) => {
     if (manager.isWebAudio()) {
-      createWebAudioSound(optsClone).then((sound) => (
-        resolve(sound)
-      ), (err) => {
-        console.warn(err);
-        console.warn('Loading Web Audio failed. Falling back to HTML5 audio.');
-
-        delete optsClone.context;
-        createHtmlAudioSound(optsClone).then((sound) => (
-          resolve(sound)
-        ), (err) => (
-          reject(new Error(
-            'HTML5 Audio failed too. Cannot construct Sound. Error follows:' +
-            '\n' + err
-          ))
-        ));
-      });
+      createWebAudioSound(optsClone).then(
+        (sound) => resolve(sound),
+        (err) => {
+          console.warn(`${strings.WEB_AUDIO_FAILED}\n${err}`);
+          createHtmlAudioSound(optsNoContext).then(
+            (sound) => resolve(sound),
+            (err) => reject(new Error(`${strings.BOTH_FAILED}\n${err}`))
+          );
+        });
     } else {
-      console.log('Manager is not in Web Audio mode. Falling back to HTML5 ' +
-                  'Audio.');
-
-      delete optsClone.context;
-      createHtmlAudioSound(optsClone).then((sound) => (
-        resolve(sound)
-      ), (err) => (
-        reject(new Error(
-          'HTML5 Audio failed too. Cannot construct Sound. Error follows:\n' +
-          err
-        ))
-      ));
+      console.warn(strings.FALLBACK_WARNING);
+      createHtmlAudioSound(optsNoContext).then(
+        (sound) => resolve(sound),
+        (err) => reject(new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`))
+      );
     }
   });
 };
