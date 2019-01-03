@@ -20,7 +20,7 @@ export function generateVolumeComponent(
                         `sm-volumeInput-container-${nodeType}`;
 
   let uniqueName;
-  if (nodeType === NodeTypes.Manager && !uniqueName) {
+  if (nodeType === NodeTypes.Manager && !name) {
     uniqueName = Math.floor(Math.random() * 100000).toString(16);
   } else {
     uniqueName = assertValid<string>(name);
