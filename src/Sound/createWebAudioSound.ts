@@ -3,10 +3,11 @@ import {
 } from '../interfaces/ICreateSoundOptions';
 import {
   loadAudioBuffer,
-} from './loadAudioBuffer';
+} from '../functions/loadAudioBuffer';
 import {
   Sound,
-} from '../Sound/Sound';
+} from './Sound';
+import { assert } from '../assertions/assert';
 
 export const createWebAudioSound = (options: ICreateSoundOptions) => {
   if (!options) {
@@ -18,24 +19,18 @@ export const createWebAudioSound = (options: ICreateSoundOptions) => {
     manager,
   } = options;
 
-  if (!url) {
-    throw new Error();
-  } else if (!manager) {
-    throw new Error();
-  }
-
+  assert(url);
+  assert(manager);
   return new Promise<Sound>((resolve, reject) => {
-    loadAudioBuffer(url, manager.getAudioContext()).then((buffer) => {
-      return resolve(new Sound({
+    loadAudioBuffer(url, manager.getAudioContext()).then((buffer) => (
+      resolve(new Sound({
         ...options,
         buffer,
         getManagerVolume() {
           /* istanbul ignore next */
           return manager.getVolume();
         },
-      }));
-    }, (err) => {
-      return reject(err);
-    });
+      }))
+    ), reject);
   });
 };

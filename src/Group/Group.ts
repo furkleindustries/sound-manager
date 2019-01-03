@@ -1,4 +1,10 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   getOneOrMany,
 } from '../functions/getOneOrMany';
 import {
@@ -16,7 +22,6 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import { assert } from '../assertions/assert';
 
 export class Group implements IGroup {
   get type() {
@@ -28,12 +33,13 @@ export class Group implements IGroup {
     return this.__sounds;
   }
 
+  private __isWebAudio: boolean;
+  private __analyserNode: AnalyserNode | null = null;
+  private __gainNode: GainNode | null = null;
+
   public __panelRegistered: boolean = false;
 
-  public readonly isWebAudio: () => boolean;
   public readonly getContextCurrentTime: () => number;
-  public readonly getAnalyserNode: () => AnalyserNode;
-  public readonly getGainNode: () => GainNode;
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => this;
 
@@ -44,15 +50,12 @@ export class Group implements IGroup {
   }: IGroupOptions)
   {
     if (context) {
-      this.isWebAudio = () => true;
+      this.__isWebAudio = true;
 
       this.getContextCurrentTime = () => context.currentTime;
 
-      const analyserNode = context.createAnalyser();
-      this.getAnalyserNode = () => analyserNode;
-
-      const gainNode = context.createGain();
-      this.getGainNode = () => gainNode;
+      this.__analyserNode = context.createAnalyser();
+      this.__gainNode = context.createGain();
 
       this.getInputNode().connect(this.getOutputNode());
 
@@ -68,17 +71,9 @@ export class Group implements IGroup {
         return this;
       };
     } else {
-      this.isWebAudio = () => false;
+      this.__isWebAudio = false;
 
       this.getContextCurrentTime = () => {
-        throw new Error();
-      };
-
-      this.getAnalyserNode = () => {
-        throw new Error();
-      };
-
-      this.getGainNode = () => {
         throw new Error();
       };
 
@@ -101,7 +96,19 @@ export class Group implements IGroup {
     }
   }
 
-  public getInputNode(): AudioNode {
+  public isWebAudio() {
+    return this.__isWebAudio;
+  }
+
+  public getAnalyserNode() {
+    return assertValid<AnalyserNode>(this.__analyserNode);
+  }
+
+  getGainNode() {
+    return assertValid<GainNode>(this.__gainNode);
+  }
+
+  public getInputNode() {
     return this.getGainNode();
   }
 
@@ -179,7 +186,7 @@ export class Group implements IGroup {
     } else if (Array.isArray(names)) {
       return Promise.all(names.map((name) => this.getSounds(name).play()));
     }
-    
+
     throw new Error();
   }
 

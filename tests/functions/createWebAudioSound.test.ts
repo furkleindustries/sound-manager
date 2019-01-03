@@ -1,6 +1,6 @@
 import {
   createWebAudioSound,
-} from '../../src/functions/createWebAudioSound';
+} from '../../src/Sound/createWebAudioSound';
 
 import {
   loadAudioBuffer,

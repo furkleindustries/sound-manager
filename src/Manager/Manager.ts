@@ -2,8 +2,14 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   createSound,
-} from '../functions/createSound';
+} from '../Sound/createSound';
+import {
+  doToOneOrMany,
+} from '../functions/doToOneOrMany';
 import {
   generateAudioPanelElement,
 } from '../functions/generateAudioPanelElement';
@@ -62,13 +68,14 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
+  nameOrAllKeys,
+} from '../functions/nameOrAllKeys';
+import {
   Playlist,
 } from '../Playlist/Playlist';
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
-import { doToOneOrMany } from '../functions/doToOneOrMany';
-import { nameOrAllKeys } from '../functions/oneKeyOrAllKeys';
 
 export class Manager implements IManager {
   get type() {
@@ -90,12 +97,12 @@ export class Manager implements IManager {
     return this.__submanagers;
   }
 
+  private __isWebAudio: boolean;
+  private __audioContext: AudioContext | null = null;
+  private __analyserNode: AnalyserNode | null = null;
+  private __gainNode: GainNode | null = null;
   private __audioPanelElement: HTMLElement | null = null;
- 
-  public readonly isWebAudio: () => boolean;
-  public readonly getAudioContext: () => AudioContext;
-  public readonly getGainNode: () => GainNode;
-  public readonly getAnalyserNode: () => AnalyserNode;
+
   public readonly getVolume: () => number;
   public readonly setVolume: (value: number) => this;
 
@@ -107,34 +114,27 @@ export class Manager implements IManager {
       masterVolume,
     } = opts;
 
-    this.isWebAudio = () => true;
+    this.__isWebAudio = true;
     if (context) {
-      this.getAudioContext = () => context;
+      this.__audioContext = context;
     } else if (
       AudioContext ||
       // @ts-ignore
       webkitAudioContext)
     {
-      const context = new (
+      this.__audioContext = new (
         AudioContext ||
         // @ts-ignore
         webkitAudioContext
       )();
-
-      this.getAudioContext = () => context;
     } else {
-      this.isWebAudio = () => false;
-      this.getAudioContext = () => {
-        throw new Error();
-      };
+      this.__isWebAudio = false;
     }
 
     if (this.isWebAudio()) {
-      const analyserNode = this.getAudioContext().createAnalyser();
-      this.getAnalyserNode = () => analyserNode;
-      const gainNode = this.getAudioContext().createGain();
-      this.getGainNode = () => gainNode;
-  
+      this.__analyserNode = this.getAudioContext().createAnalyser();
+      this.__gainNode = this.getAudioContext().createGain();
+
       this.getInputNode().connect(this.getOutputNode());
       this.getOutputNode().connect(this.getAudioContext().destination);
 
@@ -150,14 +150,6 @@ export class Manager implements IManager {
         return this;
       };
     } else {
-      this.getAnalyserNode = () => {
-        throw new Error();
-      };
-
-      this.getGainNode = () => {
-        throw new Error();
-      };
-
       let volume = 1;
       this.getVolume = () => volume;
       this.setVolume = (value: number) => {
@@ -166,12 +158,14 @@ export class Manager implements IManager {
       };
     }
 
-    this.__groups = Object.freeze({
-      default: this.createGroup(),
-    });
-
+    /* Add the 'default' group. */
+    this.initializeDefaultGroup();
     if (groups) {
-      this.__groups = Object.freeze({ ...groups, });
+      this.__groups = Object.freeze({
+        ...this.__groups,
+        ...groups,
+      });
+
       Object.keys(this.groups).forEach((groupName) => {
         const group = this.groups[groupName];
         if (this.isWebAudio()) {
@@ -185,12 +179,28 @@ export class Manager implements IManager {
     }
   }
 
+  public isWebAudio() {
+    return this.__isWebAudio;
+  }
+
+  public getAudioContext() {
+    return assertValid<AudioContext>(this.__audioContext);
+  }
+
+  public getAnalyserNode() {
+    return assertValid<AnalyserNode>(this.__analyserNode);
+  }
+
+  public getGainNode() {
+    return assertValid<GainNode>(this.__gainNode);
+  }
+
   public getInputNode() {
-    return this.getAnalyserNode();
+    return this.getGainNode();
   }
 
   public getOutputNode() {
-    return this.getGainNode();
+    return this.getAnalyserNode();
   }
 
   public createGroup(options?: IGroupOptions) {
@@ -264,14 +274,18 @@ export class Manager implements IManager {
 
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
-      if (this.isWebAudio()) {
-        this.addGroup('default', { context: this.getAudioContext(), });
-      } else {
-        this.addGroup('default', this.createGroup());
-      }
+      this.initializeDefaultGroup();
     }
 
     return this;
+  }
+
+  private initializeDefaultGroup() {
+    if (this.isWebAudio()) {
+      this.addGroup('default', { context: this.getAudioContext(), });
+    } else {
+      this.addGroup('default', this.createGroup());
+    }
   }
 
   public removeAllGroups() {
@@ -353,9 +367,7 @@ export class Manager implements IManager {
     if (typeof names === 'string') {
       delete playls[names];
     } else {
-      names.forEach((name) => {
-        delete playls[name];
-      });
+      names.forEach((name) => delete playls[name]);
     }
 
     this.__playlists = Object.freeze(playls);
