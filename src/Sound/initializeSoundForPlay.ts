@@ -2,15 +2,17 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   ISound,
 } from './ISound';
 import {
-  scheduleWebAudioFades,
-} from '../Fade/scheduleWebAudioFades';
-import {
   scheduleHtmlAudioFades,
 } from '../Fade/scheduleHtmlAudioFades';
-import { assertType } from '../assertions/assertType';
+import {
+  scheduleWebAudioFades,
+} from '../Fade/scheduleWebAudioFades';
 
 export function initializeSoundForPlay(sound: ISound, audioElement?: HTMLAudioElement) {
   const fade = sound.getFade();
@@ -80,9 +82,8 @@ export function initializeEventsForPlay(
 )
 {
   const isWebAudio = sound.isWebAudio();
-  const source = assertType<AudioBufferSourceNode | HTMLAudioElement>(
+  const source = assertValid<AudioBufferSourceNode | HTMLAudioElement>(
     isWebAudio ? sound.getSourceNode() : audioElement,
-    Boolean,
   );
 
   const ended = (e: Event) => {

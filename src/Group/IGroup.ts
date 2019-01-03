@@ -1,9 +1,9 @@
 import {
   IAnalysableNode,
-} from '../interfaces/IAnalysableNode';
+} from '../Node/IAnalysableNode';
 import {
   IPanelRegisterableNode,
-} from '../interfaces/IPanelRegisterableNode';
+} from '../Node/IPanelRegisterableNode';
 import {
   ISound,
 } from '../Sound/ISound';
@@ -11,10 +11,10 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  IWebAudioNode,
-} from '../interfaces/IWebAudioNode';
+  IManagerNode,
+} from '../Node/IManagerNode';
 
-export interface IGroup extends IWebAudioNode, IAnalysableNode, IPanelRegisterableNode {
+export interface IGroup extends IManagerNode, IAnalysableNode, IPanelRegisterableNode {
   readonly sounds: ISoundsMap;
   getContextCurrentTime(): number;
   getSounds(name: string): ISound;

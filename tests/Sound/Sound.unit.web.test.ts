@@ -100,7 +100,8 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Has a setVolume function which alters the volume property.', () => {
     const newVol = 0.5;
-    expect(testSoundFactory().setVolume(newVol).getVolume()).toBe(newVol);
+    const sound = testSoundFactory();
+    expect(sound.setVolume(newVol).getVolume()).toBe(newVol);
   });
 
   it('Has an isWebAudio function which returns true if the context and buffer are provided.', () => {

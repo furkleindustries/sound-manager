@@ -3,14 +3,15 @@ import {
 } from '../Fade/IFade';
 import {
   IPanelRegisterableNode,
-} from '../interfaces/IPanelRegisterableNode';
+} from '../Node/IPanelRegisterableNode';
 import {
-  IWebAudioNode,
-} from '../interfaces/IWebAudioNode';
+  IManagerNode,
+} from '../Node/IManagerNode';
 
-export interface ISound extends IWebAudioNode, IPanelRegisterableNode {
+export interface ISound extends IManagerNode, IPanelRegisterableNode {
   getSourceNode(): AudioBufferSourceNode;
   getFadeGainNode(): GainNode;
+  getOutputNode(): GainNode;
   getContextCurrentTime(): number;
   getTrackPosition(): number;
   setTrackPosition(seconds: number): ISound;

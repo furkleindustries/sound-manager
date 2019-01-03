@@ -1,16 +1,16 @@
 import {
   createSound,
-} from '../../src/functions/createSound';
+} from '../../src/Sound/createSound';
 
 import {
   createHtmlAudioSound,
-} from '../../src/functions/createHtmlAudioSound';
-jest.mock('../../src/functions/createHtmlAudioSound');
+} from '../../src/Sound/createHtmlAudioSound';
+jest.mock('../../src/Sound/createHtmlAudioSound');
 
 import {
   createWebAudioSound,
-} from '../../src/functions/createWebAudioSound';
-jest.mock('../../src/functions/createWebAudioSound');
+} from '../../src/Sound/createWebAudioSound';
+jest.mock('../../src/Sound/createWebAudioSound');
 
 const testManagerFactory = () => ({
   isWebAudio: jest.fn(() => true),

@@ -1,13 +1,13 @@
 import {
   createSound,
-} from '../../src/functions/createSound';
+} from '../../src/Sound/createSound';
 
 import {
   createHtmlAudioSound,
-} from '../../src/functions/createHtmlAudioSound';
-jest.mock('../../src/functions/createHtmlAudioSound');
+} from '../../src/Sound/createHtmlAudioSound';
+jest.mock('../../src/Sound/createHtmlAudioSound');
 
-console.log = jest.fn();
+console.warn = jest.fn();
 
 const testManagerFactory = () => ({
   isWebAudio: jest.fn(() => false),

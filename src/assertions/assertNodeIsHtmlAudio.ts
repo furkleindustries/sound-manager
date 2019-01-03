@@ -2,13 +2,13 @@ import {
   assert,
 } from './assert';
 import {
-  IAudioNode,
-} from '../interfaces/IAudioNode';
+  IManagerNode,
+} from '../Node/IManagerNode';
 
-export function assertNodeIsHtmlAudio(node: IAudioNode, methodName?: string) {
+export function assertNodeIsHtmlAudio<T extends IManagerNode>(node: T, methodName?: keyof T) {
   assert(
     !node.isWebAudio(),
-    `The method ${methodName ? methodName : '(not provided)'}  requires the ` +
+    `The method ${methodName ? methodName : '(not provided)'} requires the ` +
     `${node.type} calling it to be in HTML5 Audio mode.`
   );
 }

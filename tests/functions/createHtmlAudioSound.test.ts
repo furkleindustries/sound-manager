@@ -1,6 +1,6 @@
 import {
   createHtmlAudioSound,
-} from '../../src/functions/createHtmlAudioSound';
+} from '../../src/Sound/createHtmlAudioSound';
 
 import {
   Sound,

@@ -13,7 +13,7 @@
 
     <script>
     const context = new AudioContext();
-    const manager = new soundManager.Manager();
+    const manager = new soundManager.Manager({ context, });
     const clicky = document.querySelector('.clicky');
 
     const getAnimalTest = () => Promise.all([
@@ -60,7 +60,6 @@
         'test1',
         {
           url: 'http://www.hochmuth.com/mp3/Beethoven_12_Variation.mp3',
-          trackPosition: 600,
         },
       ),
     ]);
@@ -78,13 +77,12 @@
           curve: 'equalPower',
         },
 
-        loop: true,
         callback(events) {
           console.log(events);
         },
       });
 
-      manager.panelRegister(sounds[0]);
+      manager.updatePanelRegistration(sounds[0], true);
       document.body.appendChild(manager.generateAudioPanelElement());
       clicky.addEventListener('click', () => {
         manager.playPlaylist('testPlaylist').then((e) => {

@@ -32,7 +32,7 @@ export class Playlist implements IPlaylist {
     } = options;
 
     assert(Array.isArray(ids));
-    assert(ids.length === 0);
+    assert(ids.length);
     const soundGroupIds = ids.map((sgi) => {
       /* Allow 'groupName.soundName' strings and coerce them to
        * ISoundGroupIdentifiers. Also interpret 'soundName' as

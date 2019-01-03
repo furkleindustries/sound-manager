@@ -1,18 +1,18 @@
 import {
-  generateVolumeInput,
-} from '../../src/functions/generateVolumeInput';
+  generateVolumeComponent,
+} from '../../src/functions/generateVolumeComponent';
 import {
   NodeTypes,
 } from '../../src/enums/NodeTypes';
 
-describe('generateVolumeInput unit tests.', () => {
+describe('generateVolumeComponent unit tests.', () => {
   it('Outputs a div with the classes sm-volumeInput-container and sm-volumeInput-container-${nodeName}.', () => {
     const node = {
       type: NodeTypes.Manager,
       getVolume: jest.fn(() => 1),
     } as any;
 
-    const container = generateVolumeInput(node);
+    const container = generateVolumeComponent(node);
 
     expect(container).toBeInstanceOf(HTMLDivElement);
     expect(container.classList.contains('sm-volumeInput-container')).toBe(true);
@@ -26,7 +26,7 @@ describe('generateVolumeInput unit tests.', () => {
     } as any;
 
     const name = 'fikfds';
-    const container = generateVolumeInput(node, name);
+    const container = generateVolumeComponent(node, name);
     const label = container.querySelector('label') as HTMLLabelElement;
 
     expect(label).toBeInstanceOf(HTMLLabelElement);
@@ -42,7 +42,7 @@ describe('generateVolumeInput unit tests.', () => {
 
     const name = 'testname';
 
-    const container = generateVolumeInput(node, name);
+    const container = generateVolumeComponent(node, name);
     const input = container.querySelector('input') as HTMLInputElement;
 
     expect(input).toBeInstanceOf(HTMLInputElement);
@@ -55,7 +55,7 @@ describe('generateVolumeInput unit tests.', () => {
       type: NodeTypes.Group,
     } as any;
 
-    const func = () => generateVolumeInput(node);
+    const func = () => generateVolumeComponent(node);
 
     expect(func).toThrow();
   });
@@ -68,7 +68,7 @@ describe('generateVolumeInput unit tests.', () => {
 
     const name = 'foobarbazbnux';
 
-    const container = generateVolumeInput(node, name);
+    const container = generateVolumeComponent(node, name);
     const label = container.querySelector('label') as HTMLLabelElement;
     
     expect(label.textContent).toBe(name[0].toUpperCase() + name.slice(1));
@@ -82,7 +82,7 @@ describe('generateVolumeInput unit tests.', () => {
 
     const name = 'foobarbazbnux';
 
-    const container = generateVolumeInput(node, name);
+    const container = generateVolumeComponent(node, name);
     const label = container.querySelector('label') as HTMLLabelElement;
     
     expect(label.textContent).toBe(name[0].toUpperCase() + name.slice(1));
@@ -96,7 +96,7 @@ describe('generateVolumeInput unit tests.', () => {
 
     const name = 'foobarbazbnux';
 
-    const container = generateVolumeInput(node, name);
+    const container = generateVolumeComponent(node, name);
     const label = container.querySelector('label') as HTMLLabelElement;
     
     expect(label.textContent).toBe(name[0].toUpperCase() + name.slice(1));
@@ -108,7 +108,7 @@ describe('generateVolumeInput unit tests.', () => {
       type: NodeTypes.Manager,
     } as any;
 
-    const container = generateVolumeInput(node);
+    const container = generateVolumeComponent(node);
     const label = container.querySelector('label') as HTMLLabelElement;
 
     expect(label.textContent).toBe('Master volume');
@@ -120,7 +120,7 @@ describe('generateVolumeInput unit tests.', () => {
       type: NodeTypes.Manager,
     } as any;
 
-    const container = generateVolumeInput(node);
+    const container = generateVolumeComponent(node);
     const input = container.querySelector('input') as HTMLInputElement;
 
     expect(/sm-volumeInput-manager-[0-9A-Fa-f]+/.test(input.id)).toBe(true);
@@ -133,7 +133,7 @@ describe('generateVolumeInput unit tests.', () => {
       type: NodeTypes.Group,
     } as any;
 
-    const container = generateVolumeInput(node, 'foobar');
+    const container = generateVolumeComponent(node, 'foobar');
     const input = container.querySelector('input') as HTMLInputElement;
 
     expect(input.value).toBe(String(volume));
