@@ -5,6 +5,7 @@ tests/
 *.code-workspace
 *.log
 *.swp
+*.map
 
 /*.config.js
 /*.json
