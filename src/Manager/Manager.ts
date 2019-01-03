@@ -105,6 +105,18 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
+    const ctxCtor = 
+      AudioContext ||
+      // @ts-ignore
+      webkitAudioContext;
+
+    if (!this.__audioContext) {
+      if (ctxCtor) {
+        this.__audioContext = new ctxCtor();
+        this.__isWebAudio = true;
+      }
+    }
+
     const opts = options || {};
     const {
       groups,

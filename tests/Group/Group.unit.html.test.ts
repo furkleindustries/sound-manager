@@ -94,28 +94,16 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has an addSound function which puts the sound in the sounds object at the specified key.', () => {
     const group = testGroupFactory();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
-    };
-
+    const sound = { isWebAudio: jest.fn(), } as any;
     const key = 'test';
-    group.addSound(key, sound as any);
+    group.addSound(key, sound);
 
     expect(group.sounds[key]).toBe(sound);
   });
 
   it('Has an addSound function which returns the Group.', () => {
     const group = testGroupFactory();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
-    };
-
+    const sound = { isWebAudio: jest.fn(), };
     const ret = group.addSound('test1', sound as any);
 
     expect(ret).toBe(group);
@@ -123,20 +111,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has an addSounds function which merges the sounds argument with the sounds property.', () => {
     const group = testGroupFactory();
-
-    const soundOne = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        connect: jest.fn(),
-      }),
-    } as any;
-
-    const soundTwo = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        connect: jest.fn(),
-      }),
-    } as any;
+    const soundOne = { isWebAudio: jest.fn(), } as any;
+    const soundTwo = { isWebAudio: jest.fn(), } as any;
 
     group.addSounds({
       one: soundOne,
@@ -183,20 +159,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has a removeSounds function which removes the provided string from the sounds map.', () => {
     const group = testGroupFactory();
-
-    const soundOne = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
-
-    const soundTwo = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
+    const soundOne = { isWebAudio: jest.fn(), } as any;
+    const soundTwo = { isWebAudio: jest.fn(), } as any;
 
     // @ts-ignore
     group.__sounds = {
@@ -213,20 +177,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has a removeSounds function which removes all the values in the provided array from the sound map.', () => {
     const group = testGroupFactory();
-
-    const soundOne = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
-
-    const soundTwo = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
+    const soundOne = { isWebAudio: jest.fn(), } as any;
+    const soundTwo = { isWebAudio: jest.fn(), } as any;
 
     // @ts-ignore
     group.__sounds = {
@@ -239,25 +191,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     expect(group.sounds).toEqual({});
   });
 
-  it('Has a removeSounds function which disconnects the output node.', () => {
-    const group = testGroupFactory();
-
-    const mock = jest.fn();
-    const sound = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: mock,
-      }),
-    } as any;
-
-    // @ts-ignore
-    group.__sounds = { test: sound, };
-
-    group.removeSounds('test');
-
-    expect(mock).toBeCalledTimes(1);
-  });
-
   it('Has a removeSounds function which returns the Group.', () => {
     const group = testGroupFactory();
     expect(group.removeSounds([])).toBe(group);
@@ -267,20 +200,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const group = testGroupFactory();
     group.removeSounds = jest.fn();
 
-    const soundOne = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
-
-    const soundTwo = {
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: () => ({
-        disconnect: jest.fn(),
-      }),
-    } as any;
-
+    const soundOne = { isWebAudio: jest.fn(), } as any;
+    const soundTwo = { isWebAudio: jest.fn(), } as any;
     const sounds = {
       one: soundOne,
       two: soundTwo,
@@ -299,19 +220,13 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mockTwo = jest.fn();
     const sounds = {
       testOne: {
+        isWebAudio: jest.fn(),
         play: mockOne,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
       },
 
       testTwo: {
+        isWebAudio: jest.fn(),
         play: mockTwo,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
       },
     };
 
@@ -326,19 +241,13 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mockTwo = jest.fn();
     const sounds = {
       testOne: {
+        isWebAudio: jest.fn(),
         play: mockOne,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
       },
 
       testTwo: {
+        isWebAudio: jest.fn(),
         play: mockTwo,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
       },
     };
 
@@ -354,19 +263,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     group.playSounds = mock;
     const sounds = {
-      testOne: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
-
-      testTwo: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
+      testOne: { isWebAudio: jest.fn(), },
+      testTwo: { isWebAudio: jest.fn(), },
     };
 
     group.addSounds(sounds as any);
@@ -381,18 +279,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         play: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         play: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -408,18 +300,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: mockOne,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: mockTwo,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -435,18 +321,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -461,19 +341,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     group.pauseSounds = mock;
     const sounds = {
-      testOne: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
-
-      testTwo: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
+      testOne: { isWebAudio: jest.fn(), },
+      testTwo: { isWebAudio: jest.fn(), },
     };
 
     group.addSounds(sounds as any);
@@ -488,18 +357,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -514,10 +377,7 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     const sound = {
       stop: mock,
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
+      isWebAudio: jest.fn(),
     };
 
     const key = 'test';
@@ -532,10 +392,7 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     const sound = {
       stop: mock,
-      isWebAudio: jest.fn(() => true),
-      getOutputNode: jest.fn(() => ({
-        connect: jest.fn(),
-      })),
+      isWebAudio: jest.fn(),
     };
 
     const key = 'test';
@@ -552,18 +409,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: mockOne,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: mockTwo,
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -579,18 +430,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -605,19 +450,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     group.stopSounds = mock;
     const sounds = {
-      testOne: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
-
-      testTwo: {
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
-      },
+      testOne: { isWebAudio: jest.fn(), },
+      testTwo: { isWebAudio: jest.fn(), },
     };
 
     group.addSounds(sounds as any);
@@ -632,18 +466,12 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(() => true),
-        getOutputNode: jest.fn(() => ({
-          connect: jest.fn(),
-        })),
+        isWebAudio: jest.fn(),
       },
     };
 
@@ -660,7 +488,7 @@ describe('Group HTML5 Audio unit tests.', () => {
     // @ts-ignore
     group.__sounds = {
       one: {
-        isWebAudio: jest.fn(() => false),
+        isWebAudio: jest.fn(),
         updateAudioElementVolume: mockOne,
       },
 

@@ -10,5 +10,6 @@ export function assertValid<T>(
 {
   const isValid = validator || Boolean;
   assert(isValid(value), message);
+
   return value;
 }

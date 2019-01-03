@@ -2,6 +2,9 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertNodeIsWebAudio,
+} from '../assertions/assertNodeIsWebAudio';
+import {
   assertValid,
 } from '../assertions/assertValid';
 import {
@@ -34,7 +37,6 @@ import {
 import {
   updateSoundTimes,
 } from './updateSoundTimes';
-import { assertNodeIsHtmlAudio } from '../assertions/assertNodeIsHtmlAudio';
 
 const DEBUG = false;
 
@@ -88,8 +90,7 @@ export class Sound extends ManagerNode implements ISound {
     this.getGroupVolume = () => 1;
 
     if (context) {
-      assert(buffer);
-      this.__initializeForWebAudio(context, buffer!);
+      this.__initializeForWebAudio(context, assertValid<AudioBuffer>(buffer));
     } else if (audioElement) {
       this.__audioElement = audioElement;
     } else {
@@ -159,12 +160,12 @@ export class Sound extends ManagerNode implements ISound {
   }
 
   public getSourceNode() {
-    assertNodeIsHtmlAudio(this, 'getSourceNode');
+    assertNodeIsWebAudio(this, 'getSourceNode');
     return assertValid<AudioBufferSourceNode>(this.__sourceNode);
   }
 
   public getFadeGainNode() {
-    assertNodeIsHtmlAudio(this, 'getFadeGainNode');
+    assertNodeIsWebAudio(this, 'getFadeGainNode');
     return assertValid<GainNode>(this.__fadeGainNode);
   }
 

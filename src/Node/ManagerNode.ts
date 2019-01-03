@@ -24,7 +24,7 @@ export class ManagerNode implements IManagerNode {
 
   private __htmlVolume: number = 1;
   protected __audioContext: AudioContext | null = null;
-  protected __isWebAudio: boolean = false;
+  protected __isWebAudio: boolean;
   protected __gainNode: GainNode | null = null;
 
   constructor(options?: IManagerNodeOptions) {
@@ -32,13 +32,8 @@ export class ManagerNode implements IManagerNode {
     const {
       context,
     } = opts;
-    
-    const ctor = 
-      AudioContext ||
-      // @ts-ignore
-      webkitAudioContext;
 
-    this.__audioContext = context || new ctor();
+    this.__audioContext = context || null;
     this.__isWebAudio = Boolean(this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
