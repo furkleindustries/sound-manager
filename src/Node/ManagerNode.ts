@@ -49,6 +49,10 @@ export class ManagerNode implements IManagerNode {
     } else {
       this.__isWebAudio = false;
     }
+
+    if (this.isWebAudio()) {
+      this.__gainNode = this.getAudioContext().createGain();
+    }
   }
 
   public isWebAudio() {

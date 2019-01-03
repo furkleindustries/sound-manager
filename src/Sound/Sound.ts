@@ -149,12 +149,10 @@ export class Sound extends ManagerNode implements ISound {
     /* Generate the first source node. */
     this.__sourceNode = this.__getNewSourceNode();
 
-    /* Generate the output gain node. */
-    this.__gainNode = context.createGain();
     /* Generate the gain node used for fading volume. */
     this.__fadeGainNode = context.createGain();
     this.__sourceNode.connect(this.__fadeGainNode);
-    this.__fadeGainNode.connect(this.__gainNode);
+    this.__fadeGainNode.connect(this.getGainNode());
   }
 
   public getInputNode() {
@@ -163,7 +161,10 @@ export class Sound extends ManagerNode implements ISound {
 
   public setVolume(value: number) {
     super.setVolume(value);
-    this.updateAudioElementVolume();
+
+    if(!this.isWebAudio()) {
+      this.updateAudioElementVolume();
+    }
 
     return this;
   }
@@ -174,10 +175,6 @@ export class Sound extends ManagerNode implements ISound {
 
   public getSourceNode() {
     return assertValid<AudioBufferSourceNode>(this.__sourceNode);
-  }
-
-  public getGainNode() {
-    return assertValid<GainNode>(this.__gainNode);
   }
 
   public getFadeGainNode() {

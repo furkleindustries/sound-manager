@@ -537,7 +537,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
   });
 
   it('Defaults to an isPanelRegistered() of false.', () => {
-    const sound = testSoundFactory();
-    expect(sound.isPanelRegistered()).toBe(false);
+    expect(testSoundFactory().isPanelRegistered()).toBe(false);
   });
 });

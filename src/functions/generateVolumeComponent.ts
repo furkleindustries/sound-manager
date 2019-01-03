@@ -26,13 +26,15 @@ export function generateVolumeComponent(
     uniqueName = assertValid<string>(name);
   }
 
-  container.appendChild(generateVolumeLabelComponent(node, uniqueName, name));
-  container.appendChild(generateVolumeInputComponent(node, uniqueName));
+  const uniqueId = `sm-volumeInput-${nodeType}-${uniqueName}`;
+
+  container.appendChild(generateVolumeLabelComponent(node, uniqueId, name));
+  container.appendChild(generateVolumeInputComponent(node, uniqueId));
 
   return container;
 }
 
-export function generateVolumeLabelComponent(node: IManagerNode, uniqueName: string, name?: string) {
+export function generateVolumeLabelComponent(node: IManagerNode, uniqueId: string, name?: string) {
   const label = document.createElement('label');
   label.className = 'sm-volumeInput-label';
 
@@ -46,8 +48,7 @@ export function generateVolumeLabelComponent(node: IManagerNode, uniqueName: str
     label.textContent = 'Master volume';
   }
 
-  const forAttr = `sm-volumeInput-${nodeType}-${uniqueName}`;
-  label.setAttribute('for', forAttr);
+  label.setAttribute('for', uniqueId);
 
   return label;
 }

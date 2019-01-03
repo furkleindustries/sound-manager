@@ -112,9 +112,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     } = opts;
 
     if (this.isWebAudio()) {
-      this.__analyserNode = this.getAudioContext().createAnalyser();
-      this.__gainNode = this.getAudioContext().createGain();
-
       this.getInputNode().connect(this.getOutputNode());
       this.getOutputNode().connect(this.getAudioContext().destination);
     }
