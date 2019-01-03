@@ -1,9 +1,12 @@
 import {
+  ManagerNode,
+} from '../Node/ManagerNode';
+import {
+  AnalysableNodeMixin,
+} from '../Node/AnalysableNodeMixin';
+import {
   assert,
 } from '../assertions/assert';
-import {
-  assertValid,
-} from '../assertions/assertValid';
 import {
   createSound,
 } from '../Sound/createSound';
@@ -77,7 +80,7 @@ import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 
-export class Manager implements IManager {
+export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManager {
   get type() {
     return NodeTypes.Manager;
   }
@@ -97,39 +100,16 @@ export class Manager implements IManager {
     return this.__submanagers;
   }
 
-  private __isWebAudio: boolean;
-  private __audioContext: AudioContext | null = null;
-  private __analyserNode: AnalyserNode | null = null;
-  private __gainNode: GainNode | null = null;
-  private __audioPanelElement: HTMLElement | null = null;
-
-  public readonly getVolume: () => number;
-  public readonly setVolume: (value: number) => this;
+  protected __audioPanelElement: HTMLElement | null = null;
 
   constructor(options?: IManagerOptions) {
+    super({ ...options });
+
     const opts = options || {};
     const {
       groups,
-      context,
       masterVolume,
     } = opts;
-
-    this.__isWebAudio = true;
-    if (context) {
-      this.__audioContext = context;
-    } else if (
-      AudioContext ||
-      // @ts-ignore
-      webkitAudioContext)
-    {
-      this.__audioContext = new (
-        AudioContext ||
-        // @ts-ignore
-        webkitAudioContext
-      )();
-    } else {
-      this.__isWebAudio = false;
-    }
 
     if (this.isWebAudio()) {
       this.__analyserNode = this.getAudioContext().createAnalyser();
@@ -137,25 +117,6 @@ export class Manager implements IManager {
 
       this.getInputNode().connect(this.getOutputNode());
       this.getOutputNode().connect(this.getAudioContext().destination);
-
-      this.getVolume = () => this.getGainNode().gain.value;
-      this.setVolume = (value: number) => {
-        this.getGainNode().gain.setValueAtTime(
-          value,
-          this.getAudioContext().currentTime,
-        );
-
-        this.updateAllAudioElementsVolume();
-
-        return this;
-      };
-    } else {
-      let volume = 1;
-      this.getVolume = () => volume;
-      this.setVolume = (value: number) => {
-        volume = value;
-        return this.updateAllAudioElementsVolume();
-      };
     }
 
     /* Add the 'default' group. */
@@ -179,37 +140,21 @@ export class Manager implements IManager {
     }
   }
 
-  public isWebAudio() {
-    return this.__isWebAudio;
-  }
+  public setVolume(value: number) {
+    super.setVolume(value);
+    this.updateAllAudioElementsVolume();
 
-  public getAudioContext() {
-    return assertValid<AudioContext>(this.__audioContext);
-  }
-
-  public getAnalyserNode() {
-    return assertValid<AnalyserNode>(this.__analyserNode);
-  }
-
-  public getGainNode() {
-    return assertValid<GainNode>(this.__gainNode);
-  }
-
-  public getInputNode() {
-    return this.getGainNode();
-  }
-
-  public getOutputNode() {
-    return this.getAnalyserNode();
+    return this;
   }
 
   public createGroup(options?: IGroupOptions) {
     if (this.isWebAudio()) {
-      return new Group(Object.assign({}, options, {
+      return new Group({
+        ...options,
         context: this.getAudioContext(),
-      }));
+      });
     } else {
-      return new Group(Object.assign({}, options));
+      return new Group({ ...options });
     }
   }
 

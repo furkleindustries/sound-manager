@@ -3,14 +3,14 @@ import {
 } from '../../src/functions/generateAudioPanelElement';
 
 import {
-  generateVolumeInput,
-} from '../../src/functions/generateVolumeInput';
-jest.mock('../../src/functions/generateVolumeInput');
+  generateVolumeComponent,
+} from '../../src/functions/generateVolumeComponent';
+jest.mock('../../src/functions/generateVolumeComponent');
 
 describe('generateAudioPanelElement unit tests.', () => {
   beforeEach(() => {
-    (generateVolumeInput as any).mockClear();
-    (generateVolumeInput as any).mockReturnValue(document.createElement('input'));
+    (generateVolumeComponent as any).mockClear();
+    (generateVolumeComponent as any).mockReturnValue(document.createElement('input'));
   });
 
   it('Outputs a div with the class sound-manager-panel.', () => {
@@ -78,7 +78,7 @@ describe('generateAudioPanelElement unit tests.', () => {
 
     generateAudioPanelElement(manager);
 
-    expect((generateVolumeInput as any).mock.calls).toEqual([
+    expect((generateVolumeComponent as any).mock.calls).toEqual([
       [
         manager,
       ],
@@ -134,7 +134,7 @@ describe('generateAudioPanelElement unit tests.', () => {
 
     generateAudioPanelElement(manager);
 
-    expect((generateVolumeInput as any).mock.calls).toEqual([
+    expect((generateVolumeComponent as any).mock.calls).toEqual([
       [
         manager,
       ],

@@ -1,6 +1,6 @@
 import {
   IAnalysableNode,
-} from '../interfaces/IAnalysableNode';
+} from '../Node/IAnalysableNode';
 import {
   IManagerCreateSoundOptions,
 } from '../interfaces/IManagerCreateSoundOptions';
@@ -38,10 +38,10 @@ import {
   ISubmanagerMap,
 } from './ISubmanagerMap';
 import {
-  IWebAudioNode,
-} from '../interfaces/IWebAudioNode';
+  IManagerNode,
+} from '../Node/IManagerNode';
 
-export interface IManager extends IWebAudioNode, IAnalysableNode {
+export interface IManager extends IManagerNode, IAnalysableNode {
   readonly groups: IGroupsMap;
   readonly playlists: IPlaylistsMap;
   readonly submanagers: ISubmanagerMap;

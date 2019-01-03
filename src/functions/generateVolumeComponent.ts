@@ -2,14 +2,14 @@ import {
   assertValid,
 } from '../assertions/assertValid';
 import {
-  IAudioNode,
-} from '../interfaces/IAudioNode';
+  IManagerNode,
+} from '../Node/IManagerNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
 export function generateVolumeComponent(
-  node: IAudioNode,
+  node: IManagerNode,
   name?: string,
 )
 {
@@ -32,7 +32,7 @@ export function generateVolumeComponent(
   return container;
 }
 
-export function generateVolumeLabelComponent(node: IAudioNode, uniqueName: string, name?: string) {
+export function generateVolumeLabelComponent(node: IManagerNode, uniqueName: string, name?: string) {
   const label = document.createElement('label');
   label.className = 'sm-volumeInput-label';
 
@@ -52,7 +52,7 @@ export function generateVolumeLabelComponent(node: IAudioNode, uniqueName: strin
   return label;
 }
 
-export function generateVolumeInputComponent(node: IAudioNode, uniqueName: string) {
+export function generateVolumeInputComponent(node: IManagerNode, uniqueName: string) {
   const input = document.createElement('input');
   input.className = 'sm-volumeInput-input';
 

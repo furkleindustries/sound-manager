@@ -23,6 +23,9 @@ import {
   initializeSoundForPlay,
 } from './initializeSoundForPlay';
 import {
+  ManagerNode,
+} from '../Node/ManagerNode';
+import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
@@ -34,14 +37,12 @@ import {
 
 const DEBUG = false;
 
-export class Sound implements ISound {
+export class Sound extends ManagerNode implements ISound {
   get type() {
     return NodeTypes.Sound;
   }
 
-  private __isWebAudio: boolean;
   private __sourceNode: AudioBufferSourceNode | null = null;
-  private __gainNode: GainNode | null = null;
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
@@ -61,24 +62,24 @@ export class Sound implements ISound {
     throw new Error('Source node factory not initialized.');
   };
 
-  public readonly getContextCurrentTime: () => number;
   public readonly getManagerVolume: () => number;
-  public readonly getVolume: () => number;
-  public readonly setVolume: (value: number) => ISound;
   public getGroupVolume: () => number;
 
-  constructor({
-    audioElement,
-    autoplay,
-    buffer,
-    context,
-    fade,
-    getManagerVolume,
-    loop,
-    trackPosition,
-    volume,
-  }: ISoundOptions)
-  {
+  constructor(options: ISoundOptions) {
+    super(options);
+
+    const {
+      audioElement,
+      autoplay,
+      buffer,
+      context,
+      fade,
+      getManagerVolume,
+      loop,
+      trackPosition,
+      volume,
+    } = options;
+
     /* Needed to calculate volume for HTML5 audio. */
     assert(typeof getManagerVolume === 'function');
 
@@ -89,19 +90,6 @@ export class Sound implements ISound {
       assert(buffer);
 
       this.__isWebAudio = true;
-      this.getContextCurrentTime = () => context.currentTime;
-
-      this.getVolume = () => this.getGainNode().gain.value;
-
-      this.setVolume = (value: number) => {
-        this.getGainNode().gain.setValueAtTime(
-          value,
-          this.getContextCurrentTime(),
-        );
-  
-        return this;
-      };
-
       this.__initializeForWebAudio(context, buffer!);
     } else if (audioElement) {
       this.__isWebAudio = false;
@@ -169,12 +157,15 @@ export class Sound implements ISound {
     this.__fadeGainNode.connect(this.__gainNode);
   }
 
-  public isWebAudio() {
-    return this.__isWebAudio;
-  }
-
   public getInputNode() {
     return this.getSourceNode();
+  }
+
+  public setVolume(value: number) {
+    super.setVolume(value);
+    this.updateAudioElementVolume();
+
+    return this;
   }
 
   public getOutputNode() {

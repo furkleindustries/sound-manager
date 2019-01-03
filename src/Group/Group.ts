@@ -1,9 +1,12 @@
 import {
+  AnalysableNodeMixin,
+} from '../Node/AnalysableNodeMixin';
+import {
   assert,
 } from '../assertions/assert';
 import {
-  assertValid,
-} from '../assertions/assertValid';
+  ManagerNode,
+} from '../Node/ManagerNode';
 import {
   getOneOrMany,
 } from '../functions/getOneOrMany';
@@ -23,7 +26,7 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
-export class Group implements IGroup {
+export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
   get type() {
     return NodeTypes.Group;
   }
@@ -33,58 +36,22 @@ export class Group implements IGroup {
     return this.__sounds;
   }
 
-  private __isWebAudio: boolean;
-  private __analyserNode: AnalyserNode | null = null;
-  private __gainNode: GainNode | null = null;
-
   public __panelRegistered: boolean = false;
 
-  public readonly getContextCurrentTime: () => number;
-  public readonly getVolume: () => number;
-  public readonly setVolume: (value: number) => this;
+  constructor(options: IGroupOptions) {
+    super(options);
 
-  constructor({
-    context,
-    sounds,
-    volume,
-  }: IGroupOptions)
-  {
+    const {
+      context,
+      sounds,
+      volume,
+    } = options;
+
     if (context) {
       this.__isWebAudio = true;
-
-      this.getContextCurrentTime = () => context.currentTime;
-
-      this.__analyserNode = context.createAnalyser();
-      this.__gainNode = context.createGain();
-
       this.getInputNode().connect(this.getOutputNode());
-
-      this.getVolume = () => this.getGainNode().gain.value;
-      this.setVolume = (value: number) => {
-        this.getGainNode().gain.setValueAtTime(
-          value,
-          this.getContextCurrentTime(),
-        );
-
-        this.updateAllAudioElementsVolume();
-
-        return this;
-      };
     } else {
       this.__isWebAudio = false;
-
-      this.getContextCurrentTime = () => {
-        throw new Error();
-      };
-
-      let volume = 1;
-      this.getVolume = () => volume;
-      this.setVolume = (value: number) => {
-        volume = value;
-        this.updateAllAudioElementsVolume();
-
-        return this;
-      };
     }
 
     if (sounds && typeof sounds === 'object') {
@@ -96,24 +63,11 @@ export class Group implements IGroup {
     }
   }
 
-  public isWebAudio() {
-    return this.__isWebAudio;
-  }
+  public setVolume(value: number) {
+    super.setVolume(value);
+    this.updateAllAudioElementsVolume();
 
-  public getAnalyserNode() {
-    return assertValid<AnalyserNode>(this.__analyserNode);
-  }
-
-  getGainNode() {
-    return assertValid<GainNode>(this.__gainNode);
-  }
-
-  public getInputNode() {
-    return this.getGainNode();
-  }
-
-  public getOutputNode(): AudioNode {
-    return this.getAnalyserNode();
+    return this;
   }
 
   public getSounds(name: string): ISound;
@@ -155,7 +109,7 @@ export class Group implements IGroup {
   public removeSounds(names: string[]): IGroup;
   public removeSounds(names: string | string[]) {
     const remove = (soundName: string) => {
-      const sounds = Object.assign({}, this.sounds) as any;
+      const sounds = { ...this.sounds, };
       const sound = sounds[soundName];
       if (sound.isWebAudio()) {
         sound.getOutputNode().disconnect();
