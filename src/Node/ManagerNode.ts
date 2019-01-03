@@ -38,18 +38,8 @@ export class ManagerNode implements IManagerNode {
       // @ts-ignore
       webkitAudioContext;
 
-    this.__isWebAudio = false;
-    if (context) {
-      this.__audioContext = context;
-      this.__isWebAudio = true;
-    } else {
-
-      if (ctor) {
-        this.__audioContext = new ctor();
-        this.__isWebAudio = true;
-      }
-    }
-
+    this.__audioContext = context || new ctor();
+    this.__isWebAudio = Boolean(this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
     }
