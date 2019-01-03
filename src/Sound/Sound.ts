@@ -34,6 +34,7 @@ import {
 import {
   updateSoundTimes,
 } from './updateSoundTimes';
+import { assertNodeIsHtmlAudio } from '../assertions/assertNodeIsHtmlAudio';
 
 const DEBUG = false;
 
@@ -88,26 +89,9 @@ export class Sound extends ManagerNode implements ISound {
 
     if (context) {
       assert(buffer);
-
-      this.__isWebAudio = true;
       this.__initializeForWebAudio(context, buffer!);
     } else if (audioElement) {
-      this.__isWebAudio = false;
-
       this.__audioElement = audioElement;
-
-      this.getContextCurrentTime = () => {
-        throw new Error();
-      };
-
-      let volume = 1;
-      this.getVolume = () => volume;
-      this.setVolume = (value: number) => {
-        volume = value;
-        this.updateAudioElementVolume();
-
-        return this;
-      };
     } else {
       throw new Error();
     }
@@ -143,6 +127,7 @@ export class Sound extends ManagerNode implements ISound {
     this.__getNewSourceNode = () => {
       const node = context.createBufferSource();
       node.buffer = buffer;
+
       return node;
     };
 
@@ -174,10 +159,12 @@ export class Sound extends ManagerNode implements ISound {
   }
 
   public getSourceNode() {
+    assertNodeIsHtmlAudio(this, 'getSourceNode');
     return assertValid<AudioBufferSourceNode>(this.__sourceNode);
   }
 
   public getFadeGainNode() {
+    assertNodeIsHtmlAudio(this, 'getFadeGainNode');
     return assertValid<GainNode>(this.__fadeGainNode);
   }
 

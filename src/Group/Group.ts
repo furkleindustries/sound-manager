@@ -48,10 +48,7 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     } = options;
 
     if (context) {
-      this.__isWebAudio = true;
       this.getInputNode().connect(this.getOutputNode());
-    } else {
-      this.__isWebAudio = false;
     }
 
     if (sounds && typeof sounds === 'object') {

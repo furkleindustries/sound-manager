@@ -5,7 +5,7 @@ import {
   IManagerNode,
 } from '../Node/IManagerNode';
 
-export function assertNodeIsHtmlAudio(node: IManagerNode, methodName?: string) {
+export function assertNodeIsHtmlAudio<T extends IManagerNode>(node: T, methodName?: keyof T) {
   assert(
     !node.isWebAudio(),
     `The method ${methodName ? methodName : '(not provided)'}  requires the ` +

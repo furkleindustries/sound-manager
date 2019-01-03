@@ -27,7 +27,6 @@ export function generateVolumeComponent(
   }
 
   const uniqueId = `sm-volumeInput-${nodeType}-${uniqueName}`;
-
   container.appendChild(generateVolumeLabelComponent(node, uniqueId, name));
   container.appendChild(generateVolumeInputComponent(node, uniqueId));
 
