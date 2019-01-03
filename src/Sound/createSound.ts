@@ -23,33 +23,48 @@ export const strings = {
 };
 
 export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
-  assert(options);
+  const optsClone = { ...options, };
   const {
     manager,
-  } = options;
+  } = optsClone;
 
   assert(manager);
 
+  if (manager.isWebAudio()) {
+    return createWebHelper(optsClone);
+  } else {
+    console.warn(strings.FALLBACK_WARNING);
+    return createHtmlHelper(optsClone);
+  }
+};
+
+export function createWebHelper(options: ICreateSoundOptions): Promise<ISound> {
   const optsClone = { ...options, };
   const optsNoContext = { ...optsClone, };
   delete optsNoContext.context;
   return new Promise((resolve, reject) => {
-    if (manager.isWebAudio()) {
-      createWebAudioSound(optsClone).then(
-        (sound) => resolve(sound),
-        (err) => {
-          console.warn(`${strings.WEB_AUDIO_FAILED}\n${err}`);
-          createHtmlAudioSound(optsNoContext).then(
-            (sound) => resolve(sound),
-            (err) => reject(new Error(`${strings.BOTH_FAILED}\n${err}`))
-          );
-        });
-    } else {
-      console.warn(strings.FALLBACK_WARNING);
-      createHtmlAudioSound(optsNoContext).then(
-        (sound) => resolve(sound),
-        (err) => reject(new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`))
-      );
-    }
+    createWebAudioSound(options).then(
+      resolve,
+      (err) => {
+        console.warn(`${strings.WEB_AUDIO_FAILED}\n${err}`);
+        createHtmlAudioSound(optsNoContext).then(
+          resolve,
+          (err) => reject(new Error(`${strings.BOTH_FAILED}\n${err}`)),
+        );
+      },
+    );
   });
-};
+}
+
+export function createHtmlHelper(options: ICreateSoundOptions): Promise<ISound> {
+  const optsClone = { ...options, };
+  const optsNoContext = { ...optsClone, };
+  delete optsNoContext.context;
+  return new Promise((resolve, reject) => {
+    console.warn(strings.FALLBACK_WARNING);
+    createHtmlAudioSound(optsNoContext).then(
+      resolve,
+      (err) => reject(new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`)),
+    );
+  });
+}
