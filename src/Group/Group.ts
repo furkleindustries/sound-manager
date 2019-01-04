@@ -5,8 +5,8 @@ import {
   assert,
 } from '../assertions/assert';
 import {
-  ManagerNode,
-} from '../Node/ManagerNode';
+  getFrozenObject,
+} from '../functions/getFrozenObject';
 import {
   getOneOrMany,
 } from '../functions/getOneOrMany';
@@ -23,6 +23,9 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
+  ManagerNode,
+} from '../Node/ManagerNode';
+import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
@@ -31,7 +34,7 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     return NodeTypes.Group;
   }
 
-  private __sounds: ISoundsMap = Object.freeze({});
+  private __sounds: ISoundsMap = getFrozenObject();
   get sounds() {
     return this.__sounds;
   }
@@ -39,7 +42,7 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
   public __panelRegistered: boolean = false;
 
   constructor(options: IGroupOptions) {
-    super(options);
+    super(getFrozenObject(options));
 
     const {
       context,
@@ -94,10 +97,7 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
       }
     });
 
-    this.__sounds = Object.freeze({
-      ...this.sounds,
-      ...sounds,
-    });
+    this.__sounds = getFrozenObject(this.sounds, sounds);
 
     return this;
   }
@@ -105,7 +105,14 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
   public removeSounds(name: string): IGroup;
   public removeSounds(names: string[]): IGroup;
   public removeSounds(names: string | string[]) {
-    const remove = (soundName: string) => {
+    let arr: string[];
+    if (typeof names === 'string') {
+      arr = [ names ];
+    } else {
+      arr = names;
+    }
+
+    arr.forEach((soundName: string) => {
       const sounds = { ...this.sounds, };
       const sound = sounds[soundName];
       if (sound.isWebAudio()) {
@@ -113,14 +120,8 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
       }
 
       delete sounds[soundName];
-      this.__sounds = Object.freeze(sounds);
-    };
-
-    if (typeof names === 'string') {
-      remove(names);
-    } else {
-      names.forEach(remove);
-    }
+      this.__sounds = getFrozenObject(sounds);
+    });
 
     return this;
   }
