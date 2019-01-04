@@ -1,7 +1,4 @@
 import {
-  ManagerNode,
-} from '../Node/ManagerNode';
-import {
   AnalysableNodeMixin,
 } from '../Node/AnalysableNodeMixin';
 import {
@@ -16,6 +13,9 @@ import {
 import {
   generateAudioPanelElement,
 } from '../functions/generateAudioPanelElement';
+import {
+  getPlaylistMessage,
+} from './getPlaylistMessage';
 import {
   Fade,
 } from '../Fade/Fade';
@@ -68,14 +68,20 @@ import {
   ISubmanagerMap,
 } from './ISubmanagerMap';
 import {
-  NodeTypes,
-} from '../enums/NodeTypes';
+  ManagerNode,
+} from '../Node/ManagerNode';
 import {
   nameOrAllKeys,
 } from '../functions/nameOrAllKeys';
 import {
+  NodeTypes,
+} from '../enums/NodeTypes';
+import {
   Playlist,
 } from '../Playlist/Playlist';
+import {
+  shouldLoopPlaylist,
+} from './shouldLoopPlaylist';
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
@@ -325,44 +331,68 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     const playlist = this.getPlaylists(name);
     console.log(`Playing playlist ${name}.`);
     let events: Event[] = [];
-    let looped = 0;
-    for (let ii = 0; ii < playlist.ids.length; ii += 1) {
-      const id = playlist.ids[ii];
-      const sound = this.getSounds(id.soundName, id.groupName);
-
+    let playIndex = 0;
+    let loopedTimes = 0;
+    let sentinel = true;
+    while (sentinel) {
+      const id = playlist.ids[playIndex];
       console.log(`${id.groupName}.${id.soundName} starting.`);
-
-      const event = await sound.play(
-        /* Overrides the sound's fade with the playlist fade. This argument is
-         * ignored if it's falsy. */ 
-        playlist.fade,
+      const result = await this.__playPlaylist(
+        playlist,
+        events,
+        playIndex,
+        loopedTimes,
       );
-
-      events.push(event);
 
       console.log(`${id.groupName}.${id.soundName} ending.`);
 
-      if (ii === playlist.ids.length -1) {
-        /* Pass the events to the playlist's callback, if it exists. */
-        playlist.tryCallback(events);
-        events = [];
+      playIndex += 1;
+      if (result.looped) {
+        console.log(`Looping playlist ${name}.`);
+        playIndex = 0;
+        loopedTimes += 1;
+      }
 
-        const loopIsValid = playlist.loopIsValid();
-        /* Allow true to be used for loop, signifying an infinite loop. */
-        const loopIsTrue = playlist.loop === true;
-        /* Allow integers to be used for the loop value, causing the
-         * playlist to loop that many times. */
-        const loopIsInBoundInteger = playlist.loop > looped;
-        const shouldLoop = loopIsValid && (loopIsTrue || loopIsInBoundInteger);
-        if (shouldLoop) {
-          console.log(`Looping playlist ${name}.`);
-          /* This value is incremented when the loop begins a new iteration so
-           * it must be -1 rather than 0. */
-          ii = -1;
-          looped = loopIsInBoundInteger ? looped + 1 : looped;
-        }
+      if (result.ended) {
+        sentinel = false;
       }
     }
+  }
+
+  private async __playPlaylist(
+    playlist: IPlaylist,
+    events: Event[],
+    playIndex: number,
+    loopedTimes: number,
+  )
+  {
+    const id = playlist.ids[playIndex];
+    const sound = this.getSounds(id.soundName, id.groupName);
+
+    const event = await sound.play(
+      /* Overrides the sound's fade with the playlist fade. This argument is
+       * ignored if it's falsy. */
+      playlist.fade,
+    );
+
+    events.push(event);
+
+    if (playIndex === playlist.ids.length - 1) {
+      /* Pass the events to the playlist's callback, if it exists. */
+      playlist.tryCallback(events);
+      /* Empty the list. */
+      events.forEach(events.pop);
+
+      if (shouldLoopPlaylist(playlist, loopedTimes)) {
+        /* This value is incremented when the loop begins a new iteration so
+         * it must be -1 rather than 0. */
+        return getPlaylistMessage(/* ended */ false, /* looped */ true);
+      }
+
+      return getPlaylistMessage(/* ended */ true, /* looped */ false);
+    }
+
+    return getPlaylistMessage(/* ended */ false, /* looped */ false);
   }
 
   public playPlaylists(name: string): Promise<void>;
