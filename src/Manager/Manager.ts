@@ -82,6 +82,7 @@ import {
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
+import { getPlaylistMessage } from './getPlaylistMessage';
 
 declare const webkitAudioContext: AudioContext;
 
@@ -332,16 +333,21 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     let loopedTimes = 0;
     let sentinel = true;
     while (sentinel) {
+      const id = playlist.ids[playIndex];
+      console.log(`${id.groupName}.${id.soundName} starting.`);
       const result = await this.__playPlaylist(
         playlist,
-        name,
         events,
         playIndex,
         loopedTimes,
       );
 
+      console.log(`${id.groupName}.${id.soundName} ending.`);
+
       playIndex += 1;
       if (result.looped) {
+        console.log(`Looping playlist ${name}.`);
+        playIndex = 0;
         loopedTimes += 1;
       }
 
@@ -353,7 +359,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
   private async __playPlaylist(
     playlist: IPlaylist,
-    name: string,
     events: Event[],
     playIndex: number,
     loopedTimes: number,
@@ -362,44 +367,30 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     const id = playlist.ids[playIndex];
     const sound = this.getSounds(id.soundName, id.groupName);
 
-    console.log(`${id.groupName}.${id.soundName} starting.`);
-
     const event = await sound.play(
       /* Overrides the sound's fade with the playlist fade. This argument is
-        * ignored if it's falsy. */ 
+       * ignored if it's falsy. */
       playlist.fade,
     );
 
     events.push(event);
 
-    console.log(`${id.groupName}.${id.soundName} ending.`);
-
-    if (playIndex === playlist.ids.length -1) {
+    if (playIndex === playlist.ids.length - 1) {
       /* Pass the events to the playlist's callback, if it exists. */
       playlist.tryCallback(events);
       /* Empty the list. */
       events.forEach(events.pop);
 
       if (shouldLoopPlaylist(playlist, loopedTimes)) {
-        console.log(`Looping playlist ${name}.`);
         /* This value is incremented when the loop begins a new iteration so
-          * it must be -1 rather than 0. */
-        return {
-          ended: false,
-          looped: true,
-        };
+         * it must be -1 rather than 0. */
+        return getPlaylistMessage(/* ended */ false, /* looped */ true);
       }
 
-      return {
-        ended: true,
-        looped: false,
-      };
+      return getPlaylistMessage(/* ended */ true, /* looped */ false);
     }
 
-    return {
-      ended: false,
-      looped: false,
-    };
+    return getPlaylistMessage(/* ended */ false, /* looped */ false);
   }
 
   public playPlaylists(name: string): Promise<void>;
