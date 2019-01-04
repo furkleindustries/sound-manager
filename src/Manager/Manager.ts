@@ -80,6 +80,8 @@ import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 
+declare const webkitAudioContext: AudioContext;
+
 export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManager {
   get type() {
     return NodeTypes.Manager;
@@ -105,16 +107,10 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
-    const ctxCtor = 
-      AudioContext ||
-      // @ts-ignore
-      webkitAudioContext;
-
-    if (!this.__audioContext) {
-      if (ctxCtor) {
-        this.__audioContext = new ctxCtor();
-        this.__isWebAudio = true;
-      }
+    const ctxCtor = AudioContext || webkitAudioContext;
+    if (!this.__audioContext && ctxCtor) {
+      this.__audioContext = new ctxCtor();
+      this.__isWebAudio = true;
     }
 
     const opts = options || {};
@@ -206,14 +202,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   public removeGroups(name: string): IManager;
   public removeGroups(name: string[]): IManager;
   public removeGroups(names: string | string[]): IManager {
-    let arr: string[];
-
-    if (typeof names === 'string') {
-      arr = [ names, ];
-    } else {
-      arr = names;
-    }
-
+    const arr: string[] = typeof names === 'string' ? [ names, ] : names;
     const groups = { ...this.groups, };
     arr.forEach((groupName) => {
       const group = groups[groupName];
@@ -225,7 +214,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     });
 
     this.__groups = Object.freeze(groups);
-
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
       this.initializeDefaultGroup();
@@ -355,30 +343,23 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       console.log(`${id.groupName}.${id.soundName} ending.`);
 
       if (ii === playlist.ids.length -1) {
-        if (playlist.callback) {
-          console.log(`Firing playlist ${name} callback.`);
-          playlist.callback(events);
-        }
-
+        /* Pass the events to the playlist's callback, if it exists. */
+        playlist.tryCallback(events);
         events = [];
-  
-        if (playlist.loop) {
+
+        const loopIsValid = playlist.loopIsValid();
+        /* Allow true to be used for loop, signifying an infinite loop. */
+        const loopIsTrue = playlist.loop === true;
+        /* Allow integers to be used for the loop value, causing the
+         * playlist to loop that many times. */
+        const loopIsInBoundInteger = playlist.loop > looped;
+        const shouldLoop = loopIsValid && (loopIsTrue || loopIsInBoundInteger);
+        if (shouldLoop) {
           console.log(`Looping playlist ${name}.`);
           /* This value is incremented when the loop begins a new iteration so
            * it must be -1 rather than 0. */
-          if (typeof playlist.loop === 'number' &&
-              playlist.loop >= 1 &&
-              playlist.loop % 1 === 0)
-          {
-            /* Allow integers to be used for the loop value, causing the
-             * playlist to loop that many times. */
-            if (playlist.loop > looped) {
-              looped += 1;
-              ii = -1;
-            }
-          } else {
-            ii = -1;
-          }
+          ii = -1;
+          looped = loopIsInBoundInteger ? looped + 1 : looped;
         }
       }
     }

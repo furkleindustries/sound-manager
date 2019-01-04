@@ -77,4 +77,29 @@ export class Playlist implements IPlaylist {
       this.loop = loop;
     }
   }
+
+  public loopIsValid() {
+    return this.__loopIsValid(this.loop);
+  }
+
+  private __loopIsValid(value: any) {
+    return (
+      typeof value === 'boolean' || 
+      (
+        typeof this.loop === 'number' &&
+        this.loop >= 1 &&
+        this.loop % 1 === 0
+      )
+    );
+  }
+
+  public tryCallback(events: Event[], name?: string) {
+    if (typeof this.callback === 'function') {
+      console.log(
+        `Firing playlist ${name ? name : '(no name provided)'} callback.`
+      );
+
+      this.callback(events);
+    }
+  }
 }
