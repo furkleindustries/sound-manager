@@ -85,6 +85,7 @@ import {
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
+import { assertNodeIsWebAudio } from '../assertions/assertNodeIsWebAudio';
 
 declare const webkitAudioContext: AudioContext;
 
@@ -108,7 +109,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return this.__submanagers;
   }
 
-  protected __audioPanelElement: HTMLElement | null = null;
+  private __audioPanelElement: HTMLElement | null = null;
 
   constructor(options?: IManagerOptions) {
     super({ ...options });
@@ -126,8 +127,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     } = opts;
 
     if (this.isWebAudio()) {
-      this.getInputNode().connect(this.getOutputNode());
-      this.getOutputNode().connect(this.getAudioContext().destination);
+      this.__connectNodes();
     }
 
     /* Add the 'default' group. */
@@ -138,17 +138,27 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
         ...groups,
       });
 
-      Object.keys(this.groups).forEach((groupName) => {
-        const group = this.groups[groupName];
-        if (this.isWebAudio()) {
-          group.getOutputNode().connect(this.getInputNode());
-        }
-      });
+      if (this.isWebAudio()) {
+        this.__connectGroupNodes();
+      }
     }
 
     if (typeof masterVolume !== 'undefined') {
       this.setVolume(masterVolume);
     }
+  }
+
+  private __connectNodes() {
+    assertNodeIsWebAudio(this, '__connectNodes' as any);
+    this.getInputNode().connect(this.getOutputNode());
+    this.getOutputNode().connect(this.getAudioContext().destination);
+  }
+
+  private __connectGroupNodes() {
+    assertNodeIsWebAudio(this, '__connectGroupNodes' as any);
+    this.getGroups(Object.keys(this.groups)).forEach((group) => (
+      group.getOutputNode().connect(this.getInputNode())
+    ));
   }
 
   public setVolume(value: number) {
