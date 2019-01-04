@@ -105,7 +105,14 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
   public removeSounds(name: string): IGroup;
   public removeSounds(names: string[]): IGroup;
   public removeSounds(names: string | string[]) {
-    const remove = (soundName: string) => {
+    let arr: string[];
+    if (typeof names === 'string') {
+      arr = [ names ];
+    } else {
+      arr = names;
+    }
+
+    arr.forEach((soundName: string) => {
       const sounds = { ...this.sounds, };
       const sound = sounds[soundName];
       if (sound.isWebAudio()) {
@@ -114,13 +121,7 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
 
       delete sounds[soundName];
       this.__sounds = getFrozenObject(sounds);
-    };
-
-    if (typeof names === 'string') {
-      remove(names);
-    } else {
-      names.forEach(remove);
-    }
+    });
 
     return this;
   }
