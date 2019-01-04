@@ -88,6 +88,7 @@ import {
 import { assertNodeIsWebAudio } from '../assertions/assertNodeIsWebAudio';
 
 declare const webkitAudioContext: AudioContext;
+const ctxCtor = AudioContext || webkitAudioContext;
 
 export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManager {
   get type() {
@@ -114,7 +115,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
-    const ctxCtor = AudioContext || webkitAudioContext;
     if (!this.__audioContext && ctxCtor) {
       this.__audioContext = new ctxCtor();
       this.__isWebAudio = true;
@@ -132,6 +132,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
     /* Add the 'default' group. */
     this.initializeDefaultGroup();
+
     if (groups) {
       this.__groups = Object.freeze({
         ...this.__groups,
