@@ -5,6 +5,9 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertNodeIsWebAudio,
+} from '../assertions/assertNodeIsWebAudio';
+import {
   createSound,
 } from '../Sound/createSound';
 import {
@@ -13,6 +16,9 @@ import {
 import {
   generateAudioPanelElement,
 } from '../functions/generateAudioPanelElement';
+import {
+  getFrozenObject,
+} from '../functions/getFrozenObject';
 import {
   getPlaylistMessage,
 } from './getPlaylistMessage';
@@ -80,12 +86,14 @@ import {
   Playlist,
 } from '../Playlist/Playlist';
 import {
+  shallowFlattenArray,
+} from '../functions/shallowFlattenArray';
+import {
   shouldLoopPlaylist,
 } from './shouldLoopPlaylist';
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
-import { assertNodeIsWebAudio } from '../assertions/assertNodeIsWebAudio';
 
 declare const webkitAudioContext: AudioContext;
 const ctxCtor = AudioContext || webkitAudioContext;
@@ -95,17 +103,17 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return NodeTypes.Manager;
   }
 
-  private __groups: IGroupsMap = Object.freeze({});
+  private __groups: IGroupsMap = getFrozenObject();
   get groups() {
     return this.__groups;
   }
 
-  private __playlists: IPlaylistsMap = Object.freeze({});
+  private __playlists: IPlaylistsMap = getFrozenObject();
   get playlists() {
     return this.__playlists;
   }
 
-  private __submanagers: ISubmanagerMap = Object.freeze({});
+  private __submanagers: ISubmanagerMap = getFrozenObject();
   get submanagers() {
     return this.__submanagers;
   }
@@ -131,14 +139,10 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     }
 
     /* Add the 'default' group. */
-    this.initializeDefaultGroup();
+    this.__initializeDefaultGroup();
 
     if (groups) {
-      this.__groups = Object.freeze({
-        ...this.__groups,
-        ...groups,
-      });
-
+      this.__groups = getFrozenObject(this.__groups, groups);
       if (this.isWebAudio()) {
         this.__connectGroupNodes();
       }
@@ -170,21 +174,17 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   }
 
   public createGroup(options?: IGroupOptions) {
+    const opts = options || {};
     if (this.isWebAudio()) {
-      return new Group({
-        ...options,
-        context: this.getAudioContext(),
-      });
-    } else {
-      return new Group({ ...options });
+      opts.context = this.getAudioContext();
     }
+
+    return new Group(getFrozenObject(opts));
   }
 
-  public addGroup(name: string, options: IGroupOptions) {
+  public addGroup(name: string, options?: IGroupOptions) {
     const group = this.createGroup(options);
-    this.addGroups({
-      [name]: group,
-    });
+    this.addGroups({ [name]: group, });
 
     return group;
   }
@@ -202,10 +202,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       });
     }
 
-    this.__groups = Object.freeze({
-      ...this.groups,
-      ...groups,
-    });
+    this.__groups = getFrozenObject(this.groups, groups);
 
     return this;
   }
@@ -230,20 +227,20 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       delete groups[groupName];
     });
 
-    this.__groups = Object.freeze(groups);
+    this.__groups = getFrozenObject(groups);
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
-      this.initializeDefaultGroup();
+      this.__initializeDefaultGroup();
     }
 
     return this;
   }
 
-  private initializeDefaultGroup() {
+  private __initializeDefaultGroup() {
     if (this.isWebAudio()) {
       this.addGroup('default', { context: this.getAudioContext(), });
     } else {
-      this.addGroup('default', this.createGroup());
+      this.addGroup('default');
     }
   }
 
@@ -262,11 +259,8 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     }
 
     return new Promise((resolve) => (
-      Promise.all(arr.map((name) => (
-        this.getGroups(name).playAllSounds()
-      ))).then((val) => (
-        resolve(val.reduce((prev, curr) => prev.concat(curr)))
-      ))
+      Promise.all(arr.map((name) => this.getGroups(name).playAllSounds()))
+        .then((val) => resolve(shallowFlattenArray(val)))
     ));
   }
 
@@ -304,11 +298,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     const playls = playlists || {};
     const names = Object.keys(playls);
     names.forEach((playlistName) => assert(!(playlistName in this.playlists)));
-
-    this.__playlists = Object.freeze({
-      ...this.playlists,
-      ...playls,
-    });
+    this.__playlists = getFrozenObject(this.playlists, playls);
 
     return this;
   }
@@ -329,7 +319,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       names.forEach((name) => delete playls[name]);
     }
 
-    this.__playlists = Object.freeze(playls);
+    this.__playlists = getFrozenObject(playls);
 
     return this;
   }
@@ -530,11 +520,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
           this.getGroups(Object.keys(this.groups)).map((group) => (
             group.playAllSounds()
           ))
-        ).then((value) => {
-          /* Flatten event response arrays. */
-          const val = value.reduce((prev, curr) => prev.concat(curr));
-          return resolve(val);
-        });
+        ).then((value) => resolve(shallowFlattenArray(value)));
       });
     }
   }
