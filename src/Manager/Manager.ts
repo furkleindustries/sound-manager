@@ -138,15 +138,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       this.__connectNodes();
     }
 
-    /* Add the 'default' group. */
-    this.__initializeDefaultGroup();
-
-    if (groups) {
-      this.__groups = getFrozenObject(this.__groups, groups);
-      if (this.isWebAudio()) {
-        this.__connectGroupNodes();
-      }
-    }
+    this.__initializeGroups(groups);
 
     if (typeof masterVolume !== 'undefined') {
       this.setVolume(masterVolume);
@@ -157,6 +149,26 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     assertNodeIsWebAudio(this, '__connectNodes' as any);
     this.getInputNode().connect(this.getOutputNode());
     this.getOutputNode().connect(this.getAudioContext().destination);
+  }
+
+  private __initializeGroups(groups?: IGroupsMap) {
+    /* Add the 'default' group. */
+    this.__initializeDefaultGroup();
+
+    if (groups) {
+      this.__groups = getFrozenObject(this.__groups, groups);
+      if (this.isWebAudio()) {
+        this.__connectGroupNodes();
+      }
+    }
+  }
+
+  private __initializeDefaultGroup() {
+    if (this.isWebAudio()) {
+      this.addGroup('default', { context: this.getAudioContext(), });
+    } else {
+      this.addGroup('default');
+    }
   }
 
   private __connectGroupNodes() {
@@ -234,14 +246,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     }
 
     return this;
-  }
-
-  private __initializeDefaultGroup() {
-    if (this.isWebAudio()) {
-      this.addGroup('default', { context: this.getAudioContext(), });
-    } else {
-      this.addGroup('default');
-    }
   }
 
   public removeAllGroups() {
