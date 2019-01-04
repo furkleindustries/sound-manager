@@ -1,7 +1,4 @@
 import {
-  ManagerNode,
-} from '../Node/ManagerNode';
-import {
   AnalysableNodeMixin,
 } from '../Node/AnalysableNodeMixin';
 import {
@@ -16,6 +13,9 @@ import {
 import {
   generateAudioPanelElement,
 } from '../functions/generateAudioPanelElement';
+import {
+  getPlaylistMessage,
+} from './getPlaylistMessage';
 import {
   Fade,
 } from '../Fade/Fade';
@@ -68,11 +68,14 @@ import {
   ISubmanagerMap,
 } from './ISubmanagerMap';
 import {
-  NodeTypes,
-} from '../enums/NodeTypes';
+  ManagerNode,
+} from '../Node/ManagerNode';
 import {
   nameOrAllKeys,
 } from '../functions/nameOrAllKeys';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 import {
   Playlist,
 } from '../Playlist/Playlist';
@@ -82,7 +85,6 @@ import {
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
-import { getPlaylistMessage } from './getPlaylistMessage';
 
 declare const webkitAudioContext: AudioContext;
 
