@@ -343,32 +343,25 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       console.log(`${id.groupName}.${id.soundName} ending.`);
 
       if (ii === playlist.ids.length -1) {
-        this.tryPlaylistCallback(playlist, events);
-
+        /* Pass the events to the playlist's callback, if it exists. */
+        playlist.tryCallback(events);
         events = [];
 
-        if (playlist.loopIsValid()) {
+        const loopIsValid = playlist.loopIsValid();
+        /* Allow true to be used for loop, signifying an infinite loop. */
+        const loopIsTrue = playlist.loop === true
+        /* Allow integers to be used for the loop value, causing the
+         * playlist to loop that many times. */
+        const loopInBoundInteger = playlist.loop > looped;
+        const shouldLoop = loopIsTrue || loopInBoundInteger;
+        if (loopIsValid && shouldLoop) {
           console.log(`Looping playlist ${name}.`);
-          if (playlist.loop === true || playlist.loop > looped) {
-            /* This value is incremented when the loop begins a new iteration so
-             * it must be -1 rather than 0. */
-            ii = -1;
-          }
-
-          if (playlist.loop > looped) {
-            /* Allow integers to be used for the loop value, causing the
-             * playlist to loop that many times. */
-            looped += 1;
-          }
+          /* This value is incremented when the loop begins a new iteration so
+           * it must be -1 rather than 0. */
+          ii = -1;
+          looped = loopInBoundInteger ? looped + 1 : looped;
         }
       }
-    }
-  }
-
-  private tryPlaylistCallback(playlist: IPlaylist, events: Event[]) {
-    if (typeof playlist.callback === 'function') {
-      console.log(`Firing playlist ${name} callback.`);
-      playlist.callback(events);
     }
   }
 

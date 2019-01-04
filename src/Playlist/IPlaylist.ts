@@ -10,5 +10,6 @@ export interface IPlaylist {
   readonly loop: boolean | number;
   readonly ids: ISoundGroupIdentifier[];
   loopIsValid(): boolean;
-  callback?(events: Event[]): any;
+  tryCallback(events: Event[], name?: string): void;
+  callback?(events: Event[]): void;
 }

@@ -85,4 +85,14 @@ export class Playlist implements IPlaylist {
       this.loop % 1 === 0
     );
   }
+
+  public tryCallback(events: Event[], name?: string) {
+    if (typeof this.callback === 'function') {
+      console.log(
+        `Firing playlist ${name ? name : '(no name provided)'} callback.`
+      );
+
+      this.callback(events);
+    }
+  }
 }
