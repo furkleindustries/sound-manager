@@ -214,7 +214,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     });
 
     this.__groups = Object.freeze(groups);
-
     if (!('default' in this.groups)) {
       /* Re-add a (now-empty) default group. */
       this.initializeDefaultGroup();
@@ -344,32 +343,31 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       console.log(`${id.groupName}.${id.soundName} ending.`);
 
       if (ii === playlist.ids.length -1) {
-        if (playlist.callback) {
-          console.log(`Firing playlist ${name} callback.`);
-          playlist.callback(events);
-        }
+        this.tryPlaylistCallback(playlist, events);
 
         events = [];
-  
-        if (playlist.loop) {
+
+        if (playlist.loopIsValid()) {
           console.log(`Looping playlist ${name}.`);
           /* This value is incremented when the loop begins a new iteration so
            * it must be -1 rather than 0. */
-          if (typeof playlist.loop === 'number' &&
-              playlist.loop >= 1 &&
-              playlist.loop % 1 === 0)
-          {
-            /* Allow integers to be used for the loop value, causing the
-             * playlist to loop that many times. */
-            if (playlist.loop > looped) {
-              looped += 1;
-              ii = -1;
-            }
-          } else {
+          if (playlist.loop === true || playlist.loop > looped) {
             ii = -1;
+            if (typeof playlist.loop === 'number') {
+              /* Allow integers to be used for the loop value, causing the
+               * playlist to loop that many times. */
+              looped += 1;
+            }
           }
         }
       }
+    }
+  }
+
+  private tryPlaylistCallback(playlist: IPlaylist, events: Event[]) {
+    if (typeof playlist.callback === 'function') {
+      console.log(`Firing playlist ${name} callback.`);
+      playlist.callback(events);
     }
   }
 

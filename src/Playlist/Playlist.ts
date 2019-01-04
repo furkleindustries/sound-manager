@@ -77,4 +77,12 @@ export class Playlist implements IPlaylist {
       this.loop = loop;
     }
   }
+
+  public loopIsValid() {
+    return (
+      typeof this.loop === 'number' &&
+      this.loop >= 1 &&
+      this.loop % 1 === 0
+    );
+  }
 }
