@@ -79,10 +79,17 @@ export class Playlist implements IPlaylist {
   }
 
   public loopIsValid() {
+    return this.__loopIsValid(this.loop);
+  }
+
+  private __loopIsValid(value: any) {
     return (
-      typeof this.loop === 'number' &&
-      this.loop >= 1 &&
-      this.loop % 1 === 0
+      typeof value === 'boolean' || 
+      (
+        typeof this.loop === 'number' &&
+        this.loop >= 1 &&
+        this.loop % 1 === 0
+      )
     );
   }
 

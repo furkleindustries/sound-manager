@@ -349,17 +349,17 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
         const loopIsValid = playlist.loopIsValid();
         /* Allow true to be used for loop, signifying an infinite loop. */
-        const loopIsTrue = playlist.loop === true
+        const loopIsTrue = playlist.loop === true;
         /* Allow integers to be used for the loop value, causing the
          * playlist to loop that many times. */
-        const loopInBoundInteger = playlist.loop > looped;
-        const shouldLoop = loopIsTrue || loopInBoundInteger;
-        if (loopIsValid && shouldLoop) {
+        const loopIsInBoundInteger = playlist.loop > looped;
+        const shouldLoop = loopIsValid && (loopIsTrue || loopIsInBoundInteger);
+        if (shouldLoop) {
           console.log(`Looping playlist ${name}.`);
           /* This value is incremented when the loop begins a new iteration so
            * it must be -1 rather than 0. */
           ii = -1;
-          looped = loopInBoundInteger ? looped + 1 : looped;
+          looped = loopIsInBoundInteger ? looped + 1 : looped;
         }
       }
     }
