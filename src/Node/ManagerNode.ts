@@ -22,7 +22,7 @@ export class ManagerNode implements IManagerNode {
     throw new Error('Type not implemented.');
   }
 
-  private __htmlVolume: number = 1;
+  private __volume: number = 1;
   protected __audioContext: AudioContext | null = null;
   protected __isWebAudio: boolean;
   protected __gainNode: GainNode | null = null;
@@ -63,20 +63,15 @@ export class ManagerNode implements IManagerNode {
   }
 
   public getVolume() {
-    if (this.isWebAudio()) {
-      return this.getGainNode().gain.value;
-    } else {
-      return this.__htmlVolume;
-    }
+    return this.__volume;
   }
 
   public setVolume(value: number) {
+    assert(value >= 0 && value <= 1);
+    this.__volume = value;
     if (this.isWebAudio()) {
       const currentTime = this.getContextCurrentTime();
       this.getGainNode().gain.setValueAtTime(value, currentTime);
-    } else {
-      assert(value >= 0 && value <= 1);
-      this.__htmlVolume = value;
     }
 
     return this;

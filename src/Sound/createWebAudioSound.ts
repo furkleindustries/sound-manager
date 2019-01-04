@@ -1,4 +1,7 @@
 import {
+  assert,
+} from '../assertions/assert';
+import {
   ICreateSoundOptions,
 } from '../interfaces/ICreateSoundOptions';
 import {
@@ -7,17 +10,13 @@ import {
 import {
   Sound,
 } from './Sound';
-import { assert } from '../assertions/assert';
+import { assertValid } from '../assertions/assertValid';
 
 export const createWebAudioSound = (options: ICreateSoundOptions) => {
-  if (!options) {
-    throw new Error();
-  }
-
   const {
     url,
     manager,
-  } = options;
+  } = assertValid<ICreateSoundOptions>(options);
 
   assert(url);
   assert(manager);

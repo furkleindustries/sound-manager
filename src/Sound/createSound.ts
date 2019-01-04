@@ -8,6 +8,9 @@ import {
   createWebAudioSound,
 } from './createWebAudioSound';
 import {
+  getFrozenObject,
+} from '../functions/getFrozenObject';
+import {
   ICreateSoundOptions,
 } from '../interfaces/ICreateSoundOptions';
 import {
@@ -23,7 +26,7 @@ export const strings = {
 };
 
 export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
-  const optsClone = { ...options, };
+  const optsClone = getFrozenObject(options);
   const {
     manager,
   } = optsClone;

@@ -1,3 +1,3 @@
-export interface IConstructor {
-  new (...args: any[]): {};
+export interface IConstructor<T extends object = {}> {
+  new (...args: any[]): T;
 }

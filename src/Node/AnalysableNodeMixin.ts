@@ -10,9 +10,12 @@ import {
 import {
   IConstructor,
 } from '../interfaces/IConstructor';
+import {
+  IManagerNode,
+} from './IManagerNode';
 
-export function AnalysableNodeMixin<T extends IConstructor>(Base: T) {
-  return class extends Base implements IAnalysableNode {
+export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
+  return class AnalysableNodeMixin extends Base implements IAnalysableNode {
     public __analyserNode: AnalyserNode | null = null;
 
     constructor(...options: any[]) {

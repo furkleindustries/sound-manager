@@ -3,13 +3,13 @@ import {
 } from '../../src/functions/updateAudioPanelElement';
 
 import {
-  generateAudioPanelElement,
-} from '../../src/functions/generateAudioPanelElement';
-jest.mock('../../src/functions/generateAudioPanelElement');
+  generateVolumePanelElement,
+} from '../../src/functions/generateVolumePanelElement';
+jest.mock('../../src/functions/generateVolumePanelElement');
 
 describe('updateAudioPanelElement unit tests.', () => {
   beforeEach(() => {
-    (generateAudioPanelElement as any).mockClear();
+    (generateVolumePanelElement as any).mockClear();
   });
 
   it('Throws if the manager argument is falsy.', () => {
@@ -27,7 +27,7 @@ describe('updateAudioPanelElement unit tests.', () => {
     expect(() => updateAudioPanelElement(true, true)).toThrow();
   });
 
-  it('Passes the manager to generateAudioPanelElement.', () => {
+  it('Passes the manager to generateVolumePanelElement.', () => {
     const sym = Symbol('manager') as any;
     const elem = {
       parentElement: {
@@ -37,13 +37,13 @@ describe('updateAudioPanelElement unit tests.', () => {
 
     updateAudioPanelElement(sym, elem);
 
-    expect(generateAudioPanelElement).toBeCalledTimes(1);
-    expect(generateAudioPanelElement).toBeCalledWith(sym);
+    expect(generateVolumePanelElement).toBeCalledTimes(1);
+    expect(generateVolumePanelElement).toBeCalledWith(sym);
   });
 
-  it('Call\'s replaceChild on oldElem\'s parent, replacing the old element with the one from generateAudioPanelElement.', () => {
+  it('Call\'s replaceChild on oldElem\'s parent, replacing the old element with the one from generateVolumePanelElement.', () => {
     const newElem = Symbol('newElem');
-    (generateAudioPanelElement as any).mockReturnValue(newElem);
+    (generateVolumePanelElement as any).mockReturnValue(newElem);
 
     const replaceChild = jest.fn();
     const oldElem = {
@@ -56,7 +56,7 @@ describe('updateAudioPanelElement unit tests.', () => {
     expect(replaceChild).toBeCalledWith(newElem, oldElem);
   });
 
-  it('Passes the manager to generateAudioPanelElement.', () => {
+  it('Passes the manager to generateVolumePanelElement.', () => {
     const sym = Symbol('manager') as any;
     const elem = {
       parentElement: {
@@ -66,13 +66,13 @@ describe('updateAudioPanelElement unit tests.', () => {
 
     updateAudioPanelElement(sym, elem);
 
-    expect(generateAudioPanelElement).toBeCalledTimes(1);
-    expect(generateAudioPanelElement).toBeCalledWith(sym);
+    expect(generateVolumePanelElement).toBeCalledTimes(1);
+    expect(generateVolumePanelElement).toBeCalledWith(sym);
   });
 
-  it('Returns the result of generateAudioPanelElement.', () => {
+  it('Returns the result of generateVolumePanelElement.', () => {
     const newElem = Symbol('newElem');
-    (generateAudioPanelElement as any).mockReturnValue(newElem);
+    (generateVolumePanelElement as any).mockReturnValue(newElem);
 
     const elem = {
       parentElement: {

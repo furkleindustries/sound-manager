@@ -32,6 +32,9 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
+  PanelRegisterableNodeMixin,
+} from '../Node/PanelRegisterableNodeMixin';
+import {
   playAudioSource,
 } from './playAudioSource';
 import {
@@ -40,7 +43,10 @@ import {
 
 const DEBUG = false;
 
-export class Sound extends ManagerNode implements ISound {
+export class Sound
+  extends PanelRegisterableNodeMixin(ManagerNode)
+  implements ISound
+{
   get type() {
     return NodeTypes.Sound;
   }
@@ -55,7 +61,6 @@ export class Sound extends ManagerNode implements ISound {
   
   public __promise: Promise<Event> | null = null;
   public __startedTime: number = 0;
-  public __panelRegistered: boolean = false;
   public __audioElement: HTMLAudioElement | null = null;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
@@ -335,10 +340,6 @@ export class Sound extends ManagerNode implements ISound {
 
   public fastForward(seconds: number) {
     return this.setTrackPosition(this.getTrackPosition() + seconds);    
-  }
-
-  public isPanelRegistered() {
-    return this.__panelRegistered;
   }
 
   public updateAudioElementVolume() {
