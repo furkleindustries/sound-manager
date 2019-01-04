@@ -80,6 +80,8 @@ import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 
+declare const webkitAudioContext: AudioContext;
+
 export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManager {
   get type() {
     return NodeTypes.Manager;
@@ -105,16 +107,10 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
-    const ctxCtor = 
-      AudioContext ||
-      // @ts-ignore
-      webkitAudioContext;
-
-    if (!this.__audioContext) {
-      if (ctxCtor) {
-        this.__audioContext = new ctxCtor();
-        this.__isWebAudio = true;
-      }
+    const ctxCtor = AudioContext || webkitAudioContext;
+    if (!this.__audioContext && ctxCtor) {
+      this.__audioContext = new ctxCtor();
+      this.__isWebAudio = true;
     }
 
     const opts = options || {};
@@ -206,14 +202,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   public removeGroups(name: string): IManager;
   public removeGroups(name: string[]): IManager;
   public removeGroups(names: string | string[]): IManager {
-    let arr: string[];
-
-    if (typeof names === 'string') {
-      arr = [ names, ];
-    } else {
-      arr = names;
-    }
-
+    const arr: string[] = typeof names === 'string' ? [ names, ] : names;
     const groups = { ...this.groups, };
     arr.forEach((groupName) => {
       const group = groups[groupName];
