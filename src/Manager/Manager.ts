@@ -77,10 +77,11 @@ import {
   Playlist,
 } from '../Playlist/Playlist';
 import {
+  shouldLoopPlaylist,
+} from './shouldLoopPlaylist';
+import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
-import { loopIsInBoundInteger } from './loopIsInBoundInteger';
-import { shouldLoopPlaylist } from './shouldLoopPlaylist';
 
 declare const webkitAudioContext: AudioContext;
 
@@ -340,15 +341,12 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
       );
 
       playIndex += 1;
+      if (result.looped) {
+        loopedTimes += 1;
+      }
 
-      if (result) {
-        if (result.looped) {
-          loopedTimes += 1;
-        }
-
-        if (result.ended) {
-          sentinel = false;
-        }
+      if (result.ended) {
+        sentinel = false;
       }
     }
   }
@@ -386,13 +384,22 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
         console.log(`Looping playlist ${name}.`);
         /* This value is incremented when the loop begins a new iteration so
           * it must be -1 rather than 0. */
-        return { looped: true, };
+        return {
+          ended: false,
+          looped: true,
+        };
       }
 
-      return { ended: true, };
+      return {
+        ended: true,
+        looped: false,
+      };
     }
 
-    return null;
+    return {
+      ended: false,
+      looped: false,
+    };
   }
 
   public playPlaylists(name: string): Promise<void>;
