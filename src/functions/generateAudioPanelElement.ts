@@ -5,7 +5,7 @@ import {
   IManager,
 } from '../Manager/IManager';
 
-export const generateAudioPanelElement = (manager: IManager) => {
+export function generateAudioPanelElement(manager: IManager) {
   const audioPanelElement = document.createElement('div');
   audioPanelElement.className = 'sound-manager-panel';
 
@@ -21,10 +21,7 @@ export const generateAudioPanelElement = (manager: IManager) => {
     const group = manager.getGroups(groupName);
     if (group.isPanelRegistered()) {
       /* Add registered group sliders. */
-      audioPanelElement.appendChild(generateVolumeComponent(
-        group,
-        groupName,
-      ));
+      audioPanelElement.appendChild(generateVolumeComponent(group, groupName));
     }
 
     Object.keys(group.sounds).forEach((soundName) => {
