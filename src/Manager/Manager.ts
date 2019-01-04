@@ -354,9 +354,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
           /* This value is incremented when the loop begins a new iteration so
            * it must be -1 rather than 0. */
           ii = -1;
-
-          const inBound = loopIsInBoundInteger(playlist, loopedTimes);
-          loopedTimes = inBound ? loopedTimes + 1 : loopedTimes;
+          loopedTimes += 1;
         }
       }
     }
