@@ -79,6 +79,8 @@ import {
 import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
+import { loopIsInBoundInteger } from './loopIsInBoundInteger';
+import { shouldLoopPlaylist } from './shouldLoopPlaylist';
 
 declare const webkitAudioContext: AudioContext;
 
@@ -325,7 +327,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     const playlist = this.getPlaylists(name);
     console.log(`Playing playlist ${name}.`);
     let events: Event[] = [];
-    let looped = 0;
+    let loopedTimes = 0;
     for (let ii = 0; ii < playlist.ids.length; ii += 1) {
       const id = playlist.ids[ii];
       const sound = this.getSounds(id.soundName, id.groupName);
@@ -347,19 +349,14 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
         playlist.tryCallback(events);
         events = [];
 
-        const loopIsValid = playlist.loopIsValid();
-        /* Allow true to be used for loop, signifying an infinite loop. */
-        const loopIsTrue = playlist.loop === true;
-        /* Allow integers to be used for the loop value, causing the
-         * playlist to loop that many times. */
-        const loopIsInBoundInteger = playlist.loop > looped;
-        const shouldLoop = loopIsValid && (loopIsTrue || loopIsInBoundInteger);
-        if (shouldLoop) {
+        if (shouldLoopPlaylist(playlist, loopedTimes)) {
           console.log(`Looping playlist ${name}.`);
           /* This value is incremented when the loop begins a new iteration so
            * it must be -1 rather than 0. */
           ii = -1;
-          looped = loopIsInBoundInteger ? looped + 1 : looped;
+
+          const inBound = loopIsInBoundInteger(playlist, loopedTimes);
+          loopedTimes = inBound ? loopedTimes + 1 : loopedTimes;
         }
       }
     }
