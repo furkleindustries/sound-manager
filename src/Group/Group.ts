@@ -28,8 +28,14 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import {
+  PanelRegisterableNodeMixin,
+} from '../Node/PanelRegisterableNodeMixin';
 
-export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
+export class Group
+  extends PanelRegisterableNodeMixin(AnalysableNodeMixin(ManagerNode))
+  implements IGroup
+{
   get type() {
     return NodeTypes.Group;
   }
@@ -38,8 +44,6 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
   get sounds() {
     return this.__sounds;
   }
-
-  public __panelRegistered: boolean = false;
 
   constructor(options: IGroupOptions) {
     super(getFrozenObject(options));
@@ -102,8 +106,8 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     return this;
   }
 
-  public removeSounds(name: string): IGroup;
-  public removeSounds(names: string[]): IGroup;
+  public removeSounds(name: string): this;
+  public removeSounds(names: string[]): this;
   public removeSounds(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
@@ -146,8 +150,8 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     return this.playSounds(Object.keys(this.sounds));
   }
 
-  public pauseSounds(name: string): IGroup;
-  public pauseSounds(names: string[]): IGroup;
+  public pauseSounds(name: string): this;
+  public pauseSounds(names: string[]): this;
   public pauseSounds(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
@@ -171,8 +175,8 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     return this.stopSounds(name);
   }
 
-  public stopSounds(name: string): IGroup;
-  public stopSounds(names: string[]): IGroup;
+  public stopSounds(name: string): this;
+  public stopSounds(names: string[]): this;
   public stopSounds(names: string | string[]) {
     let arr: string[];
     if (typeof names === 'string') {
@@ -199,9 +203,5 @@ export class Group extends AnalysableNodeMixin(ManagerNode) implements IGroup {
     });
 
     return this;
-  }
-
-  isPanelRegistered() {
-    return this.__panelRegistered;
   }
 }

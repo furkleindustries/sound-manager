@@ -1,6 +1,6 @@
 import {
-  generateAudioPanelElement,
-} from '../../src/functions/generateAudioPanelElement';
+  generateVolumePanelElement,
+} from '../../src/functions/generateVolumePanelElement';
 
 import {
   generateVolumeComponent,
@@ -14,7 +14,7 @@ describe('generateAudioPanelElement unit tests.', () => {
   });
 
   it('Outputs a div with the class sound-manager-panel.', () => {
-    const panel = generateAudioPanelElement({
+    const panel = generateVolumePanelElement({
       groups: {},
     } as any);
 
@@ -45,7 +45,7 @@ describe('generateAudioPanelElement unit tests.', () => {
       getGroups: mock,
     } as any;
 
-    generateAudioPanelElement(manager);
+    generateVolumePanelElement(manager);
 
     expect(mock.mock.calls).toEqual([
       [ 'one', ],
@@ -76,7 +76,7 @@ describe('generateAudioPanelElement unit tests.', () => {
       getGroups: jest.fn((name) => manager.groups[name]),
     } as any;
 
-    generateAudioPanelElement(manager);
+    generateVolumePanelElement(manager);
 
     expect((generateVolumeComponent as any).mock.calls).toEqual([
       [
@@ -132,7 +132,7 @@ describe('generateAudioPanelElement unit tests.', () => {
       getGroups: jest.fn((name) => manager.groups[name]),
     } as any;
 
-    generateAudioPanelElement(manager);
+    generateVolumePanelElement(manager);
 
     expect((generateVolumeComponent as any).mock.calls).toEqual([
       [

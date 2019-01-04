@@ -85,8 +85,8 @@
       manager.updatePanelRegistration(sounds[0], true);
       document.body.appendChild(manager.generateAudioPanelElement());
       clicky.addEventListener('click', () => {
-        manager.playPlaylist('testPlaylist').then((e) => {
-          console.log(e);
+        manager.playPlaylist('testPlaylist').then(() => {
+          console.log('All done!');
         }, (err) => {
           console.log(err);
         });

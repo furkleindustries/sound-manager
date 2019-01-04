@@ -2,33 +2,36 @@ import {
   generateVolumeComponent,
 } from './generateVolumeComponent';
 import {
-  IManager,
-} from '../Manager/IManager';
+  IManagerNode,
+} from '../Node/IManagerNode';
+import {
+  INodeCollectionSubmanager,
+} from '../Manager/Submanagers/INodeCollectionSubmanager';
 
-export function generateAudioPanelElement(manager: IManager) {
-  const audioPanelElement = document.createElement('div');
-  audioPanelElement.className = 'sound-manager-panel';
+export function generateVolumePanelElement(manager: IManagerNode & INodeCollectionSubmanager) {
+  const volumePanelElement = document.createElement('div');
+  volumePanelElement.className = 'sound-manager-panel';
 
   const title = document.createElement('h2');
   title.className = 'sound-manager-title';
   title.textContent = 'Sound Manager Options';
-  audioPanelElement.appendChild(title);
+  volumePanelElement.appendChild(title);
 
   /* Add the master volume slider. */
-  audioPanelElement.appendChild(generateVolumeComponent(manager));
+  volumePanelElement.appendChild(generateVolumeComponent(manager));
 
   Object.keys(manager.groups).forEach((groupName) => {
     const group = manager.getGroups(groupName);
     if (group.isPanelRegistered()) {
       /* Add registered group sliders. */
-      audioPanelElement.appendChild(generateVolumeComponent(group, groupName));
+      volumePanelElement.appendChild(generateVolumeComponent(group, groupName));
     }
 
     Object.keys(group.sounds).forEach((soundName) => {
       const sound = group.getSounds(soundName);
       if (sound.isPanelRegistered()) {
         /* Add registered sound sliders. */
-        audioPanelElement.appendChild(generateVolumeComponent(
+        volumePanelElement.appendChild(generateVolumeComponent(
           sound,
           soundName,
         ));
@@ -36,5 +39,5 @@ export function generateAudioPanelElement(manager: IManager) {
     });
   });
 
-  return audioPanelElement;
+  return volumePanelElement;
 };
