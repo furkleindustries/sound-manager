@@ -330,7 +330,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   public async playPlaylist(name: string) {
     const playlist = this.getPlaylists(name);
     console.log(`Playing playlist ${name}.`);
-    let events: Event[] = [];
+    const events: Event[] = [];
     let playIndex = 0;
     let loopedTimes = 0;
     let sentinel = true;
@@ -353,9 +353,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
         loopedTimes += 1;
       }
 
-      if (result.ended) {
-        sentinel = false;
-      }
+      sentinel = result.ended;
     }
   }
 
