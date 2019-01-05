@@ -187,7 +187,7 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IN
         /* Pass the events to the playlist's callback, if it exists. */
         playlist.tryCallback(events, name);
         /* Empty the list. */
-        events.forEach(events.pop);
+        events.splice(0, events.length);
 
         if (shouldLoopPlaylist(playlist, loopedTimes)) {
           /* This value is incremented when the loop begins a new iteration so

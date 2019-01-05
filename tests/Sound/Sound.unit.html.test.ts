@@ -458,6 +458,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     const getManagerVolume = jest.fn();
     const sound = testSoundFactory({ getManagerVolume, });
 
+    // @ts-ignore
     expect(sound.getManagerVolume).toBe(getManagerVolume);
   });
 
@@ -507,29 +508,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Returns 1 from getFadeVolume if there is no fade.', () => {
     expect(testSoundFactory().getFadeVolume()).toBe(1);
-  });
-
-  it('Has a clearFadeState function which clears the fade override, cancels the fade volume scheduling, and sets the fade volume to 1.', () => {
-    const sound = testSoundFactory();
-    const fade = {
-      easingCurve: {
-        in: EasingCurves.EqualPower,
-        out: EasingCurves.Cubic,
-      },
-
-      length: {
-        in: 2,
-        out: 2,
-      },
-    };
-
-    sound.play(fade);
-
-    expect((sound as any).__fadeOverride).toEqual(fade);
-
-    sound.clearFadeState();
-
-    expect((sound as any).__fadeOverride).toBeUndefined();
   });
 
   it('Defaults to an isPanelRegistered() of false.', () => {

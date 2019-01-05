@@ -55,6 +55,7 @@ import {
 import {
   warn,
 } from '../logging/warn';
+import { isValidVolume } from '../functions/isValidVolume';
 
 export class Sound
   extends PanelRegisterableNodeMixin(ManagerNode)
@@ -114,7 +115,7 @@ export class Sound
       throw new Error();
     }
 
-    if (typeof volume !== 'undefined' && volume >= 0 && volume <= 1) {
+    if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
 

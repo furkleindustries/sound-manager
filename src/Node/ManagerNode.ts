@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
@@ -16,6 +13,7 @@ import {
 import {
   IManagerNodeOptions,
 } from './IManagerNodeOptions';
+import { isValidVolume } from '../functions/isValidVolume';
 
 export class ManagerNode implements IManagerNode {
   get type(): NodeTypes {
@@ -67,7 +65,7 @@ export class ManagerNode implements IManagerNode {
   }
 
   public setVolume(value: number) {
-    assert(value >= 0 && value <= 1);
+    assertValid(value, '', isValidVolume);
     this.__volume = value;
     if (this.isWebAudio()) {
       const currentTime = this.getContextCurrentTime();
