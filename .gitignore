@@ -4,6 +4,8 @@
 *.swp
 *.tmp
 
+typedocs/
+
 coverage/
 dist/
 node_modules/

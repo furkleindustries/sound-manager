@@ -2,7 +2,7 @@ documentation/
 tests/
 .vscode/
 
-typedocs*
+typedocs/
 
 *.code-workspace
 *.log
