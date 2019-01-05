@@ -597,6 +597,7 @@ describe('Sound Web Audio unit tests.', () => {
     const getManagerVolume = jest.fn();
     const sound = testSoundFactory({ getManagerVolume, });
 
+    // @ts-ignore
     expect(sound.getManagerVolume).toBe(getManagerVolume);
   });
 

@@ -14,9 +14,6 @@ import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
 import {
-  getFrozenObject,
-} from '../functions/getFrozenObject';
-import {
   getNewSourceNode,
 } from './getNewSourceNode';
 import {
@@ -47,6 +44,9 @@ import {
   playAudioSource,
 } from './playAudioSource';
 import {
+  setPerPlaySoundOverrides,
+} from './setPerPlaySoundOverrides';
+import {
   updateSoundTimes,
 } from './updateSoundTimes';
 import {
@@ -63,19 +63,22 @@ export class Sound
 
   private __audioElement: HTMLAudioElement | null = null;
   private __fade: IFade | null = null;
-  private __fadeOverride?: IFade;
-  private __loopOverride?: boolean;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
-
+  
   public __fadeGainNode: GainNode | null = null;
+  public __fadeOverride?: IFade;
+  public __loopOverride?: boolean;
   public __promise: Promise<Event> | null = null;
   public __sourceNode: AudioBufferSourceNode | null = null;
   public __startedTime: number = 0;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
 
-  public readonly getManagerVolume: () => number;
+  private readonly getManagerVolume: () => number = () => {
+    throw new Error('getManagerVolume not initialized.');
+  };
+
   public getGroupVolume: () => number;
 
   constructor(options: ISoundOptions) {
@@ -95,9 +98,9 @@ export class Sound
     if (!this.isWebAudio()) {
       /* Needed to calculate volume for HTML5 audio. */
       assert(typeof getManagerVolume === 'function');
+      this.getManagerVolume = getManagerVolume;
     }
 
-    this.getManagerVolume = getManagerVolume;
     this.getGroupVolume = () => 1;
 
     if (context) {
@@ -236,7 +239,8 @@ export class Sound
 
   public play(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const isWebAudio = this.isWebAudio();
-    updateSoundTimes(this, assertValid<HTMLAudioElement>(this.__audioElement));
+    const audioElem = this.__audioElement;
+    updateSoundTimes(this, audioElem);
 
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
@@ -244,7 +248,7 @@ export class Sound
     if (!this.__promise) {
       /* Sets the private override properties e.g. if this sound is part of a
        * playlist. */
-      this.__setOverrides(fadeOverride, loopOverride);
+      setPerPlaySoundOverrides(this, fadeOverride, loopOverride);
       /* Generates the promise and registers events. */
       if (isWebAudio) {
         initializeSoundForPlay(this);
@@ -264,16 +268,6 @@ export class Sound
     /* Emit the promise that was either just generated or emitted on previous
      * unfinished plays. */
     return this.__promise!;
-  }
-
-  private __setOverrides(fadeOverride?: IFade | null, loopOverride?: boolean) {
-    if (fadeOverride) {
-      this.__fadeOverride = getFrozenObject({ ...fadeOverride, });
-    }
-
-    if (typeof loopOverride === 'boolean') {
-      this.__loopOverride = loopOverride;
-    }
   }
 
   public pause() {
