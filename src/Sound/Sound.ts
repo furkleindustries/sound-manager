@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
@@ -10,9 +7,6 @@ import {
 import {
   clearScheduledFadesOnSound,
 } from './clearScheduledFadesOnSound';
-import {
-  Fade,
-} from '../Fade/Fade';
 import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
@@ -34,9 +28,6 @@ import {
 import {
   initializeSoundForWebAudio,
 } from './initializeSoundForWebAudio';
-import {
-  isValidVolume,
-} from '../functions/isValidVolume';
 import {
   ManagerNode,
 } from '../Node/ManagerNode';
@@ -193,7 +184,7 @@ export class Sound
     if (this.isWebAudio()) {
       const sourceNode = this.getSourceNode();
       if (!sourceNode.buffer) {
-        warn('Audio buffer empty or not found for Sound.');
+        warn('Audio buffer not found for Sound.');
         return 0;
       }
 
