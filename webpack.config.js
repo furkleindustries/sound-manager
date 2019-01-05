@@ -1,5 +1,4 @@
 const path = require('path');
-const TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 
 const mode = process.env.NODE_ENV === 'development' ?
   'development' :
