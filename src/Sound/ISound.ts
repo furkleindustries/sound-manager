@@ -18,7 +18,7 @@ export interface ISound extends IManagerNode, IPanelRegisterableNode {
   getDuration(): number;
   isPlaying(): boolean;
   getLoop(): boolean;
-  setLoop(doLoop: boolean): this;
+  setLoop(loop: boolean | number): this;
   getFade(): IFade | null;
   setFade(fade: IFade | null): this;
   play(fadeOverride?: IFade | null): Promise<Event>;

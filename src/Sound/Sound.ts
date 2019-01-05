@@ -35,6 +35,9 @@ import {
   initializeSoundForWebAudio,
 } from './initializeSoundForWebAudio';
 import {
+  isValidVolume,
+} from '../functions/isValidVolume';
+import {
   ManagerNode,
 } from '../Node/ManagerNode';
 import {
@@ -55,7 +58,18 @@ import {
 import {
   warn,
 } from '../logging/warn';
-import { isValidVolume } from '../functions/isValidVolume';
+import {
+  trySetSoundFade,
+} from './trySetSoundFade';
+import {
+  trySetSoundLoop,
+} from './trySetSoundLoop';
+import {
+  trySetSoundTrackPosition,
+} from './trySetSoundTrackPosition';
+import {
+  trySetSoundVolume,
+} from './trySetSoundVolume';
 
 export class Sound
   extends PanelRegisterableNodeMixin(ManagerNode)
@@ -115,21 +129,10 @@ export class Sound
       throw new Error();
     }
 
-    if (isValidVolume(volume)) {
-      this.setVolume(volume);
-    }
-
-    if (typeof loop === 'boolean') {
-      this.setLoop(loop);
-    }
-
-    if (fade) {
-      this.__fade = typeof fade === 'boolean' ? new Fade() : new Fade(fade);
-    }
-
-    if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
-      this.setTrackPosition(trackPosition);
-    }
+    trySetSoundFade(this, fade);
+    trySetSoundLoop(this, loop);
+    trySetSoundTrackPosition(this, trackPosition);
+    trySetSoundVolume(this, volume);
   }
 
   public getInputNode() {
