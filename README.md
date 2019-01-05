@@ -5,3 +5,7 @@
 ## Introduction
 
 A full-service sound manager designed for use with hypertext fiction systems like Twine or Accelerate.
+
+## Type documentation
+
+There is a full set of type-oriented API documentation [here](/typedocs/markdown/).

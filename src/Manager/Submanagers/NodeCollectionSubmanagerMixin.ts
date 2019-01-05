@@ -2,6 +2,9 @@ import {
   assert,
 } from '../../assertions/assert';
 import {
+  assertValid,
+} from '../../assertions/assertValid';
+import {
   createGroup,
 } from '../../Group/createGroup';
 import {
@@ -137,13 +140,10 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
       groupName: string = 'default',
     ): Promise<ISound>
     {
-      const opts = options || {};
+      const opts = getFrozenObject(assertValid<ICreateSoundOptions>(options));
       return new Promise((resolve) => {
         createSound(opts).then((sound) => {
-          this.addSounds({
-            [name]: sound,
-          }, groupName);
-
+          this.addSounds({ [name]: sound }, groupName);
           return resolve(sound);
         });
       });

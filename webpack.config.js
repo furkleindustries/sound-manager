@@ -1,10 +1,14 @@
 const path = require('path');
 
+const mode = process.env.NODE_ENV === 'development' ?
+  'development' :
+  'production';
+
 module.exports = {
   entry: './src/index.ts',
   devtool: 'source-map',
-  mode: process.env.NODE_ENV === 'development' ? 'development' : 'production',
-  
+  mode,
+
   module: {
     rules: [
       {
@@ -14,15 +18,21 @@ module.exports = {
       }
     ]
   },
-  
+
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js' ]
+    extensions: [
+      '.tsx',
+      '.ts',
+      '.js',
+    ],
   },
-  
+
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
     library: 'soundManager',
     libraryTarget: 'umd',
   },
+
+  plugins: [],
 };

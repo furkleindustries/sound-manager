@@ -1,0 +1,9 @@
+{
+  "lib": "lib.dom.d.ts,lib.esnext.d.ts",
+  "mode": "file",
+  "include": "./src/**/*",
+  "exclude": [
+    "**/node_modules/**/*.*",
+    "./tests/**/*"
+  ]
+}

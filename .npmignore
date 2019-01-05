@@ -2,6 +2,8 @@ documentation/
 tests/
 .vscode/
 
+typedocs*
+
 *.code-workspace
 *.log
 *.swp

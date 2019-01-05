@@ -6,6 +6,9 @@
   "scripts": {
     "build": "cross-env NODE_ENV=development webpack --verbose",
     "build:prod": "cross-env NODE_ENV=production webpack",
+    "build:docs": "npm run build:docs-md && npm run build:docs-html",
+    "build:docs-md": "typedoc --theme markdown --options ./typedoc.json --out typedocs/markdown",
+    "build:docs-html": "typedoc --options ./typedoc.json --out typedocs/html",
     "test": "jest",
     "test-watch": "jest --watch",
     "test-coverage": "jest --coverage",
@@ -34,6 +37,8 @@
     "jest": "^23.6.0",
     "ts-jest": "^23.10.5",
     "ts-loader": "^5.3.1",
+    "typedoc": "^0.13.0",
+    "typedoc-plugin-markdown": "^1.1.20",
     "typescript": "^3.2.2",
     "web-audio-test-api": "^0.5.2",
     "webpack": "^4.27.1",
