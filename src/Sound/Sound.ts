@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
@@ -10,9 +7,6 @@ import {
 import {
   clearScheduledFadesOnSound,
 } from './clearScheduledFadesOnSound';
-import {
-  Fade,
-} from '../Fade/Fade';
 import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
@@ -55,7 +49,18 @@ import {
 import {
   warn,
 } from '../logging/warn';
-import { isValidVolume } from '../functions/isValidVolume';
+import {
+  trySetSoundFade,
+} from './trySetSoundFade';
+import {
+  trySetSoundLoop,
+} from './trySetSoundLoop';
+import {
+  trySetSoundTrackPosition,
+} from './trySetSoundTrackPosition';
+import {
+  trySetSoundVolume,
+} from './trySetSoundVolume';
 
 export class Sound
   extends PanelRegisterableNodeMixin(ManagerNode)
@@ -80,10 +85,9 @@ export class Sound
   public __promise: Promise<Event> | null = null;
   public __sourceNode: AudioBufferSourceNode | null = null;
   public __startedTime: number = 0;
+  public getGroupVolume: () => number = () => 1;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
-
-  public getGroupVolume: () => number;
 
   constructor(options: ISoundOptions) {
     super(options);
@@ -91,7 +95,6 @@ export class Sound
     const {
       audioElement,
       buffer,
-      context,
       fade,
       getManagerVolume,
       loop,
@@ -99,37 +102,22 @@ export class Sound
       volume,
     } = options;
 
-    if (!this.isWebAudio()) {
-      /* Needed to calculate volume for HTML5 audio. */
-      assert(typeof getManagerVolume === 'function');
-      this.getManagerVolume = getManagerVolume;
-    }
-
-    this.getGroupVolume = () => 1;
-
-    if (context) {
+    if (this.isWebAudio()) {
       initializeSoundForWebAudio(this, assertValid<AudioBuffer>(buffer));
-    } else if (audioElement) {
-      this.__audioElement = audioElement;
     } else {
-      throw new Error();
+      this.__audioElement = assertValid<HTMLAudioElement>(audioElement);
+      /* Needed to calculate volume for HTML5 audio. */
+      this.getManagerVolume = assertValid<() => number>(
+        getManagerVolume,
+        '',
+        (aa) => typeof aa === 'function',
+      );
     }
 
-    if (isValidVolume(volume)) {
-      this.setVolume(volume);
-    }
-
-    if (typeof loop === 'boolean') {
-      this.setLoop(loop);
-    }
-
-    if (fade) {
-      this.__fade = typeof fade === 'boolean' ? new Fade() : new Fade(fade);
-    }
-
-    if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
-      this.setTrackPosition(trackPosition);
-    }
+    trySetSoundFade(this, fade);
+    trySetSoundLoop(this, loop);
+    trySetSoundTrackPosition(this, trackPosition);
+    trySetSoundVolume(this, volume);
   }
 
   public getInputNode() {
@@ -196,7 +184,7 @@ export class Sound
     if (this.isWebAudio()) {
       const sourceNode = this.getSourceNode();
       if (!sourceNode.buffer) {
-        warn('Audio buffer empty or not found for Sound.');
+        warn('Audio buffer not found for Sound.');
         return 0;
       }
 
@@ -231,11 +219,11 @@ export class Sound
     return this;
   }
 
-  public setLoop(doLoop: boolean) {
+  public setLoop(loop: boolean) {
     if (this.isWebAudio()) {
-      this.getSourceNode().loop = doLoop;
+      this.getSourceNode().loop = loop;
     } else {
-      assertValid<HTMLAudioElement>(this.__audioElement).loop = doLoop;
+      assertValid<HTMLAudioElement>(this.__audioElement).loop = loop;
     }
 
     return this;
