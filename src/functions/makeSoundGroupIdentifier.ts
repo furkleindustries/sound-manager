@@ -13,21 +13,12 @@ export function makeSoundGroupIdentifier(value: TSoundGroupIdentifierArg): ISoun
   if (typeof value === 'string') {
     /* Allow 'groupName.soundName' strings and coerce them to
      * ISoundGroupIdentifiers. */
-    const split = value.split('.');
-    return split.length === 1 ?
-      /* Interpret 'soundName' as 'default.soundName'. */
-      {
-        groupName: 'default',
-        soundName: split[0],
-      } : {
-        groupName: split[0],
-        soundName: split[1],
-      };
+    return structureSoundGroupIdentifier.apply(
+      null,
+      value.split('.') as [ string ] | [ string, string ],
+    );
   } else if (Array.isArray(value) && value.length === 2) {
-    return {
-      groupName: value[0],
-      soundName: value[1],
-    };
+    return structureSoundGroupIdentifier(value[0], value[1]);
   } else if (typeof value === 'object' &&
     'groupName' in value &&
     'soundName' in value)
@@ -36,4 +27,18 @@ export function makeSoundGroupIdentifier(value: TSoundGroupIdentifierArg): ISoun
   }
 
   throw new Error();
+}
+
+export function structureSoundGroupIdentifier(soundName: string, groupName?: string): ISoundGroupIdentifier {
+  if (groupName) {
+    return {
+      groupName,
+      soundName,
+    };
+  }
+
+  return {
+    soundName,
+    groupName: 'default',
+  };
 }
