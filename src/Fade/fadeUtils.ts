@@ -22,7 +22,10 @@ export function fadeArgumentToFadeProperty<T>(arg: TFadeArg<T>, defaultValue: T 
 export function argToPropHelper<T>(
   arg: TFadeArg<T>,
   validator: (arg: T) => boolean
-): { valids: [ boolean, boolean ], value: IFadeProperty<T>, }
+): {
+  valids: [ boolean, boolean ],
+  value: IFadeProperty<T>,
+}
 {
   if (validatorWrapper<T>(arg, validator)) {
     return {
@@ -54,7 +57,11 @@ export function argToPropHelper<T>(
   throw new Error();
 }
 
-export function validatorWrapper<T>(arg: any, validator: (arg: any) => boolean): arg is T {
+export function validatorWrapper<T>(
+  arg: any,
+  validator: (arg: any) => boolean,
+): arg is T
+{
   return arg === null || validator(arg);
 }
 

@@ -14,9 +14,9 @@ import { getOneOrMany } from '../../functions/getOneOrMany';
 import { assert } from '../../assertions/assert';
 import { ISoundGroupIdentifier } from '../../interfaces/ISoundGroupIdentifier';
 import { IPlaylistOptions } from '../../Playlist/IPlaylistOptions';
-import { IFactorySubmanager } from './IFactorySubmanager';
+import { createPlaylist } from '../../Playlist/createPlaylist';
 
-export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IFactorySubmanager & INodeCollectionSubmanager>>(Base: T) {
+export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & INodeCollectionSubmanager>>(Base: T) {
   return class NodePlaySubmanagerMixin extends Base implements INodePlaySubmanager {
     public __playlists: IPlaylistsMap = getFrozenObject();
     get playlists() {
@@ -91,8 +91,8 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IF
     public addPlaylist(name: string, options: IPlaylistOptions): IPlaylist
     public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions) {
       const playlist = Array.isArray(options) ?
-        this.createPlaylist({ ids: getFrozenObject(options), }) :
-        this.createPlaylist(getFrozenObject(options));
+        createPlaylist({ ids: getFrozenObject(options), }) :
+        createPlaylist(getFrozenObject(options));
   
       this.addPlaylists({ [name]: playlist });
   
@@ -148,6 +148,7 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IF
           events,
           playIndex,
           loopedTimes,
+          name,
         );
 
         console.log(`${id.groupName}.${id.soundName} ending.`);
@@ -163,11 +164,12 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IF
       }
     }
 
-    async playlistPlaySound(
+    public async playlistPlaySound(
       playlist: IPlaylist,
       events: Event[],
       playIndex: number,
       loopedTimes: number,
+      name?: string,
     )
     {
       const id = playlist.ids[playIndex];
@@ -183,9 +185,9 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IF
 
       if (playIndex === playlist.ids.length - 1) {
         /* Pass the events to the playlist's callback, if it exists. */
-        playlist.tryCallback(events);
+        playlist.tryCallback(events, name);
         /* Empty the list. */
-        events.forEach(events.pop);
+        events.splice(0, events.length);
 
         if (shouldLoopPlaylist(playlist, loopedTimes)) {
           /* This value is incremented when the loop begins a new iteration so
@@ -243,7 +245,7 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IF
           this.getSounds(id.soundName, id.groupName).stop();
           stopped[id.groupName][id.soundName] = true;
         });
-      }, []);
+      });
 
       return this;
     }

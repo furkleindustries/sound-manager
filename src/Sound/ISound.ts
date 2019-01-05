@@ -26,13 +26,14 @@ export interface ISound extends IManagerNode, IPanelRegisterableNode {
   stop(): this;
   rewind(seconds: number): this;
   fastForward(seconds: number): this;
-  getManagerVolume(): number;
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): this;
-  clearFadeState(): this;
+  __sourceNode: AudioBufferSourceNode | null;
+  __fadeGainNode: GainNode | null;
+  __fadeOverride?: IFade;
+  __loopOverride?: boolean;
   __startedTime: number;
   __promise: Promise<Event> | null;
-  __audioElement: HTMLAudioElement | null;
   __rejectOnStop: () => void;
 }

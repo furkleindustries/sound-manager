@@ -3,7 +3,7 @@ import {
 } from '../assertions/assert';
 import {
   ICreateSoundOptions,
-} from '../interfaces/ICreateSoundOptions';
+} from './ICreateSoundOptions';
 import {
   Sound,
 } from '../Sound/Sound';

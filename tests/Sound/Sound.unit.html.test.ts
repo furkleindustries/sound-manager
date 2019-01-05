@@ -127,6 +127,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a getDuration function which returns the duration of the audio element.', () => {
     const sound = testSoundFactory();
     const dur = 12;
+    // @ts-ignore
     Object.assign(sound.__audioElement, { duration: dur, });
     expect(sound.getDuration()).toBe(dur);
   });
@@ -137,11 +138,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a playing value which defaults to false.', () => {
     expect(testSoundFactory().isPlaying()).toBe(false);
-  });
-
-  it('Allows setting the playing value through the autoplay property of the options object.', () => {    
-    const autoplay = true;
-    expect(testSoundFactory({ autoplay, }).isPlaying()).toBe(autoplay);
   });
 
   it('Has a getLoop function which returns a boolean.', () => {
@@ -462,6 +458,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     const getManagerVolume = jest.fn();
     const sound = testSoundFactory({ getManagerVolume, });
 
+    // @ts-ignore
     expect(sound.getManagerVolume).toBe(getManagerVolume);
   });
 
@@ -511,29 +508,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Returns 1 from getFadeVolume if there is no fade.', () => {
     expect(testSoundFactory().getFadeVolume()).toBe(1);
-  });
-
-  it('Has a clearFadeState function which clears the fade override, cancels the fade volume scheduling, and sets the fade volume to 1.', () => {
-    const sound = testSoundFactory();
-    const fade = {
-      easingCurve: {
-        in: EasingCurves.EqualPower,
-        out: EasingCurves.Cubic,
-      },
-
-      length: {
-        in: 2,
-        out: 2,
-      },
-    };
-
-    sound.play(fade);
-
-    expect((sound as any).__fadeOverride).toEqual(fade);
-
-    sound.clearFadeState();
-
-    expect((sound as any).__fadeOverride).toBeUndefined();
   });
 
   it('Defaults to an isPanelRegistered() of false.', () => {

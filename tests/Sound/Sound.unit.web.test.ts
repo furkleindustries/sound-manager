@@ -48,26 +48,14 @@ describe('Sound Web Audio unit tests.', () => {
     expect(func).toThrow();
   });
 
-  it('Throws an error if the getManagerVolume argument property is not a function.', () => {
-    const func = () => (
-      // @ts-ignore
-      new Sound({})
-    );
-
-    expect(func).toThrow();
-  });
-
   it('Throws an error if neither a context nor an audioElement property were provided.', () => {
-    const func = () => new Sound({ getManagerVolume: jest.fn(), });
+    const func = () => new Sound({} as any);
     expect(func).toThrow();
   });
 
   it('Throws an error if the buffer is missing.', () => {
     const func = () => (
-      new Sound({
-        context: getContext(),
-        getManagerVolume: jest.fn(),
-      })
+      new Sound({ context: getContext() } as any)
     );
 
     expect(func).toThrow();
@@ -221,11 +209,6 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Has a playing value which defaults to false.', () => {
     expect(testSoundFactory().isPlaying()).toBe(false);
-  });
-
-  it('Allows setting the playing value through the autoplay property of the options object.', () => {    
-    const autoplay = true;
-    expect(testSoundFactory({ autoplay, }).isPlaying()).toBe(autoplay);
   });
 
   it('Has a getLoop function which returns a boolean.', () => {
@@ -598,13 +581,6 @@ describe('Sound Web Audio unit tests.', () => {
     expect(ret).toBe(sound);
   });
 
-  it('Has a getManagerVolume argument which is used as the getManagerVolume method.', () => {
-    const getManagerVolume = jest.fn();
-    const sound = testSoundFactory({ getManagerVolume, });
-
-    expect(sound.getManagerVolume).toBe(getManagerVolume);
-  });
-
   it('Has a getGroupVolume function which returns a number betweeen 0 and 1 inclusive.', () => {
     const volume = testSoundFactory().getGroupVolume();
 
@@ -659,29 +635,6 @@ describe('Sound Web Audio unit tests.', () => {
     }));
 
     expect(sound.getFadeVolume()).toBe(1);
-  });
-
-  it('Has a clearFadeState function which clears the fade override, cancels the fade volume scheduling, and sets the fade volume to 1.', () => {
-    const sound = testSoundFactory();
-    const fade = {
-      easingCurve: {
-        in: EasingCurves.EqualPower,
-        out: EasingCurves.Cubic,
-      },
-
-      length: {
-        in: 2,
-        out: 2,
-      },
-    };
-
-    sound.play(fade);
-
-    expect((sound as any).__fadeOverride).toEqual(fade);
-
-    sound.clearFadeState();
-
-    expect((sound as any).__fadeOverride).toBeUndefined();
   });
 
   it('Defaults to an isPanelRegistered() of false.', () => {

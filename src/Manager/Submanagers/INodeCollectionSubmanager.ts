@@ -5,7 +5,7 @@ import { ISoundsMap } from '../../Group/ISoundsMap';
 import { ISound } from '../../Sound/ISound';
 import { IGroup } from '../../Group/IGroup';
 import { IGroupOptions } from '../../Group/IGroupOptions';
-import { IManagerCreateSoundOptions } from '../../interfaces/IManagerCreateSoundOptions';
+import { ICreateSoundOptions } from '../../Sound/ICreateSoundOptions';
 
 export interface INodeCollectionSubmanager {
   readonly groups: IGroupsMap;
@@ -22,7 +22,7 @@ export interface INodeCollectionSubmanager {
   setGroupVolume(value: number, groupName?: string): this;
   addSound(
     name: string,
-    options: IManagerCreateSoundOptions,
+    options: ICreateSoundOptions,
     groupName?: string,
   ): Promise<ISound>;
   addSounds(sounds: ISoundsMap, groupName?: string): this;
@@ -33,4 +33,5 @@ export interface INodeCollectionSubmanager {
   removeAllSounds(groupName?: string): this;
   getSoundVolume(name: string, groupName?: string): number;
   setSoundVolume(name: string, value: number, groupName?: string): this;
+  updateAllAudioElementsVolume(): this;
 }
