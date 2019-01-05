@@ -2,6 +2,12 @@ import {
   assert,
 } from '../../assertions/assert';
 import {
+  createGroup,
+} from '../../Group/createGroup';
+import {
+  createSound,
+} from '../../Sound/createSound';
+import {
   doToOneOrMany,
 } from '../../functions/doToOneOrMany';
 import {
@@ -14,8 +20,8 @@ import {
   IConstructor,
 } from '../../interfaces/IConstructor';
 import {
-  IFactorySubmanager,
-} from './IFactorySubmanager';
+  ICreateSoundOptions,
+} from '../../Sound/ICreateSoundOptions';
 import {
   IGroup,
 } from '../../Group/IGroup';
@@ -25,9 +31,6 @@ import {
 import {
   IGroupsMap,
 } from '../IGroupsMap';
-import {
-  IManagerCreateSoundOptions,
-} from '../../interfaces/IManagerCreateSoundOptions';
 import {
   IManagerNode,
 } from '../../Node/IManagerNode';
@@ -44,7 +47,7 @@ import {
   nameOrAllKeys,
 } from '../../functions/nameOrAllKeys';
 
-export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNode & IFactorySubmanager>>(Base: T) {
+export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNode>>(Base: T) {
   return class NodeCollectionSubmanagerMixin extends Base implements INodeCollectionSubmanager {
     public __groups: IGroupsMap = getFrozenObject();
     get groups() {
@@ -52,8 +55,8 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
     }
 
     public addGroup(name: string, options?: IGroupOptions) {
-      const group = this.createGroup(options);
-      this.addGroups({ [name]: group, });
+      const group = createGroup(options);
+      this.addGroups({ [name]: group });
 
       return group;
     }
@@ -130,13 +133,13 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
 
     public addSound(
       name: string,
-      options: IManagerCreateSoundOptions,
+      options: ICreateSoundOptions,
       groupName: string = 'default',
     ): Promise<ISound>
     {
       const opts = options || {};
       return new Promise((resolve) => {
-        this.createSound(opts).then((sound) => {
+        createSound(opts).then((sound) => {
           this.addSounds({
             [name]: sound,
           }, groupName);
@@ -181,6 +184,16 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
 
     public setSoundVolume(name: string, value: number, groupName: string = 'default') {
       this.getGroups(groupName).getSounds(name).setVolume(value);
+      return this;
+    }
+
+    public updateAllAudioElementsVolume() {
+      doToOneOrMany(
+        this.groups,
+        Object.keys(this.groups),
+        'updateAllAudioElementsVolume',
+      );
+  
       return this;
     }
   };

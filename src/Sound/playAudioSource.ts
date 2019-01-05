@@ -1,8 +1,11 @@
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   ISound,
 } from './ISound';
 
-export function playAudioSource(sound: ISound) {
+export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| null) {
   const trackPosition = sound.getTrackPosition();
   if (sound.isWebAudio()) {
     /* Play the source node, respecting a possible pause. */
@@ -12,6 +15,6 @@ export function playAudioSource(sound: ISound) {
      * and sound volumes. */
     sound.updateAudioElementVolume();
     /* Starts the audio element. This may involve buffering. */
-    sound.__audioElement!.play();
+    assertValid<HTMLAudioElement>(audioElement).play();
   }
 }

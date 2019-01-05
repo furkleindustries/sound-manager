@@ -223,11 +223,6 @@ describe('Sound Web Audio unit tests.', () => {
     expect(testSoundFactory().isPlaying()).toBe(false);
   });
 
-  it('Allows setting the playing value through the autoplay property of the options object.', () => {    
-    const autoplay = true;
-    expect(testSoundFactory({ autoplay, }).isPlaying()).toBe(autoplay);
-  });
-
   it('Has a getLoop function which returns a boolean.', () => {
     expect(typeof testSoundFactory().getLoop()).toBe('boolean');
   });

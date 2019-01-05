@@ -11,9 +11,6 @@ import {
   Fade,
 } from '../Fade/Fade';
 import {
-  getFadeValueAtTime,
-} from '../functions/getFadeValueAtTime';
-import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -25,6 +22,9 @@ import {
 import {
   initializeSoundForPlay,
 } from './initializeSoundForPlay';
+import {
+  initializeSoundForWebAudio,
+} from './initializeSoundForWebAudio';
 import {
   ManagerNode,
 } from '../Node/ManagerNode';
@@ -40,6 +40,9 @@ import {
 import {
   updateSoundTimes,
 } from './updateSoundTimes';
+import { getNewSourceNode } from './getNewSourceNode';
+import { getFadeVolume } from '../Fade/getFadeVolume';
+import { getFrozenObject } from '../functions/getFrozenObject';
 
 const DEBUG = false;
 
@@ -51,24 +54,19 @@ export class Sound
     return NodeTypes.Sound;
   }
 
-  private __sourceNode: AudioBufferSourceNode | null = null;
-  private __fadeGainNode: GainNode | null = null;
+  private __audioElement: HTMLAudioElement | null = null;
+  private __fade: IFade | null = null;
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
-  private __fade: IFade | null = null;
-  
+
+  public __fadeGainNode: GainNode | null = null;
   public __promise: Promise<Event> | null = null;
+  public __sourceNode: AudioBufferSourceNode | null = null;
   public __startedTime: number = 0;
-  public __audioElement: HTMLAudioElement | null = null;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
-
-  /* istanbul ignore next */
-  private __getNewSourceNode: () => AudioBufferSourceNode = () => {
-    throw new Error('Source node factory not initialized.');
-  };
 
   public readonly getManagerVolume: () => number;
   public getGroupVolume: () => number;
@@ -78,7 +76,6 @@ export class Sound
 
     const {
       audioElement,
-      autoplay,
       buffer,
       context,
       fade,
@@ -88,14 +85,16 @@ export class Sound
       volume,
     } = options;
 
-    /* Needed to calculate volume for HTML5 audio. */
-    assert(typeof getManagerVolume === 'function');
+    if (!this.isWebAudio()) {
+      /* Needed to calculate volume for HTML5 audio. */
+      assert(typeof getManagerVolume === 'function');
+    }
 
     this.getManagerVolume = getManagerVolume;
     this.getGroupVolume = () => 1;
 
     if (context) {
-      this.__initializeForWebAudio(context, assertValid<AudioBuffer>(buffer));
+      initializeSoundForWebAudio(this, assertValid<AudioBuffer>(buffer));
     } else if (audioElement) {
       this.__audioElement = audioElement;
     } else {
@@ -111,39 +110,12 @@ export class Sound
     }
 
     if (fade) {
-      if (typeof fade === 'boolean') {
-        this.__fade = new Fade();
-      } else {
-        this.__fade = new Fade(fade);
-      }
+      this.__fade = typeof fade === 'boolean' ? new Fade() : new Fade(fade);
     }
 
     if (typeof trackPosition !== 'undefined' && trackPosition > 0) {
       this.setTrackPosition(trackPosition);
     }
-
-    if (autoplay) {
-      this.play();
-    }
-  }
-
-  private __initializeForWebAudio(context: AudioContext, buffer: AudioBuffer) {
-    /* Keep reference to the necessary context factory method and the buffer
-     * in a private closure available elsewhere in the class. */
-    this.__getNewSourceNode = () => {
-      const node = context.createBufferSource();
-      node.buffer = buffer;
-
-      return node;
-    };
-
-    /* Generate the first source node. */
-    this.__sourceNode = this.__getNewSourceNode();
-
-    /* Generate the gain node used for fading volume. */
-    this.__fadeGainNode = context.createGain();
-    this.__sourceNode.connect(this.__fadeGainNode);
-    this.__fadeGainNode.connect(this.getGainNode());
   }
 
   public getInputNode() {
@@ -153,7 +125,7 @@ export class Sound
   public setVolume(value: number) {
     super.setVolume(value);
 
-    if(!this.isWebAudio()) {
+    if (!this.isWebAudio()) {
       this.updateAudioElementVolume();
     }
 
@@ -178,9 +150,9 @@ export class Sound
     if (this.isPlaying()) {
       if (this.isWebAudio()) {
         return this.getContextCurrentTime() - this.__startedTime;
-      } else {
-        return this.__audioElement!.currentTime;
       }
+
+      return assertValid<HTMLAudioElement>(this.__audioElement).currentTime;
     }
 
     return this.__pausedTime;
@@ -193,7 +165,8 @@ export class Sound
         this.pause();
         this.play();
       } else {
-        this.__audioElement!.currentTime = seconds;
+        const secs = seconds;
+        assertValid<HTMLAudioElement>(this.__audioElement).currentTime = secs;
       }
 
       this.clearFadeState();
@@ -208,11 +181,11 @@ export class Sound
     let duration: number;
     if (this.isWebAudio()) {
       duration = (this.getSourceNode().buffer || {} as any).duration;
-      if (DEBUG) {
-        console.warn('Audio buffer not found for Sound.');
+      if (!duration && DEBUG) {
+        console.warn('Audio buffer empty or not found for Sound.');
       }
     } else {
-      duration = this.__audioElement!.duration;
+      duration = (this.__audioElement! || {} as any).duration;
     }
 
     return duration || 0;
@@ -227,9 +200,9 @@ export class Sound
       return this.__loopOverride;
     } else if (this.isWebAudio()) {
       return this.getSourceNode().loop;
-    } else {
-      return this.__audioElement!.loop;
     }
+
+    return assertValid<HTMLAudioElement>(this.__audioElement).loop;
   }
 
   public getFade() {
@@ -245,7 +218,7 @@ export class Sound
     if (this.isWebAudio()) {
       this.getSourceNode().loop = doLoop;
     } else {
-      this.__audioElement!.loop = doLoop;
+      assertValid<HTMLAudioElement>(this.__audioElement).loop = doLoop;
     }
 
     return this;
@@ -253,7 +226,7 @@ export class Sound
 
   public play(fadeOverride?: IFade | null, loopOverride?: boolean) {
     const isWebAudio = this.isWebAudio();
-    updateSoundTimes(this, this.__audioElement!);
+    updateSoundTimes(this, assertValid<HTMLAudioElement>(this.__audioElement));
 
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
@@ -270,7 +243,7 @@ export class Sound
       }
     }
 
-    playAudioSource(this);
+    playAudioSource(this, this.__audioElement);
 
     /* Reset the paused time. */
     this.__pausedTime = 0;
@@ -285,7 +258,7 @@ export class Sound
 
   private __setOverrides(fadeOverride?: IFade | null, loopOverride?: boolean) {
     if (fadeOverride) {
-      this.__fadeOverride = { ...fadeOverride, };
+      this.__fadeOverride = getFrozenObject({ ...fadeOverride, });
     }
 
     if (typeof loopOverride === 'boolean') {
@@ -302,12 +275,15 @@ export class Sound
       if (this.isPlaying()) {
         const sourceNode = this.getSourceNode();
         sourceNode.stop();
-        this.__sourceNode = this.__getNewSourceNode();
+        this.__sourceNode = getNewSourceNode(
+          this.getAudioContext(),
+          assertValid<AudioBuffer>(this.getSourceNode().buffer),
+        );
       }
 
       this.__startedTime = 0;
     } else {
-      this.__audioElement!.pause();
+      assertValid<HTMLAudioElement>(this.__audioElement).pause();
     }
 
     /* Must be executed after __pausedTime = ... and this.getPlaying(). */
@@ -328,7 +304,7 @@ export class Sound
 
     this.__pausedTime = 0;
     if (!this.isWebAudio()) {
-      this.__audioElement!.currentTime = 0;
+      assertValid<HTMLAudioElement>(this.__audioElement).currentTime = 0;
     }
 
     return this;
@@ -343,11 +319,9 @@ export class Sound
   }
 
   public updateAudioElementVolume() {
-    const audioElement = assertValid<HTMLAudioElement>(this.__audioElement);
-
     /* Set the audio element volume to the product of manager, group, and
      * fade, and sound volumes. */
-    audioElement.volume =
+    assertValid<HTMLAudioElement>(this.__audioElement).volume =
       this.getManagerVolume() *
       this.getGroupVolume() *
       this.getFadeVolume() *
@@ -360,29 +334,8 @@ export class Sound
     const fade = this.getFade();
     const trackPosition = this.getTrackPosition();
     const duration = this.getDuration();
-    if (fade) {
-      const inLen = Number(fade.length.in);
-      const outLen = Number(fade.length.out);
-      if (fade.easingCurve.in && inLen >= trackPosition) {
-        return getFadeValueAtTime({
-          change: 1,
-          curve: fade.easingCurve.in,
-          duration: inLen,
-          initial: 0,
-          time: trackPosition,
-        });
-      } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
-        return getFadeValueAtTime({
-          change: -1,
-          curve: fade.easingCurve.out,
-          duration: outLen,
-          initial: 1,
-          time: outLen - (duration - trackPosition),
-        });
-      }
-    }
 
-    return 1;
+    return fade ? getFadeVolume(fade, trackPosition, duration) : 1;
   }
 
   public clearFadeState() {

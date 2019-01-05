@@ -1,11 +1,13 @@
 import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
+import {
+  IManagerNode,
+} from '../Node/IManagerNode';
 
-export interface IManagerCreateSoundOptions {
+export interface ICreateSoundOptions {
   url: string;
-  autoplay?: boolean;
-  context?: AudioContext;
+  manager: IManagerNode;
   fade?: IFadeOptions | boolean;
   loop?: boolean;
   trackPosition?: number;

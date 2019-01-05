@@ -2,9 +2,6 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
-  IFactorySubmanager,
-} from './Submanagers/IFactorySubmanager';
-import {
   IManagerNode,
 } from '../Node/IManagerNode';
 import {
@@ -20,11 +17,8 @@ import {
 export interface IManager
   extends
     IManagerNode,
-    IFactorySubmanager,
     INodeCollectionSubmanager,
     INodePlaySubmanager,
     IVolumePanelSubmanager,
     IAnalysableNode
-{
-  updateAllAudioElementsVolume(): this;
-}
+{}

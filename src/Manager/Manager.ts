@@ -5,12 +5,6 @@ import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
-  doToOneOrMany,
-} from '../functions/doToOneOrMany';
-import {
-  FactorySubmanagerMixin,
-} from './Submanagers/FactorySubmanagerMixin';
-import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
@@ -49,9 +43,8 @@ export class Manager
     VolumePanelSubmanagerMixin(
     NodePlaySubmanagerMixin(
     NodeCollectionSubmanagerMixin(
-    FactorySubmanagerMixin(
       ManagerNode
-    )))))
+    ))))
   implements IManager
 {
   get type() {
@@ -111,16 +104,6 @@ export class Manager
   public setVolume(value: number) {
     super.setVolume(value);
     this.updateAllAudioElementsVolume();
-
-    return this;
-  }
-
-  public updateAllAudioElementsVolume() {
-    doToOneOrMany(
-      this.groups,
-      Object.keys(this.groups),
-      'updateAllAudioElementsVolume',
-    );
 
     return this;
   }

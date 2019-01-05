@@ -127,6 +127,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a getDuration function which returns the duration of the audio element.', () => {
     const sound = testSoundFactory();
     const dur = 12;
+    // @ts-ignore
     Object.assign(sound.__audioElement, { duration: dur, });
     expect(sound.getDuration()).toBe(dur);
   });
@@ -137,11 +138,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a playing value which defaults to false.', () => {
     expect(testSoundFactory().isPlaying()).toBe(false);
-  });
-
-  it('Allows setting the playing value through the autoplay property of the options object.', () => {    
-    const autoplay = true;
-    expect(testSoundFactory({ autoplay, }).isPlaying()).toBe(autoplay);
   });
 
   it('Has a getLoop function which returns a boolean.', () => {
