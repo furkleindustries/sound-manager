@@ -14,18 +14,15 @@ export function makeSoundGroupIdentifier(value: TSoundGroupIdentifierArg): ISoun
     /* Allow 'groupName.soundName' strings and coerce them to
      * ISoundGroupIdentifiers. */
     const split = value.split('.');
-    if (split.length === 1) {
-      /* Also interpret 'soundName' as 'default.soundName'. */
-      return {
+    return split.length === 1 ?
+      /* Interpret 'soundName' as 'default.soundName'. */
+      {
         groupName: 'default',
         soundName: split[0],
+      } : {
+        groupName: split[0],
+        soundName: split[1],
       };
-    }
-
-    return {
-      groupName: split[0],
-      soundName: split[1],
-    };
   } else if (Array.isArray(value) && value.length === 2) {
     return {
       groupName: value[0],
