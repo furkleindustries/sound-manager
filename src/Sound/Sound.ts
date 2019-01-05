@@ -11,6 +11,15 @@ import {
   Fade,
 } from '../Fade/Fade';
 import {
+  getFadeVolume,
+} from '../Fade/getFadeVolume';
+import {
+  getFrozenObject,
+} from '../functions/getFrozenObject';
+import {
+  getNewSourceNode,
+} from './getNewSourceNode';
+import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -40,11 +49,9 @@ import {
 import {
   updateSoundTimes,
 } from './updateSoundTimes';
-import { getNewSourceNode } from './getNewSourceNode';
-import { getFadeVolume } from '../Fade/getFadeVolume';
-import { getFrozenObject } from '../functions/getFrozenObject';
-
-const DEBUG = false;
+import {
+  warn,
+} from '../logging/warn';
 
 export class Sound
   extends PanelRegisterableNodeMixin(ManagerNode)
@@ -178,14 +185,17 @@ export class Sound
   }
 
   public getDuration() {
-    let duration: number;
+    let duration: number = 0;
     if (this.isWebAudio()) {
-      duration = (this.getSourceNode().buffer || {} as any).duration;
-      if (!duration && DEBUG) {
-        console.warn('Audio buffer empty or not found for Sound.');
+      const sourceNode = this.getSourceNode();
+      if (!sourceNode.buffer) {
+        warn('Audio buffer empty or not found for Sound.');
+        return 0;
       }
-    } else {
-      duration = (this.__audioElement! || {} as any).duration;
+
+      duration = sourceNode.buffer!.duration;
+    } else if (this.__audioElement) {
+      duration = this.__audioElement.duration;
     }
 
     return duration || 0;
