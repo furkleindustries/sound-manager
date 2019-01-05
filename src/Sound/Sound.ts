@@ -94,10 +94,9 @@ export class Sound
   public __promise: Promise<Event> | null = null;
   public __sourceNode: AudioBufferSourceNode | null = null;
   public __startedTime: number = 0;
+  public getGroupVolume: () => number = () => 1;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
-
-  public getGroupVolume: () => number;
 
   constructor(options: ISoundOptions) {
     super(options);
@@ -105,7 +104,6 @@ export class Sound
     const {
       audioElement,
       buffer,
-      context,
       fade,
       getManagerVolume,
       loop,
@@ -113,20 +111,16 @@ export class Sound
       volume,
     } = options;
 
-    if (!this.isWebAudio()) {
-      /* Needed to calculate volume for HTML5 audio. */
-      assert(typeof getManagerVolume === 'function');
-      this.getManagerVolume = getManagerVolume;
-    }
-
-    this.getGroupVolume = () => 1;
-
-    if (context) {
+    if (this.isWebAudio()) {
       initializeSoundForWebAudio(this, assertValid<AudioBuffer>(buffer));
-    } else if (audioElement) {
-      this.__audioElement = audioElement;
     } else {
-      throw new Error();
+      this.__audioElement = assertValid<HTMLAudioElement>(audioElement);
+      /* Needed to calculate volume for HTML5 audio. */
+      this.getManagerVolume = assertValid<() => number>(
+        getManagerVolume,
+        '',
+        (aa) => typeof aa === 'function',
+      );
     }
 
     trySetSoundFade(this, fade);
