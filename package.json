@@ -10,7 +10,7 @@
     "test-watch": "jest --watch",
     "test-coverage": "jest --coverage",
     "test-coverage-watch": "jest --coverage --watch",
-    "prepublishOnly": "npm run test"
+    "prepublishOnly": "npm run test && npm run build:prod"
   },
   "repository": {
     "type": "git",
