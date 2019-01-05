@@ -8,4 +8,4 @@ A full-service sound manager designed for use with hypertext fiction systems lik
 
 ## Type documentation
 
-There is a full set of type-oriented API documentation [here](/typedocs).
+There is a full set of type-oriented API documentation [here](/typedocs/markdown/).
