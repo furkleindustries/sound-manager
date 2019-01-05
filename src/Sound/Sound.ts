@@ -250,7 +250,7 @@ export class Sound
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
     if (!this.__promise) {
-      /* Sets the private override properties e.g. if this sound is part of a
+      /* Sets the override properties e.g. if this sound is part of a
        * playlist. */
       setPerPlaySoundOverrides(this, fadeOverride, loopOverride);
       /* Generates the promise and registers events. */
