@@ -1,6 +1,6 @@
 {
   "name": "sound-manager",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A sound library for Twine, Accelerator, and other hypertext fiction frameworks.",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "test": "jest",
     "test-watch": "jest --watch",
     "test-coverage": "jest --coverage",
-    "test-coverage-watch": "jest --coverage --watch"
+    "test-coverage-watch": "jest --coverage --watch",
+    "prepublishOnly": "npm run test && npm run build:prod"
   },
   "repository": {
     "type": "git",
