@@ -29,7 +29,6 @@ export interface ISound extends IManagerNode, IPanelRegisterableNode {
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): this;
-  clearFadeState(): this;
   __sourceNode: AudioBufferSourceNode | null;
   __fadeGainNode: GainNode | null;
   __fadeOverride?: IFade;

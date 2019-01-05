@@ -105,7 +105,7 @@ export function initializeEventsForPlay(
 
     /* Resolve the promise with the ended event. */
     return resolver(e);
-  }
+  };
 
   /* Register the ended export function to fire when the audio source emits the
    * 'ended' event. */

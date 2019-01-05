@@ -11,7 +11,7 @@ import {
 export function setPerPlaySoundOverrides(
   sound: ISound,
   fadeOverride?: IFade | null,
-  loopOverride?: boolean
+  loopOverride?: boolean,
 )
 {
   if (fadeOverride) {

@@ -8,6 +8,9 @@ import {
   assertValid,
 } from '../assertions/assertValid';
 import {
+  clearScheduledFadesOnSound,
+} from './clearScheduledFadesOnSound';
+import {
   Fade,
 } from '../Fade/Fade';
 import {
@@ -65,6 +68,10 @@ export class Sound
   private __fade: IFade | null = null;
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
+  /* istanbul ignore next */
+  private readonly getManagerVolume: () => number = () => {
+    throw new Error('getManagerVolume not initialized.');
+  };
   
   public __fadeGainNode: GainNode | null = null;
   public __fadeOverride?: IFade;
@@ -74,10 +81,6 @@ export class Sound
   public __startedTime: number = 0;
   /* istanbul ignore next */
   public __rejectOnStop: (message?: string) => void = () => {};
-
-  private readonly getManagerVolume: () => number = () => {
-    throw new Error('getManagerVolume not initialized.');
-  };
 
   public getGroupVolume: () => number;
 
@@ -179,7 +182,7 @@ export class Sound
         assertValid<HTMLAudioElement>(this.__audioElement).currentTime = secs;
       }
 
-      this.clearFadeState();
+      clearScheduledFadesOnSound(this);
     } else {
       this.__pausedTime = seconds;
     }
@@ -292,7 +295,7 @@ export class Sound
 
     /* Must be executed after __pausedTime = ... and this.getPlaying(). */
     this.__playing = false;
-    this.clearFadeState();
+    clearScheduledFadesOnSound(this);
 
     return this;
   }
@@ -340,17 +343,5 @@ export class Sound
     const duration = this.getDuration();
 
     return fade ? getFadeVolume(fade, trackPosition, duration) : 1;
-  }
-
-  public clearFadeState() {
-    delete this.__fadeOverride;
-
-    if (this.isWebAudio()) {
-      const fadeGain = this.getFadeGainNode();
-      fadeGain.gain.cancelScheduledValues(this.getContextCurrentTime());
-      fadeGain.gain.setValueAtTime(1, this.getContextCurrentTime());
-    }
-
-    return this;
   }
 }
