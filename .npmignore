@@ -1,5 +1,6 @@
 documentation/
 tests/
+typedocs/
 .vscode/
 
 *.code-workspace

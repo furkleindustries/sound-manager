@@ -55,7 +55,8 @@ export class Manager
     super({ ...options });
 
     if (!this.__audioContext && ctxCtor) {
-      this.__audioContext = new ctxCtor();
+      /* any cast is for typedoc complaints. */
+      this.__audioContext = new (ctxCtor as any)();
       this.__isWebAudio = true;
     }
 
