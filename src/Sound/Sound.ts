@@ -219,11 +219,11 @@ export class Sound
     return this;
   }
 
-  public setLoop(doLoop: boolean) {
+  public setLoop(loop: boolean) {
     if (this.isWebAudio()) {
-      this.getSourceNode().loop = doLoop;
+      this.getSourceNode().loop = loop;
     } else {
-      assertValid<HTMLAudioElement>(this.__audioElement).loop = doLoop;
+      assertValid<HTMLAudioElement>(this.__audioElement).loop = loop;
     }
 
     return this;
