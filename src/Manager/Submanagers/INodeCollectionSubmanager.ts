@@ -15,6 +15,7 @@ export interface INodeCollectionSubmanager {
   initializeDefaultGroup(): this;
   getGroups(name: string): IGroup;
   getGroups(names: string[]): IGroup[];
+  getAllGroups(): IGroup[];
   removeGroups(name: string): this;
   removeGroups(names: string[]): this;
   removeAllGroups(): this;
@@ -28,6 +29,7 @@ export interface INodeCollectionSubmanager {
   addSounds(sounds: ISoundsMap, groupName?: string): this;
   getSounds(name: string, groupName?: string): ISound;
   getSounds(names: string[], groupName?: string): ISound[];
+  getAllSounds(): ISound[];
   removeSounds(name: string, groupName?: string): this;
   removeSounds(names: string[], groupName?: string): this;
   removeAllSounds(groupName?: string): this;

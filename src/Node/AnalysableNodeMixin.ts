@@ -1,4 +1,7 @@
 import {
+  AnalysisSuite,
+} from '../AnalysisSuite/AnalysisSuite';
+import {
   assertValid,
 } from '../assertions/assertValid';
 import {
@@ -11,12 +14,16 @@ import {
   IConstructor,
 } from '../interfaces/IConstructor';
 import {
+  IAnalysisSuite,
+} from '../AnalysisSuite/IAnalysisSuite';
+import {
   IManagerNode,
 } from './IManagerNode';
 
 export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
   return class AnalysableNodeMixin extends Base implements IAnalysableNode {
-    public __analyserNode: AnalyserNode | null = null;
+    public readonly analysis: IAnalysisSuite | null = null;
+    public readonly __analyserNode: AnalyserNode | null = null;
 
     constructor(...options: any[]) {
       super(...options);
@@ -29,6 +36,7 @@ export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: 
 
       if (context) {
         this.__analyserNode = context.createAnalyser();
+        this.analysis = new AnalysisSuite(this.getAnalyserNode());
       }
     }
 

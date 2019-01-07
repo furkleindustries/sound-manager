@@ -2,6 +2,9 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   ICreateSoundOptions,
 } from './ICreateSoundOptions';
 import {
@@ -12,11 +15,11 @@ export const createHtmlAudioSound = (options: ICreateSoundOptions) => {
   assert(options);
 
   const {
-    manager,
+    getManagerVolume,
     url,
   } = options;
 
-  assert(manager);
+  assert(getManagerVolume);
   assert(url);
 
   const audioElement = new Audio(url);
@@ -25,9 +28,6 @@ export const createHtmlAudioSound = (options: ICreateSoundOptions) => {
   return Promise.resolve(new Sound({
     ...options,
     audioElement,
-    getManagerVolume() {
-      /* istanbul ignore next */
-      return manager.getVolume();
-    },
+    getManagerVolume: assertValid<() => number>(getManagerVolume),
   }));
 };

@@ -2,9 +2,6 @@ import {
   assert,
 } from '../../assertions/assert';
 import {
-  assertValid,
-} from '../../assertions/assertValid';
-import {
   createGroup,
 } from '../../Group/createGroup';
 import {
@@ -66,16 +63,16 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
 
     public addGroups(groups: IGroupsMap) {
       const names = Object.keys(groups);
-      names.forEach((groupName) => assert(!(groupName in this.groups)));
-      if (this.isWebAudio()) {
-        names.forEach((groupName) => {
+      names.forEach((groupName) => {
+        assert(!(groupName in this.groups))
+        if (this.isWebAudio()) {
           const group = groups[groupName];
           if (group.isWebAudio()) {
             /* Chain the group's output node to the manager's input node. */
             group.getOutputNode().connect(this.getInputNode());
           }
-        });
-      }
+        }
+      });
 
       this.__groups = getFrozenObject(this.groups, groups);
 
@@ -96,6 +93,10 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
     public getGroups(names: string[]): IGroup[];
     public getGroups(nameOrNames: string | string[]): IGroup | IGroup[] {
       return getOneOrMany(nameOrNames as string, this.groups);
+    }
+
+    public getAllGroups() {
+      return this.getGroups(Object.keys(this.groups));
     }
 
     public removeGroups(name: string): this;
@@ -136,11 +137,32 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
 
     public addSound(
       name: string,
+      options: string,
+      groupName?: string,
+    ): Promise<ISound>;
+    public addSound(
+      name: string,
       options: ICreateSoundOptions,
+      groupName?: string): Promise<ISound>;
+    public addSound(
+      name: string,
+      options: string | ICreateSoundOptions,
       groupName: string = 'default',
     ): Promise<ISound>
     {
-      const opts = getFrozenObject(assertValid<ICreateSoundOptions>(options));
+      /* Allow a bare string to be used as an URL argument. */
+      const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
+        typeof options === 'string' ?
+          { url: options } :
+          { ...options };
+
+      const opts: ICreateSoundOptions = getFrozenObject({
+        isWebAudio: this.isWebAudio(),
+        context: this.getAudioContext(),
+        getManagerVolume: () => this.getVolume(),
+        ...tempOpts,
+      });
+
       return new Promise((resolve) => {
         createSound(opts).then((sound) => {
           this.addSounds({ [name]: sound }, groupName);
@@ -158,6 +180,10 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
     public getSounds(names: string[], groupName?: string): ISound[];
     public getSounds(names: string | string[], groupName: string = 'default'): ISound | ISound[] {
       return this.getGroups(groupName).getSounds(names as string);
+    }
+
+    public getAllSounds() {
+      return this.getAllGroups().flatMap((group) => group.getAllSounds());
     }
 
     public removeSound(name: string, groupName: string = 'default') {
@@ -188,12 +214,7 @@ export function NodeCollectionSubmanagerMixin<T extends IConstructor<IManagerNod
     }
 
     public updateAllAudioElementsVolume() {
-      doToOneOrMany(
-        this.groups,
-        Object.keys(this.groups),
-        'updateAllAudioElementsVolume',
-      );
-  
+      this.getAllGroups().forEach((grp) => grp.updateAllAudioElementsVolume());
       return this;
     }
   };

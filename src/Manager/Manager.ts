@@ -97,7 +97,7 @@ export class Manager
 
   private __connectGroupNodes() {
     assertNodeIsWebAudio(this, '__connectGroupNodes' as any);
-    this.getGroups(Object.keys(this.groups)).forEach((group) => (
+    this.getAllGroups().forEach((group) => (
       group.getOutputNode().connect(this.getInputNode())
     ));
   }

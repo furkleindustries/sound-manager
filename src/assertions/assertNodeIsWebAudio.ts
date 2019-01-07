@@ -12,7 +12,7 @@ export function assertNodeIsWebAudio<T extends IManagerNode>(
 {
   assert(
     node.isWebAudio(),
-    `The method ${methodName ? methodName : '(not provided)'}  requires the ` +
-    `${node.type} calling it to be in Web Audio mode.`
+    `The method ${methodName ? methodName : '(not provided)'} requires the ` +
+      `${node.type} calling it to be in Web Audio mode.`
   );
 }

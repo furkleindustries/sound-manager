@@ -80,6 +80,10 @@ export class Group
     return getOneOrMany(names as string, this.sounds);
   }
 
+  public getAllSounds() {
+    return this.getSounds(Object.keys(this.sounds));
+  }
+
   public addSound(name: string, sound: ISound) {
     return this.addSounds({ [name]: sound, });
   }
@@ -138,7 +142,7 @@ export class Group
   public playSounds(names: string[]): Promise<Event[]>;
   public playSounds(names: string | string[]) {
     if (typeof names === 'string') {
-      return this.getSounds(name).play();
+      return this.getSounds(names).play();
     } else if (Array.isArray(names)) {
       return Promise.all(names.map((name) => this.getSounds(name).play()));
     }
@@ -195,8 +199,7 @@ export class Group
   }
 
   public updateAllAudioElementsVolume() {
-    Object.keys(this.sounds).forEach((soundName) => {
-      const sound = this.getSounds(soundName);
+    this.getAllSounds().forEach((sound) => {
       if (!sound.isWebAudio()) {
         sound.updateAudioElementVolume();
       }

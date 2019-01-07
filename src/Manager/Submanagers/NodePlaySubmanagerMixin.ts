@@ -49,13 +49,11 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IN
       if (groupName) {
         return this.getGroups(groupName).playAllSounds();
       } else {
-        return new Promise((resolve) => {
+        return new Promise((resolve) => (
           Promise.all(
-            this.getGroups(Object.keys(this.groups)).map((group) => (
-              group.playAllSounds()
-            ))
-          ).then((value) => resolve(shallowFlattenArray(value)));
-        });
+            this.getAllGroups().map((group) => group.playAllSounds())
+          ).then((value) => resolve(shallowFlattenArray(value)))
+        ));
       }
     }
 
@@ -93,9 +91,9 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IN
       const playlist = Array.isArray(options) ?
         createPlaylist({ ids: getFrozenObject(options), }) :
         createPlaylist(getFrozenObject(options));
-  
+
       this.addPlaylists({ [name]: playlist });
-  
+
       return playlist;
     }
 
@@ -104,7 +102,7 @@ export function NodePlaySubmanagerMixin<T extends IConstructor<IManagerNode & IN
       const names = Object.keys(playls);
       names.forEach((playlistName) => assert(!(playlistName in this.playlists)));
       this.__playlists = getFrozenObject(this.playlists, playls);
-  
+
       return this;
     }
 

@@ -234,6 +234,10 @@ export class Sound
     const audioElem = this.__audioElement;
     updateSoundTimes(this, audioElem);
 
+    if (this.isPlaying()) {
+      this.pause();
+    }
+
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
