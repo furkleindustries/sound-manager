@@ -14,9 +14,9 @@ describe('createHtmlAudioSound unit tests.', () => {
 
   it('Outputs an object of instance Promise.', () => {
     const prom = createHtmlAudioSound({
-      manager: {} as any,
-      url: 'whatever',
-    });
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+    } as any);
 
     expect(prom).toBeInstanceOf(Promise);
   });
@@ -25,8 +25,8 @@ describe('createHtmlAudioSound unit tests.', () => {
     const url = 'https://foo.bar/fooobar';
     const prom = createHtmlAudioSound({
       url,
-      manager: {} as any,
-    });
+      getManagerVolume: jest.fn(() => 1),
+    } as any);
 
     return expect(new Promise((resolve) => {
       prom.then(() => {
@@ -38,11 +38,10 @@ describe('createHtmlAudioSound unit tests.', () => {
   });
 
   it('Sets the audio element to preload=auto.', () => {
-    const url = 'whatever';
     const prom = createHtmlAudioSound({
-      url,
-      manager: {} as any,
-    });
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+    } as any);
 
     return expect(new Promise((resolve) => {
       prom.then(() => {
@@ -55,9 +54,9 @@ describe('createHtmlAudioSound unit tests.', () => {
 
   it('Merges options in and passes them to the Sound constructor.', () => {
     const opts = {
-      url: 'foobarbaz',
-      manager: {} as any,
-    };
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+    } as any;
 
     const prom = createHtmlAudioSound(opts);
 

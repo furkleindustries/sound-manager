@@ -12,10 +12,6 @@ import {
 } from '../../src/Sound/createWebAudioSound';
 jest.mock('../../src/Sound/createWebAudioSound');
 
-const testManagerFactory = () => ({
-  isWebAudio: jest.fn(() => true),
-} as any);
-
 describe('createSound Web Audio unit tests.', () => {
   beforeEach(() => {
     (createHtmlAudioSound as any).mockClear();
@@ -29,24 +25,19 @@ describe('createSound Web Audio unit tests.', () => {
     expect(func).toThrow();
   });
 
-  it('Throws if the manager is not included in the options argument.', () => {
-    // @ts-ignore
-    const func = () => createSound({});
-
-    expect(func).toThrow();
-  });
-
   it('Outputs a promise.', () => {
     expect(createSound({
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
     })).toBeInstanceOf(Promise);
   });
 
   it('Calls createWebAudioSound with the provided options if the manager is in Web Audio mode.', () => {
     const opts = {
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
     };
 
     createSound(opts);
@@ -61,15 +52,14 @@ describe('createSound Web Audio unit tests.', () => {
 
     const opts = {
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
     };
 
     return expect(createSound(opts)).resolves.toBe(sym);
   });
 
   it('Calls createHtmlAudioSound with the provided options if the call to createWebAudioSound fails.', () => {
-    expect.assertions(4);
-    
     const warn = console.warn;
     console.warn = jest.fn();
 
@@ -77,8 +67,9 @@ describe('createSound Web Audio unit tests.', () => {
     (createHtmlAudioSound as any).mockReturnValue(Promise.resolve());
 
     const opts = {
-      url: 'fdsjkfds',
-      manager: testManagerFactory(),
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
     };
 
     return createSound(opts).then(() => {
@@ -98,8 +89,9 @@ describe('createSound Web Audio unit tests.', () => {
     console.error = jest.fn();
 
     const opts = {
-      url: 'fdsjkfds',
-      manager: testManagerFactory(),
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
     };
 
     (createWebAudioSound as any).mockReturnValue(Promise.reject());

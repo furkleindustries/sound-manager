@@ -9,10 +9,6 @@ jest.mock('../../src/Sound/createHtmlAudioSound');
 
 console.warn = jest.fn();
 
-const testManagerFactory = () => ({
-  isWebAudio: jest.fn(() => false),
-} as any);
-
 describe('createSound HTML5 Audio unit tests.', () => {
   beforeEach(() => {
     (createHtmlAudioSound as any).mockClear();
@@ -25,19 +21,13 @@ describe('createSound HTML5 Audio unit tests.', () => {
     expect(func).toThrow();
   });
 
-  it('Throws if the manager is not included in the options argument.', () => {
-    // @ts-ignore
-    const func = () => createSound({});
-
-    expect(func).toThrow();
-  });
-
   it('Outputs a promise.', () => {
     (createHtmlAudioSound as any).mockReturnValue(Promise.resolve());
 
     expect(createSound({
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: false,
     })).toBeInstanceOf(Promise);
   });
 
@@ -46,7 +36,8 @@ describe('createSound HTML5 Audio unit tests.', () => {
 
     const opts = {
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: false,
     };
 
     createSound(opts);
@@ -61,7 +52,8 @@ describe('createSound HTML5 Audio unit tests.', () => {
 
     const opts = {
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: false,
     };
 
     return expect(createSound(opts)).resolves.toBe(val);
@@ -73,7 +65,8 @@ describe('createSound HTML5 Audio unit tests.', () => {
 
     const opts = {
       url: 'foobar',
-      manager: testManagerFactory(),
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: false,
     };
 
     return expect(createSound(opts)).rejects.toBeTruthy();
