@@ -34,7 +34,7 @@
       } else {
         played = true;
         context = new AudioContext();
-        manager = new soundManager.Manager({ context, });
+        manager = new soundManager.Manager({ context });
       }
 
       const getAnimalTest = () => Promise.all([
@@ -42,44 +42,44 @@
           'test1',
           'http://www.noiseaddicts.com/samples_1w72b820/280.mp3',
         ),
-        
+
         manager.addSound(
           'test2',
           'http://www.noiseaddicts.com/samples_1w72b820/271.mp3',
-          ),
-  
+        ),
+
         manager.addSound(
           'test3',
           'http://www.noiseaddicts.com/samples_1w72b820/272.mp3',
         ),
       ]);
-  
+
       const getNoiseTest = () => Promise.all([
         manager.addSound(
           'test1',
           'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Tape_Noise_04.mp3',
         ),
-        
+
         manager.addSound(
           'test2',
           'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Crackle_Loop_05.mp3',
         ),
       ]);
-  
+
       const getMusicTest = () => Promise.all([
         manager.addSound(
           'test1',
           'http://www.hochmuth.com/mp3/Beethoven_12_Variation.mp3',
           ),
       ]);
-      
+
       const getWebAudioTest = () => Promise.all([
         manager.addSound(
           'test1',
           'https://s3.amazonaws.com/furkleindustries-homepage/sound/take-a-chance.mp3',
           ),
       ]);
-      
+
       getWebAudioTest().then((sounds) => {
         /*manager.addPlaylist('testPlaylist', {
           ids: [
