@@ -19,6 +19,7 @@ export interface IGroup extends IManagerNode, IAnalysableNode, IPanelRegisterabl
   getContextCurrentTime(): number;
   getSounds(name: string): ISound;
   getSounds(names: string[]): ISound[];
+  getAllSounds(): ISound[];
   addSound(name: string, sound: ISound): this;
   addSounds(sounds: ISoundsMap): this;
   removeSounds(names: string): this;

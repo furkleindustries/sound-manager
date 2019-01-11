@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   createHtmlAudioSound,
 } from './createHtmlAudioSound';
 import {
@@ -25,43 +22,40 @@ export const strings = {
   HTML_AUDIO_FAILED: 'Generating HTML5 Audio failed. Cannot construct Sound.',
 };
 
-export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
-  const optsClone = { ...options };
+export function createSound(options: ICreateSoundOptions): Promise<ISound> {
+  const opts = getFrozenObject(options);
   const {
-    manager,
-  } = optsClone;
+    isWebAudio,
+  } = opts;
 
-  assert(manager);
-
-  if (manager.isWebAudio()) {
-    return createWebHelper(getFrozenObject(optsClone));
+  if (isWebAudio) {
+    return createWebHelper(opts);
   } else {
     console.warn(strings.FALLBACK_WARNING);
-    return createHtmlHelper(getFrozenObject(optsClone));
+    return createHtmlHelper(opts);
   }
-};
+}
 
 export function createWebHelper(options: ICreateSoundOptions): Promise<ISound> {
-  return new Promise((resolve, reject) => {
-    createWebAudioSound(options).then(
+  const opts = getFrozenObject(options);
+  return new Promise((resolve, reject) => (
+    createWebAudioSound(opts).then(
       resolve,
       (err) => {
         console.warn(`${strings.WEB_AUDIO_FAILED}\n${err}`);
-        createHtmlAudioSound(getFrozenObject(options)).then(
+        createHtmlHelper(opts).then(
           resolve,
           (err) => reject(new Error(`${strings.BOTH_FAILED}\n${err}`)),
         );
       },
-    );
-  });
+    )
+  ));
 }
 
 export function createHtmlHelper(options: ICreateSoundOptions): Promise<ISound> {
-  const optsClone = { ...options, };
-  const optsNoContext = { ...optsClone, };
   return new Promise((resolve, reject) => {
     console.warn(strings.FALLBACK_WARNING);
-    createHtmlAudioSound(optsNoContext).then(
+    createHtmlAudioSound(getFrozenObject(options)).then(
       resolve,
       (err) => reject(new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`)),
     );

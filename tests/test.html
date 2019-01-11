@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>sound-manager test</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    .sm-visualizer {
+      height: 800px;
+      background-color: red;
+    }
+    </style>
     <script src="../dist/bundle.js"></script>
   </head>
 
@@ -12,86 +18,119 @@
     <button class="clicky">clicky</button>
 
     <script>
-    const context = new AudioContext();
-    const manager = new soundManager.Manager({ context, });
     const clicky = document.querySelector('.clicky');
+    let context;
+    let manager;
+    let played = false;
 
-    const getAnimalTest = () => Promise.all([
-      manager.addSound(
-        'test1',
-        {
-          url: 'http://www.noiseaddicts.com/samples_1w72b820/280.mp3',
-        },
-      ),
+    clicky.addEventListener('click', () => {
+      if (played) {
+        if (manager.getSounds('test1').isPlaying()) {
+          return;
+        }
 
-      manager.addSound(
-        'test2',
-        {
-          url: 'http://www.noiseaddicts.com/samples_1w72b820/271.mp3',
-        },
-      ),
+        /* Play it again. */
+        return manager.getSounds('test1').play();
+      } else {
+        played = true;
+        context = new AudioContext();
+        manager = new soundManager.Manager({ context });
+      }
 
-      manager.addSound(
-        'test3',
-        {
-          url: 'http://www.noiseaddicts.com/samples_1w72b820/272.mp3',
-        },
-      ),
-    ]);
-
-    const getNoiseTest = () => Promise.all([
-      manager.addSound(
-        'test1',
-        {
-          url: 'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Tape_Noise_04.mp3',
-        },
-      ),
-
-      manager.addSound(
-        'test2',
-        {
-          url: 'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Crackle_Loop_05.mp3',
-        },
-      ),
-    ]);
-
-    const getMusicTest = () => Promise.all([
-      manager.addSound(
-        'test1',
-        {
-          url: 'http://www.hochmuth.com/mp3/Beethoven_12_Variation.mp3',
-        },
-      ),
-    ]);
-
-    getMusicTest().then((sounds) => {
-      manager.addPlaylist('testPlaylist', {
-        ids: [
+      const getAnimalTest = () => Promise.all([
+        manager.addSound(
           'test1',
-          //'test2',
-          //'test3',
-        ],
+          'http://www.noiseaddicts.com/samples_1w72b820/280.mp3',
+        ),
 
-        fade: {
-          length: 10,
-          curve: 'equalPower',
-        },
+        manager.addSound(
+          'test2',
+          'http://www.noiseaddicts.com/samples_1w72b820/271.mp3',
+        ),
 
-        callback(events) {
-          console.log(events);
-        },
-      });
+        manager.addSound(
+          'test3',
+          'http://www.noiseaddicts.com/samples_1w72b820/272.mp3',
+        ),
+      ]);
 
-      manager.updatePanelRegistration(sounds[0], true);
-      document.body.appendChild(manager.generateAudioPanelElement());
-      clicky.addEventListener('click', () => {
-        manager.playPlaylist('testPlaylist').then(() => {
+      const getNoiseTest = () => Promise.all([
+        manager.addSound(
+          'test1',
+          'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Tape_Noise_04.mp3',
+        ),
+
+        manager.addSound(
+          'test2',
+          'http://cdn.mos.musicradar.com/audio/samples/noise-crackle-demos/Crackle_Loop_05.mp3',
+        ),
+      ]);
+
+      const getMusicTest = () => Promise.all([
+        manager.addSound(
+          'test1',
+          'http://www.hochmuth.com/mp3/Beethoven_12_Variation.mp3',
+          ),
+      ]);
+
+      const getWebAudioTest = () => Promise.all([
+        manager.addSound(
+          'test1',
+          'https://s3.amazonaws.com/furkleindustries-homepage/sound/take-a-chance.mp3',
+          ),
+      ]);
+
+      getWebAudioTest().then((sounds) => {
+        /*manager.addPlaylist('testPlaylist', {
+          ids: [
+            'test1',
+            //'test2',
+            //'test3',
+          ],
+          
+          fade: {
+            length: 10,
+            curve: 'equalPower',
+          },
+          
+          callback(events) {
+            console.log(events);
+          },
+        });*/
+
+        manager.volumePanelRegister(sounds[0]);
+        document.body.appendChild(manager.generateVolumePanelElement());
+
+        const visualizer = document.createElement('div');
+        visualizer.className = 'sm-visualizer';
+        document.body.appendChild(visualizer);
+
+        manager.analysis.addRenderListener((analysis) => {
+          const frequencyData = analysis.getFrequencyByte();
+          const timeDomainData = analysis.getTimeDomainByte();
+          const fAverage = frequencyData.reduce((prev, curr) => {
+            return prev + curr;
+          }) / frequencyData.length / 256 * 360;
+
+          const tAverage = Math.min(100, timeDomainData.reduce((prev, curr) => {
+            return prev + Math.abs(128 - curr) * 4;
+          }) / timeDomainData.length / 256 * 100);
+
+          visualizer.style.backgroundColor = getColor(fAverage, tAverage);
+          console.log(getColor(fAverage, tAverage));
+        }, 'listener1');
+
+        manager.playSounds('test1').then(() => {
           console.log('All done!');
         }, (err) => {
           console.log(err);
         });
       });
     });
+
+    function getColor(fAverage, tAverage) {
+      return `hsl(${fAverage}, ${tAverage}%, 50%)`;
+    }
     </script>
   </body>
 </html>

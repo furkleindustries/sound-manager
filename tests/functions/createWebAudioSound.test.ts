@@ -26,18 +26,7 @@ describe('createWebAudioSound unit tests.', () => {
 
   it('Throws if the url property is missing from the options.', () => {
     // @ts-ignore
-    const func = () => createWebAudioSound({
-      manager: {} as any,
-    });
-
-    expect(func).toThrow();
-  });
-
-  it('Throws if the manager property is missing from the options.', () => {
-    // @ts-ignore
-    const func = () => createWebAudioSound({
-      url: 'test',
-    });
+    const func = () => createWebAudioSound({});
 
     expect(func).toThrow();
   });
@@ -45,33 +34,14 @@ describe('createWebAudioSound unit tests.', () => {
   it('Returns a promise.', () => {
     const opts = {
       url: 'foobar',
-      manager: {
-        getAudioContext: jest.fn(),
-      },
-    } as any;
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
+    };
 
     expect(createWebAudioSound(opts)).toBeInstanceOf(Promise);
   });
 
-  it('Passes the computed arguments to loadAudioBuffer.', () => {
-    const mockVal = {};
-    const mock = jest.fn(() => mockVal);
-    const url = 'test';
-    const opts = {
-      url,
-      manager: { getAudioContext: mock, },
-    } as any;
-
-    createWebAudioSound(opts);
-
-    expect(loadAudioBuffer).toBeCalledTimes(1);
-    expect(loadAudioBuffer).toBeCalledWith(url, mockVal);
-    expect(mock).toBeCalledTimes(1);
-  });
-
   it('Constructs a Sound with the audio buffer with other options if loadAudioBuffer resolves.', () => {
-    expect.assertions(3);
-
     const mockVal1 = Symbol('Sound');
     (Sound as any).mockImplementation(() => mockVal1);
     const mockVal2 = Symbol('buffer');
@@ -100,13 +70,11 @@ describe('createWebAudioSound unit tests.', () => {
     const mockVal = Symbol('buffer');
     (loadAudioBuffer as any).mockReturnValue(Promise.reject(mockVal));
 
-    const url = 'test';
     const opts = {
-      url,
-      manager: {
-        getAudioContext: jest.fn(),
-      },
-    } as any;
+      url: 'foobar',
+      getManagerVolume: jest.fn(() => 1),
+      isWebAudio: true,
+    };
 
     return expect(createWebAudioSound(opts)).rejects.toBe(mockVal);
   });

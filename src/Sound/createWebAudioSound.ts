@@ -19,21 +19,18 @@ import {
 
 export const createWebAudioSound = (options: ICreateSoundOptions) => {
   const {
+    context,
+    getManagerVolume,
     url,
-    manager,
   } = assertValid<ICreateSoundOptions>(options);
 
   assert(url);
-  assert(manager);
   return new Promise<Sound>((resolve, reject) => {
-    loadAudioBuffer(url, manager.getAudioContext()).then((buffer) => (
+    loadAudioBuffer(url, assertValid<AudioContext>(context)).then((buffer) => (
       resolve(new Sound(getFrozenObject({
         ...options,
         buffer,
-        getManagerVolume() {
-          /* istanbul ignore next */
-          return manager.getVolume();
-        },
+        getManagerVolume: assertValid<() => number>(getManagerVolume),
       })))
     ), reject);
   });

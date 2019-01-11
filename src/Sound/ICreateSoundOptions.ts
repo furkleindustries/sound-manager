@@ -1,15 +1,14 @@
 import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
-import {
-  IManagerNode,
-} from '../Node/IManagerNode';
 
 export interface ICreateSoundOptions {
+  isWebAudio: boolean;
   url: string;
-  manager: IManagerNode;
+  context?: AudioContext;
   fade?: IFadeOptions | boolean;
   loop?: boolean;
   trackPosition?: number;
   volume?: number;
+  getManagerVolume?(): number;
 }
