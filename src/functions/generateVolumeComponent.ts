@@ -96,8 +96,8 @@ export function generateVolumeInputComponent(node: IManagerNode, uniqueName: str
 
 export function generateVolumeLevelsVisualizerComponent(node: IManagerNode & IAnalysableNode) {
   const canvas = document.createElement('canvas');
-  canvas.width = 20;
-  canvas.height = 150;
+  canvas.width = 150;
+  canvas.height = 20;
   const canvasCtx = assertValid<CanvasRenderingContext2D>(
     canvas.getContext('2d'),
   );
@@ -110,9 +110,8 @@ export function generateVolumeLevelsVisualizerComponent(node: IManagerNode & IAn
     }
 
     analysis.getTimeDomainByte(arr);
-    const tAverage = Math.min(100, arr.reduce((prev, curr) => {
-      return prev + Math.abs(128 - curr);
-    }) / arr.length / 128);
+    const tAverage = arr.reduce((prev, curr) => prev + Math.abs(128 - curr)) /
+      arr.length / 128;
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     canvasCtx.fillStyle = 'rgb(255, 0, 0)';
