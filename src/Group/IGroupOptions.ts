@@ -5,5 +5,6 @@ import {
 export interface IGroupOptions {
   context?: AudioContext;
   sounds?: ISoundsMap;
+  tags?: string[];
   volume?: number;
 }

@@ -9,6 +9,7 @@ export interface ISoundOptions {
   context?: AudioContext;
   fade?: boolean | IFadeOptions;
   loop?: boolean;
+  tags?: string[];
   trackPosition?: number;
   volume?: number;
 }

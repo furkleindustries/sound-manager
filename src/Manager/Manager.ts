@@ -575,20 +575,14 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return getPlaylistMessage(/* ended */ false, /* looped */ false);
   }
 
-  public playPlaylists(name: string): Promise<void>;
-  public playPlaylists(names: string[]): Promise<void>;
-  public playPlaylists(names: string | string[]): Promise<void> {
-    if (typeof names === 'string') {
-      return this.playPlaylist(names);
-    } else if (Array.isArray(names)) {
-      return new Promise((resolve) => {
-        Promise.all(names.map((name) => this.playPlaylist(name))).then(() => (
-          resolve()
-        ));
-      });
-    }
-
-    throw new Error();
+  public playPlaylists(names: string[]): Promise<void> {
+    assert(Array.isArray(names));
+    return new Promise((resolve, reject) => (
+      Promise.all(names.map(this.playPlaylist)).then(
+        () => resolve(),
+        reject,
+      )
+    ));
   }
 
   public stopPlaylist(name: string) {
