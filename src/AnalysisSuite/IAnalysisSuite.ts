@@ -14,7 +14,7 @@ export interface IAnalysisSuite {
   addRenderListener(
     renderCallback: IAnalysisRenderCallback,
     name?: string,
-  ): void;
+  ): this;
 
   removeRenderListener(name: string): this;
 }

@@ -13,7 +13,9 @@ import {
 import {
   IManagerNodeOptions,
 } from './IManagerNodeOptions';
-import { isValidVolume } from '../functions/isValidVolume';
+import {
+  isValidVolume,
+} from '../functions/isValidVolume';
 
 export class ManagerNode implements IManagerNode {
   get type(): NodeTypes {

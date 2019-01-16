@@ -113,11 +113,11 @@
           }) / frequencyData.length / 256 * 360;
 
           const tAverage = Math.min(100, timeDomainData.reduce((prev, curr) => {
-            return prev + Math.abs(128 - curr) * 4;
-          }) / timeDomainData.length / 256 * 100);
+            return prev + Math.abs(128 - curr);
+          }) / timeDomainData.length / 128 * 100);
 
           visualizer.style.backgroundColor = getColor(fAverage, tAverage);
-          console.log(getColor(fAverage, tAverage));
+          //console.log(getColor(fAverage, tAverage));
         }, 'listener1');
 
         manager.playSounds('test1').then(() => {

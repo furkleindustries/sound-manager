@@ -49,12 +49,19 @@ import {
 import { scheduleHtmlAudioFades } from '../Fade/scheduleHtmlAudioFades';
 import { scheduleWebAudioFades } from '../Fade/scheduleWebAudioFades';
 import { getFrozenObject } from '../functions/getFrozenObject';
+import { AnalysableNodeMixin } from '../Node/AnalysableNodeMixin';
+import { TaggableNodeMixin } from '../Node/TaggableNodeMixin';
 
 export class Sound
-  extends PanelRegisterableNodeMixin(ManagerNode)
+  extends
+    AnalysableNodeMixin(
+    PanelRegisterableNodeMixin(
+    TaggableNodeMixin(
+      ManagerNode
+    )))
   implements ISound
 {
-  get type() {
+  get type(): NodeTypes.Sound {
     return NodeTypes.Sound;
   }
 
@@ -121,9 +128,6 @@ export class Sound
     /* Generate the gain node used for fading volume. */
     this.__fadeGainNode = context.createGain();
   
-    /* Connect the source node to the fade gain node. */
-    this.__sourceNode.connect(this.__fadeGainNode);
-  
     /* Connect the fade gain node to the sound's gain node. */
     this.__fadeGainNode.connect(this.getGainNode());
   }
@@ -140,10 +144,6 @@ export class Sound
     }
 
     return this;
-  }
-
-  public getOutputNode() {
-    return this.getGainNode();
   }
 
   public getSourceNode() {
@@ -189,13 +189,16 @@ export class Sound
   public getDuration() {
     let duration: number = 0;
     if (this.isWebAudio()) {
-      const sourceNode = this.getSourceNode();
-      if (!sourceNode.buffer) {
+      const {
+        buffer,
+      } = this.getSourceNode();
+
+      if (!buffer) {
         warn('Audio buffer not found for Sound.');
         return 0;
       }
 
-      duration = sourceNode.buffer!.duration;
+      duration = buffer.duration;
     } else if (this.__audioElement) {
       duration = this.__audioElement.duration;
     }
@@ -212,9 +215,9 @@ export class Sound
       return this.__loopOverride;
     } else if (this.isWebAudio()) {
       return this.getSourceNode().loop;
+    } else {
+      return assertValid<HTMLAudioElement>(this.__audioElement).loop;
     }
-
-    return assertValid<HTMLAudioElement>(this.__audioElement).loop;
   }
 
   public getFade() {
@@ -290,7 +293,7 @@ export class Sound
         timeUpdate,
       );
     }
-  
+
     this.__initializePromiseForPlay(audioElement, timeUpdate);
   }
 
@@ -299,6 +302,12 @@ export class Sound
       this.getAudioContext(),
       assertValid<AudioBuffer>(this.getSourceNode().buffer),
     );
+
+    /* Connect the input node to the fade gain node. */
+    this.getInputNode().connect(this.getFadeGainNode());
+
+    /* Connect the fade gain node to the output node. */
+    this.getFadeGainNode().connect(this.getOutputNode());
   }
 
   private __updateSoundTimes() {
@@ -309,11 +318,11 @@ export class Sound
     } else {
       /* Set the current time to the track position. */
       assertValid<HTMLAudioElement>(
-        this.__audioElement
+        this.__audioElement,
       ).currentTime = trackPosition;
     }
   }
-  
+
   private __initializeFadeForPlay(
     audioElement?: HTMLAudioElement | null,
     htmlTimeUpdater?: () => void,
@@ -328,7 +337,7 @@ export class Sound
       );
     }
   }
-  
+
   private __initializeStopRejector(reject: Function) {
     this.__rejectOnStop = (message?: string) => reject(
       message ||
@@ -343,12 +352,12 @@ export class Sound
   {
     this.__promise = new Promise((resolve, reject) => {
       this.__initializeEventsForPlay(resolve, audioElement, timeUpdate);
-  
+
       /* Allow the promise to be rejected if the sound is stopped. */
       this.__initializeStopRejector(reject);
     });
   }
-  
+
   private __initializeEventsForPlay(
     resolver: (arg: Event) => void,
     audioElement?: HTMLAudioElement | null,
@@ -359,7 +368,7 @@ export class Sound
     const source = assertValid<AudioBufferSourceNode | HTMLAudioElement>(
       isWebAudio ? this.getSourceNode() : audioElement,
     );
-  
+
     const ended = (e: Event) => {
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
@@ -369,18 +378,18 @@ export class Sound
         /* Remove the 'timeupdate' event listener. */
         source.removeEventListener('timeupdate', timeUpdate);
       }
-  
+
       /* Don't reject the emitted promise. */
       this.__rejectOnStop = () => {};
-  
+
       /* Reset the track position of the sound after it ends. Also deletes
        * the old promise. */
       this.stop();
-  
+
       /* Resolve the promise with the ended event. */
       return resolver(e);
     };
-  
+
     /* Register the ended export function to fire when the audio source emits the
      * 'ended' event. */
     source.addEventListener('ended', ended);

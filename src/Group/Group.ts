@@ -5,11 +5,11 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
-import {
-  getOneOrMany,
-} from '../functions/getOneOrMany';
 import {
   IGroup,
 } from './IGroup';
@@ -31,12 +31,20 @@ import {
 import {
   PanelRegisterableNodeMixin,
 } from '../Node/PanelRegisterableNodeMixin';
+import {
+  TaggableNodeMixin,
+} from '../Node/TaggableNodeMixin';
 
 export class Group
-  extends PanelRegisterableNodeMixin(AnalysableNodeMixin(ManagerNode))
+  extends
+    AnalysableNodeMixin(
+    PanelRegisterableNodeMixin(
+    TaggableNodeMixin(
+      ManagerNode
+    )))
   implements IGroup
 {
-  get type() {
+  get type(): NodeTypes.Group {
     return NodeTypes.Group;
   }
 
@@ -74,14 +82,33 @@ export class Group
     return this;
   }
 
-  public getSounds(name: string): ISound;
-  public getSounds(names: string[]): ISound[];
-  public getSounds(names: string | string[]): ISound | ISound[] {
-    return getOneOrMany(names as string, this.sounds);
+  public getSound(name: string) {
+    return assertValid<ISound>(this.sounds[name]);
+  }
+
+  public getSounds(names: string[]) {
+    assert(Array.isArray(names));
+    return names.map(this.getSound);
   }
 
   public getAllSounds() {
     return this.getSounds(Object.keys(this.sounds));
+  }
+
+  public getSoundsByTag(tag: string) {
+    return this.getAllSounds().filter((sound) => sound.hasTag(tag));
+  }
+
+  public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
+    if (matchOneOrAll === 'all') {
+      return this.getAllSounds().filter((sound) => (
+        tags.filter(sound.hasTag).length === tags.length
+      ));
+    }
+
+    return this.getAllSounds().filter((sound) => (
+      tags.filter(sound.hasTag).length >= 1
+    ));
   }
 
   public addSound(name: string, sound: ISound) {
@@ -110,26 +137,24 @@ export class Group
     return this;
   }
 
-  public removeSounds(name: string): this;
-  public removeSounds(names: string[]): this;
-  public removeSounds(names: string | string[]) {
-    let arr: string[];
-    if (typeof names === 'string') {
-      arr = [ names ];
-    } else {
-      arr = names;
-    }
+  public removeSound(name: string) {
+    this.removeSounds([ name ]);
+    return this;
+  }
 
-    arr.forEach((soundName: string) => {
-      const sounds = { ...this.sounds, };
+  public removeSounds(names: string[]) {
+    assert(Array.isArray(names));
+    const sounds = { ...this.sounds, };
+    names.forEach((soundName: string) => {
       const sound = sounds[soundName];
       if (sound.isWebAudio()) {
         sound.getOutputNode().disconnect();
       }
 
       delete sounds[soundName];
-      this.__sounds = getFrozenObject(sounds);
     });
+    
+    this.__sounds = getFrozenObject(sounds);
 
     return this;
   }
@@ -138,35 +163,27 @@ export class Group
     return this.removeSounds(Object.keys(this.sounds));
   }
 
-  public playSounds(name: string): Promise<Event>;
-  public playSounds(names: string[]): Promise<Event[]>;
-  public playSounds(names: string | string[]) {
-    if (typeof names === 'string') {
-      return this.getSounds(names).play();
-    } else if (Array.isArray(names)) {
-      return Promise.all(names.map((name) => this.getSounds(name).play()));
-    }
+  public playSound(name: string) {
+    return this.getSound(name).play();
+  }
 
-    throw new Error();
+  public playSounds(names: string[]) {
+    assert(Array.isArray(names));
+    return Promise.all(names.map(this.playSound));
   }
 
   public playAllSounds() {
     return this.playSounds(Object.keys(this.sounds));
   }
 
-  public pauseSounds(name: string): this;
-  public pauseSounds(names: string[]): this;
-  public pauseSounds(names: string | string[]) {
-    let arr: string[];
-    if (typeof names === 'string') {
-      arr = [ names, ];
-    } else if (Array.isArray(names)) {
-      arr = names;
-    } else {
-      throw new Error();
-    }
+  public pauseSound(name: string) {
+    this.getSound(name).pause();
+    return this;
+  }
 
-    arr.forEach((name) => this.getSounds(name).pause());
+  public pauseSounds(names: string[]) {
+    assert(Array.isArray(names));
+    names.map(this.pauseSound);
 
     return this;
   }
@@ -176,20 +193,13 @@ export class Group
   }
 
   public stopSound(name: string) {
-    return this.stopSounds(name);
+    this.getSound(name).stop();
+    return this;
   }
 
-  public stopSounds(name: string): this;
-  public stopSounds(names: string[]): this;
-  public stopSounds(names: string | string[]) {
-    let arr: string[];
-    if (typeof names === 'string') {
-      arr = [ names, ];
-    } else {
-      arr = names;
-    }
-
-    arr.forEach((name) => this.getSounds(name).stop());
+  public stopSounds(names: string[]) {
+    assert(Array.isArray(names));
+    names.map(this.stopSound);
 
     return this;
   }

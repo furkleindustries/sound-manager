@@ -4,7 +4,7 @@ import {
 
 export function assertValid<T>(
   value: any,
-  message?: string,
+  message?: string | null,
   validator?: (arg: any) => boolean,
 ): T
 {

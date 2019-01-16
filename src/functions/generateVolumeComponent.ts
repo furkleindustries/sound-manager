@@ -2,6 +2,15 @@ import {
   assertValid,
 } from '../assertions/assertValid';
 import {
+  IAnalysableNode,
+} from '../Node/IAnalysableNode';
+import {
+  IAnalysis,
+} from '../AnalysisSuite/IAnalysis';
+import {
+  IAnalysisSuite,
+} from '../AnalysisSuite/IAnalysisSuite';
+import {
   IManagerNode,
 } from '../Node/IManagerNode';
 import {
@@ -29,6 +38,11 @@ export function generateVolumeComponent(
   const uniqueId = `sm-volumeInput-${nodeType}-${uniqueName}`;
   container.appendChild(generateVolumeLabelComponent(node, uniqueId, name));
   container.appendChild(generateVolumeInputComponent(node, uniqueId));
+  if (node.isWebAudio()) {
+    container.appendChild(generateVolumeLevelsVisualizerComponent(
+      node as any,
+    ));
+  }
 
   return container;
 }
@@ -40,9 +54,10 @@ export function generateVolumeLabelComponent(node: IManagerNode, uniqueId: strin
   const nodeType = node.type;
   if (nodeType === NodeTypes.Group || nodeType === NodeTypes.Sound) {
     const checkedName = assertValid<string>(name);
-    label.textContent = checkedName[0].toUpperCase() + checkedName.slice(1);
+    const upperFirstChar = checkedName[0].toUpperCase();
+    label.textContent = `${upperFirstChar}${checkedName.slice(1)}`;
   } else if (name) {
-    label.textContent = name[0].toUpperCase() + name.slice(1);
+    label.textContent = `${name[0].toUpperCase()}${name.slice(1)}`;
   } else {
     label.textContent = 'Master volume';
   }
@@ -77,4 +92,37 @@ export function generateVolumeInputComponent(node: IManagerNode, uniqueName: str
   });
 
   return input;
+}
+
+export function generateVolumeLevelsVisualizerComponent(node: IManagerNode & IAnalysableNode) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 20;
+  canvas.height = 150;
+  const canvasCtx = assertValid<CanvasRenderingContext2D>(
+    canvas.getContext('2d'),
+  );
+
+  const analysisSuite = assertValid<IAnalysisSuite>(node.analysis);
+  let arr: Uint8Array;
+  analysisSuite.addRenderListener((analysis: IAnalysis) => {
+    if (!arr) {
+      arr = new Uint8Array(analysis.getBinCount());
+    }
+
+    analysis.getTimeDomainByte(arr);
+    const tAverage = Math.min(100, arr.reduce((prev, curr) => {
+      return prev + Math.abs(128 - curr);
+    }) / arr.length / 128);
+
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+    canvasCtx.fillStyle = 'rgb(255, 0, 0)';
+    canvasCtx.fillRect(
+      0,
+      canvas.height * (1 - tAverage),
+      canvas.width,
+      canvas.height,
+    );
+  });
+
+  return canvas;
 }
