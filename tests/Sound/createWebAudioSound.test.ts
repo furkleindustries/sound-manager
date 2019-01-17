@@ -2,14 +2,14 @@ import {
   createWebAudioSound,
 } from '../../src/Sound/createWebAudioSound';
 
+jest.mock('../../src/functions/loadAudioBuffer');
 import {
   loadAudioBuffer,
 } from '../../src/functions/loadAudioBuffer';
-jest.mock('../../src/functions/loadAudioBuffer');
+jest.mock('../../src/Sound/Sound');
 import {
   Sound,
 } from '../../src/Sound/Sound';
-jest.mock('../../src/Sound/Sound');
 
 describe('createWebAudioSound unit tests.', () => {
   beforeEach(() => {

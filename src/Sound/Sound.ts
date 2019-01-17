@@ -2,11 +2,17 @@ import {
   AnalysableNodeMixin,
 } from '../Node/AnalysableNodeMixin';
 import {
+  assert,
+} from '../assertions/assert';
+import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
   assertValid,
 } from '../assertions/assertValid';
+import {
+  createFade,
+} from '../Fade/createFade';
 import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
@@ -20,11 +26,17 @@ import {
   IFade,
 } from '../Fade/IFade';
 import {
+  IFadeOptions,
+} from '../Fade/IFadeOptions';
+import {
   ISound,
 } from './ISound';
 import {
   ISoundOptions,
 } from './ISoundOptions';
+import {
+  loopIsValid,
+} from '../Playlist/loopIsValid';
 import {
   ManagerNode,
 } from '../Node/ManagerNode';
@@ -44,13 +56,11 @@ import {
   scheduleWebAudioFades,
 } from '../Fade/scheduleWebAudioFades';
 import {
+  strings,
+} from './strings';
+import {
   TaggableNodeMixin,
 } from '../Node/TaggableNodeMixin';
-import { strings } from './strings';
-import { assert } from '../assertions/assert';
-import { IFadeOptions } from '../Fade/IFadeOptions';
-import { createFade } from '../Fade/createFade';
-import { loopIsValid } from '../Playlist/loopIsValid';
 
 export class Sound
   extends
@@ -101,7 +111,12 @@ export class Sound
 
     const isWebAudio = this.isWebAudio();
     if (isWebAudio) {
-      this.__initializeSoundForWebAudio(assertValid<AudioBuffer>(buffer));
+      this.__initializeSoundForWebAudio(
+        assertValid<AudioBuffer>(
+          buffer,
+          strings.CTOR_BUFFER_INVALID,
+        ),
+      );
     } else {
       this.__audioElement = assertValid<HTMLAudioElement>(
         audioElement,
@@ -170,12 +185,18 @@ export class Sound
 
   public getSourceNode() {
     assertNodeIsWebAudio(this, 'getSourceNode');
-    return assertValid<AudioBufferSourceNode>(this.__sourceNode);
+    return assertValid<AudioBufferSourceNode>(
+      this.__sourceNode,
+      strings.GET_SOURCE_NODE_NODE_INVALID,
+    );
   }
 
   public getFadeGainNode() {
     assertNodeIsWebAudio(this, 'getFadeGainNode');
-    return assertValid<GainNode>(this.__fadeGainNode);
+    return assertValid<GainNode>(
+      this.__fadeGainNode,
+      strings.GET_FADE_GAIN_NODE_NODE_INVALID,
+    );
   }
 
   public setVolume(value: number) {
@@ -194,7 +215,10 @@ export class Sound
         return this.getContextCurrentTime() - this.__startedTime;
       }
 
-      return assertValid<HTMLAudioElement>(this.__audioElement).currentTime;
+      return assertValid<HTMLAudioElement>(
+        this.__audioElement,
+        strings.GET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
+      ).currentTime;
     }
 
     return this.__pausedTime;

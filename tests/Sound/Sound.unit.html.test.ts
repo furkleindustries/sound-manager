@@ -152,7 +152,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     expect(testSoundFactory().getTrackPosition()).toBeGreaterThanOrEqual(0);
   });
 
-  it('Has a getTrackPosition which returns the currentTime property of the audio element if isPlaying method returns true.', () => {
+  it('Has a getTrackPosition function which returns the currentTime property of the audio element if isPlaying method returns true.', () => {
     const currentTime = 15;
     const sound = testSoundFactory();
     sound.isPlaying = jest.fn(() => true);
@@ -166,7 +166,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     expect(sound.getTrackPosition()).toBe(currentTime);
   });
 
-  it('Has a getTrackPosition which returns the __pausedTime property if the isPlaying method returns false.', () => {
+  it('Has a getTrackPosition function which returns the __pausedTime property if the isPlaying method returns false.', () => {
     const sym = Symbol('paused')
     const sound = testSoundFactory();
     sound.isPlaying = jest.fn();
@@ -174,6 +174,16 @@ describe('Sound HTML5 Audio unit tests.', () => {
     sound.__pausedTime = sym;
 
     expect(sound.getTrackPosition()).toBe(sym);
+  });
+
+  it('Has a getTrackPosition function which throws if the audio element is not present.', () => {
+    const sound = testSoundFactory();
+    sound.isPlaying = jest.fn(() => true);
+    // @ts-ignore
+    delete sound.__audioElement;
+    const func = () => sound.getTrackPosition();
+
+    expect(func).toThrow(strings.GET_TRACK_POSITION_AUDIO_ELEMENT_INVALID);
   });
 
   it('Has a track position which defaults to 0.', () => {
