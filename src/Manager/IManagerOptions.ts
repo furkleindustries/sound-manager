@@ -5,5 +5,4 @@ import {
 export interface IManagerOptions {
   context?: AudioContext;
   groups?: IGroupsMap;
-  masterVolume?: number;
 }

@@ -1,9 +1,11 @@
 import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
+import {
+  IManagerNodeOptions,
+} from '../Node/IManagerNodeOptions';
 
-export interface ISoundOptions {
-  getManagerVolume(): number;
+export interface ISoundOptions extends IManagerNodeOptions {
   audioElement?: HTMLAudioElement;
   buffer?: AudioBuffer;
   context?: AudioContext;
@@ -11,5 +13,5 @@ export interface ISoundOptions {
   loop?: boolean;
   tags?: string[];
   trackPosition?: number;
-  volume?: number;
+  getManagerVolume?(): number;
 }

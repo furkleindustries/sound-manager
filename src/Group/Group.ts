@@ -54,12 +54,11 @@ export class Group
   }
 
   constructor(options: IGroupOptions) {
-    super(getFrozenObject(options));
+    super({ ...options });
 
     const {
       context,
       sounds,
-      volume,
     } = options;
 
     if (context) {
@@ -68,10 +67,6 @@ export class Group
 
     if (sounds && typeof sounds === 'object') {
       this.addSounds(sounds);
-    }
-
-    if (typeof volume !== 'undefined') {
-      this.setVolume(volume);
     }
   }
 

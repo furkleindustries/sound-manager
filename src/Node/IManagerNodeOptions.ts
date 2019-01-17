@@ -1,3 +1,4 @@
 export interface IManagerNodeOptions {
-  readonly context?: AudioContext;
+  context?: AudioContext;
+  volume?: number;
 }

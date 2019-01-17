@@ -23,20 +23,26 @@ export class ManagerNode implements IManagerNode {
   }
 
   private __volume: number = 1;
-  protected __audioContext: AudioContext | null = null;
+  private __gainNode: GainNode | null = null;
+
   protected __isWebAudio: boolean;
-  protected __gainNode: GainNode | null = null;
+  protected __audioContext: AudioContext | null = null;
 
   constructor(options?: IManagerNodeOptions) {
     const opts = options || {};
     const {
       context,
+      volume,
     } = opts;
 
     this.__audioContext = context || null;
     this.__isWebAudio = Boolean(this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
+    }
+
+    if (isValidVolume(volume)) {
+      this.setVolume(volume);
     }
   }
 
