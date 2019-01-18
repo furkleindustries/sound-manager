@@ -1,6 +1,6 @@
 export function assert(condition: any, message?: string | null) {
   const msg = message || 'A run-time assertion failed.';
-  if (!Boolean(condition)) {
+  if (!condition) {
     throw new Error(msg);
   }
 

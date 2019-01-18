@@ -22,6 +22,7 @@ import {
 
 export function createWebHelper(options: ICreateSoundOptions): Promise<ISound> {
   const opts = getFrozenObject(options);
+  console.log('wtf dude');
   return new Promise((resolve, reject) => (
     createWebAudioSound(opts).then(
       resolve,

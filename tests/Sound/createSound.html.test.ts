@@ -13,6 +13,7 @@ import {
 } from '../../src/functions/getFrozenObject';
 
 const getOpts = () => ({
+  getManagerVolume: jest.fn(() => 1),
   isWebAudio: false,
   url: 'foobar',
 });
@@ -21,7 +22,7 @@ describe('createSound HTML5 Audio unit tests.', () => {
   beforeEach(() => {
     (createHtmlHelper as any).mockClear();
     (getFrozenObject as any).mockClear();
-    (getFrozenObject as any).mockReturnValue((aa: any) => aa);
+    (getFrozenObject as any).mockImplementation((aa: any) => aa);
   });
 
   it('Throws if no options argument is provided.', () => {
@@ -41,10 +42,7 @@ describe('createSound HTML5 Audio unit tests.', () => {
 
   it('Calls createHtmlHelper.', () => {
     const opts = getOpts();
-    createSound({
-      isWebAudio: false,
-      url: 'foobar',
-    });
+    createSound(opts);
 
     expect(createHtmlHelper).toBeCalledTimes(1);
     expect(createHtmlHelper).toBeCalledWith(opts);

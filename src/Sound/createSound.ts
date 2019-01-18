@@ -30,8 +30,9 @@ export function createSound(options: ICreateSoundOptions): Promise<ISound> {
   const {
     isWebAudio,
   } = opts;
-  
+
   if (isWebAudio === false) {
+    console.log('weird')
     return createHtmlHelper(opts);
   } else {
     return createWebHelper(opts);
