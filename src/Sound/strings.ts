@@ -1,4 +1,14 @@
 export const strings = {
+  CREATE_HTML_AUDIO_SOUND_GET_MANAGER_VOLUME_INVALID:
+    'The getManagerVolume argument property was not provided to ' +
+    'createHtmlAudioSound.',
+
+  CREATE_HTML_AUDIO_SOUND_OPTIONS_INVALID:
+    'The options argument was not provided to createHtmlAudioSound.',
+
+  CREATE_HTML_AUDIO_SOUND_URL_INVALID:
+    'The url argument property was not provided to createHtmlAudioSound.',
+
   CREATE_SOUND_BOTH_FAILED:
     'Generating HTML5 Audio failed too. Cannot construct Sound.',
 
@@ -13,6 +23,15 @@ export const strings = {
 
   CREATE_SOUND_WEB_AUDIO_FAILED:
     'Loading Web Audio failed. Falling back to HTML5 audio.',
+
+  CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID:
+    'The context property of the argument object was not present.',
+
+  CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID:
+    'The options argument was not present.',
+
+  CREATE_WEB_AUDIO_SOUND_URL_INVALID:
+    'The url property of the argument object was not present.',
 
   CTOR_AUDIO_ELEMENT_INVALID:
     'The audioElement property of the argument object was not present. This ' +
@@ -54,6 +73,16 @@ export const strings = {
   INITIALIZE_SOUND_FOR_WEB_AUDIO_BUFFER_INVALID:
     'The buffer was not present but is necessary for initializing Sound ' +
     'objects in Web Audio mode.',
+
+  PLAY_AUDIO_SOURCE_AUDIO_ELEMENT_INVALID:
+    'The audio element argument was not present in playAudioSource. This ' +
+    'argument is necessary for a song to be played in HTML Audio mode.',
+
+  PLAY_AUDIO_SOURCE_SOUND_INVALID:
+    'The sound argument was not provided to playAudioSource.',
+
+  PLAY_AUDIO_SOURCE_SOUND_PLAYING:
+    'The Sound provided to playAudioSource was already playing.',
 
   SET_LOOP_AUDIO_ELEMENT_INVALID:
     'The audio element was not present but is necessary for use of the ' +

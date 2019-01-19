@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertValid,
 } from '../assertions/assertValid';
 import {
@@ -14,24 +11,38 @@ import {
   loadAudioBuffer,
 } from '../functions/loadAudioBuffer';
 import {
+  ISound,
+} from './ISound';
+import {
   Sound,
 } from './Sound';
+import {
+  strings,
+} from '../../src/Sound/strings';
 
-export const createWebAudioSound = (options: ICreateSoundOptions) => {
+export async function createWebAudioSound(options: ICreateSoundOptions): Promise<ISound> {
   const {
     context,
-    getManagerVolume,
     url,
-  } = assertValid<ICreateSoundOptions>(options);
+  } = assertValid<ICreateSoundOptions>(
+    options,
+    strings.CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID,
+  );
 
-  assert(url);
-  return new Promise<Sound>((resolve, reject) => {
-    loadAudioBuffer(url, assertValid<AudioContext>(context)).then((buffer) => (
-      resolve(new Sound(getFrozenObject({
-        ...options,
-        buffer,
-        getManagerVolume: assertValid<() => number>(getManagerVolume),
-      })))
-    ), reject);
-  });
+  const safeContext = assertValid<AudioContext>(
+    context,
+    strings.CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID,
+  );
+  
+  const safeUrl = assertValid<string>(
+    url,
+    strings.CREATE_WEB_AUDIO_SOUND_URL_INVALID,
+  );
+
+  const buffer = await loadAudioBuffer(safeUrl, safeContext);
+
+  return new Sound(getFrozenObject({
+    ...options,
+    buffer,
+  }));
 };

@@ -71,6 +71,9 @@ import {
   IManagerOptions,
 } from './IManagerOptions';
 import {
+  log,
+} from '../logging/log';
+import {
   ManagerNode,
 } from '../Node/ManagerNode';
 import {
@@ -98,18 +101,16 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   }
 
   constructor(options?: IManagerOptions) {
-    super({ ...options });
+    super(getFrozenObject(options!));
 
     if (!this.__audioContext && ctxCtor) {
-      /* any cast is for typedoc complaints. */
-      this.__audioContext = new (ctxCtor as any)();
+      this.__audioContext = new ctxCtor();
       this.__isWebAudio = true;
     }
 
     const opts = options || {};
     const {
       groups,
-      masterVolume,
     } = opts;
 
     if (this.isWebAudio()) {
@@ -117,10 +118,6 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     }
 
     this.__initializeGroups(groups);
-
-    if (typeof masterVolume !== 'undefined') {
-      this.setVolume(masterVolume);
-    }
   }
 
   private __connectNodes() {
@@ -171,6 +168,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   public addGroups(groups: IGroupsMap) {
     const names = Object.keys(groups);
     names.forEach((groupName) => {
+      /* Throw if there is already a group with this name. */
       assert(!(groupName in this.groups))
       if (this.isWebAudio()) {
         const group = groups[groupName];
@@ -188,7 +186,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
   private __initializeDefaultGroup() {
     if (this.isWebAudio()) {
-      this.addGroup('default', { context: this.getAudioContext(), });
+      this.addGroup('default', { context: this.getAudioContext() });
     } else {
       this.addGroup('default');
     }
@@ -506,14 +504,14 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
   public async playPlaylist(name: string) {
     const playlist = this.getPlaylist(name);
-    console.log(`Playing playlist ${name}.`);
+    log(`Playing playlist ${name}.`);
     const events: Event[] = [];
     let playIndex = 0;
     let loopedTimes = 0;
     let sentinel = true;
     while (sentinel) {
       const id = playlist.ids[playIndex];
-      console.log(`${id.groupName}.${id.soundName} starting.`);
+      log(`${id.groupName}.${id.soundName} starting.`);
       const {
         ended,
         looped,
@@ -525,11 +523,11 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
         name,
       );
 
-      console.log(`${id.groupName}.${id.soundName} ending.`);
+      log(`${id.groupName}.${id.soundName} ending.`);
 
       playIndex += 1;
       if (looped) {
-        console.log(`Looping playlist ${name}.`);
+        log(`Looping playlist ${name}.`);
         playIndex = 0;
         loopedTimes += 1;
       }
@@ -575,14 +573,9 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return getPlaylistMessage(/* ended */ false, /* looped */ false);
   }
 
-  public playPlaylists(names: string[]): Promise<void> {
+  public async playPlaylists(names: string[]) {
     assert(Array.isArray(names));
-    return new Promise((resolve, reject) => (
-      Promise.all(names.map(this.playPlaylist)).then(
-        () => resolve(),
-        reject,
-      )
-    ));
+    await Promise.all(names.map(this.playPlaylist));
   }
 
   public stopPlaylist(name: string) {

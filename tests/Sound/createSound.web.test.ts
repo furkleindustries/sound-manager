@@ -3,19 +3,26 @@ import {
 } from '../../src/Sound/createSound';
 
 import {
-  createHtmlAudioSound,
-} from '../../src/Sound/createHtmlAudioSound';
-jest.mock('../../src/Sound/createHtmlAudioSound');
+  createWebHelper,
+} from '../../src/Sound/createWebHelper';
+jest.mock('../../src/Sound/createWebHelper');
 
 import {
-  createWebAudioSound,
-} from '../../src/Sound/createWebAudioSound';
-jest.mock('../../src/Sound/createWebAudioSound');
+  getFrozenObject,
+} from '../../src/functions/getFrozenObject';
+jest.mock('../../src/functions/getFrozenObject');
+
+const getOpts = () => ({
+  getManagerVolume: jest.fn(() => 1),
+  isWebAudio: true,
+  url: 'foobar',
+});
 
 describe('createSound Web Audio unit tests.', () => {
   beforeEach(() => {
-    (createHtmlAudioSound as any).mockClear();
-    (createWebAudioSound as any).mockClear();
+    (createWebHelper as any).mockClear();
+    (getFrozenObject as any).mockClear();
+    (getFrozenObject as any).mockImplementation((aa: any) => aa);
   });
 
   it('Throws if no options argument is provided.', () => {
@@ -25,89 +32,19 @@ describe('createSound Web Audio unit tests.', () => {
     expect(func).toThrow();
   });
 
-  it('Outputs a promise.', () => {
-    expect(createSound({
-      url: 'foobar',
-      getManagerVolume: jest.fn(() => 1),
-      isWebAudio: true,
-    })).toBeInstanceOf(Promise);
-  });
-
-  it('Calls createWebAudioSound with the provided options if the manager is in Web Audio mode.', () => {
-    const opts = {
-      url: 'foobar',
-      getManagerVolume: jest.fn(() => 1),
-      isWebAudio: true,
-    };
-
+  it('Freezes the options argument.', () => {
+    const opts = getOpts();
     createSound(opts);
 
-    expect(createWebAudioSound).toBeCalledTimes(1);
-    expect(createWebAudioSound).toBeCalledWith(opts);
+    expect(getFrozenObject).toBeCalledTimes(1);
+    expect(getFrozenObject).toBeCalledWith(opts);
   });
 
-  it('Resolves if createWebAudioSound does.', () => {
-    const sym = Symbol('foo');
-    (createWebAudioSound as any).mockReturnValue(Promise.resolve(sym));
+  it('Calls createWebHelper.', () => {
+    const opts = getOpts();
+    createSound(opts);
 
-    const opts = {
-      url: 'foobar',
-      getManagerVolume: jest.fn(() => 1),
-      isWebAudio: true,
-    };
-
-    return expect(createSound(opts)).resolves.toBe(sym);
-  });
-
-  it('Calls createHtmlAudioSound with the provided options if the call to createWebAudioSound fails.', () => {
-    const warn = console.warn;
-    console.warn = jest.fn();
-
-    (createWebAudioSound as any).mockReturnValue(Promise.reject());
-    (createHtmlAudioSound as any).mockReturnValue(Promise.resolve());
-
-    const opts = {
-      url: 'foobar',
-      getManagerVolume: jest.fn(() => 1),
-      isWebAudio: true,
-    };
-
-    return createSound(opts).then(() => {
-      expect(createWebAudioSound).toBeCalledTimes(1);
-      expect(createWebAudioSound).toBeCalledWith(opts);
-      expect(createHtmlAudioSound).toBeCalledTimes(1);
-      expect(createHtmlAudioSound).toBeCalledWith(opts);
-  
-      console.warn = warn;
-    });
-  });
-
-  it('Rejects if the call to createHtmlAudioSound fails.', () => {
-    const warn = console.warn;
-    console.warn = jest.fn();
-    const error = console.error;
-    console.error = jest.fn();
-
-    const opts = {
-      url: 'foobar',
-      getManagerVolume: jest.fn(() => 1),
-      isWebAudio: true,
-    };
-
-    (createWebAudioSound as any).mockReturnValue(Promise.reject());
-    (createHtmlAudioSound as any).mockReturnValue(Promise.reject(true));
-
-    return expect(new Promise((
-      // @ts-ignore
-      resolve,
-      reject,
-    ) => {
-      createSound(opts).catch(() => {
-        console.warn = warn;
-        console.error = error;
-
-        return reject(true);
-      });
-    })).rejects.toBe(true);
+    expect(createWebHelper).toBeCalledTimes(1);
+    expect(createWebHelper).toBeCalledWith(opts);
   });
 });

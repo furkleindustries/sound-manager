@@ -20,19 +20,16 @@ import {
   warn,
 } from '../logging/warn';
 
-export function createWebHelper(options: ICreateSoundOptions): Promise<ISound> {
-  const opts = getFrozenObject(options);
-  console.log('wtf dude');
-  return new Promise((resolve, reject) => (
-    createWebAudioSound(opts).then(
-      resolve,
-      (err) => {
-        warn(`${strings.CREATE_SOUND_WEB_AUDIO_FAILED}\n${err}`);
-        createHtmlHelper(opts).then(
-          resolve,
-          (err) => reject(`${strings.CREATE_SOUND_BOTH_FAILED}\n${err}`),
-        );
-      },
-    )
-  ));
+export async function createWebHelper(options: ICreateSoundOptions): Promise<ISound> {
+  try {
+    return await createWebAudioSound(getFrozenObject(options));
+  } catch (err) {
+    warn(`${strings.CREATE_SOUND_WEB_AUDIO_FAILED}\n${err}`);
+
+    try {
+      return await createHtmlHelper(getFrozenObject(options));
+    } catch (err) {
+      throw new Error(`${strings.CREATE_SOUND_BOTH_FAILED}\n${err}`);
+    }
+  }
 }

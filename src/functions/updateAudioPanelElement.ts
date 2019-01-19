@@ -2,26 +2,27 @@ import {
   assert,
 } from '../assertions/assert';
 import {
+  assertValid,
+} from '../assertions/assertValid';
+import {
   generateVolumePanelElement,
 } from './generateVolumePanelElement';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
-import {
-  INodeCollectionSubmanager,
-} from '../Manager/Submanagers/INodeCollectionSubmanager';
+  IManager,
+} from '../Manager/IManager';
 
 export function updateAudioPanelElement(
-  manager: IManagerNode & INodeCollectionSubmanager,
-  oldElem: HTMLElement
+  manager: IManager,
+  oldElem: HTMLElement,
 )
 {
   assert(manager);
   assert(oldElem);
-  assert(oldElem.parentElement);
 
   const newElem = generateVolumePanelElement(manager);
-  oldElem.parentElement!.replaceChild(newElem, oldElem);
+  assertValid<HTMLElement>(
+    oldElem.parentElement,
+  ).replaceChild(newElem, oldElem);
 
   return newElem;
 }

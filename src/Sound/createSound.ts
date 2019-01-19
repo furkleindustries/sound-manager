@@ -31,8 +31,8 @@ export function createSound(options: ICreateSoundOptions): Promise<ISound> {
     isWebAudio,
   } = opts;
 
+  /* Default to web audio and require very explicit opt-out. */
   if (isWebAudio === false) {
-    console.log('weird')
     return createHtmlHelper(opts);
   } else {
     return createWebHelper(opts);

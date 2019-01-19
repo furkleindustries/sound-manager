@@ -4,9 +4,9 @@ import {
 
 const inDevMode = isDev();
 
-export function warn(...messages: any[]) {
+export function log(...messages: any[]) {
   if (inDevMode) {
-    const bound = console.warn.bind(console);
+    const bound = console.log.bind(console);
     messages.forEach(bound);
   }
 }

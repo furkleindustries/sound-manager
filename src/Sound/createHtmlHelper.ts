@@ -14,11 +14,10 @@ import {
   strings,
 } from './strings';
 
-export function createHtmlHelper(options: ICreateSoundOptions): Promise<ISound> {
-  return new Promise((resolve, reject) => (
-    createHtmlAudioSound(getFrozenObject(options)).then(
-      resolve,
-      (err) => reject(`${strings.CREATE_SOUND_HTML_AUDIO_FAILED}\n${err}`),
-    )
-  ));
+export async function createHtmlHelper(options: ICreateSoundOptions): Promise<ISound> {
+  try {
+    return await createHtmlAudioSound(getFrozenObject(options));
+  } catch (err) {
+    throw new Error(`${strings.CREATE_SOUND_HTML_AUDIO_FAILED}\n${err}`);
+  }
 }
