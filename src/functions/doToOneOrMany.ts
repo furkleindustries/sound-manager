@@ -1,6 +1,9 @@
 import {
-  assert,
-} from '../assertions/assert';
+  doToMany,
+} from './doToMany';
+import {
+  doToOne,
+} from './doToOne';
 import {
   ICollection,
 } from '../interfaces/ICollection';
@@ -17,25 +20,4 @@ export function doToOneOrMany<T>(
   } else {
     doToOne(collection, propOrProps, functionName, ...args);
   }
-}
-
-export function doToOne<T>(
-  collection: ICollection<T>,
-  propName: string,
-  functionName: keyof T,
-  ...args: any[]
-)
-{
-  assert(typeof collection[propName][functionName] === 'function');
-  (collection[propName][functionName] as any as Function)(...args);
-}
-
-export function doToMany<T>(
-  collection: ICollection<T>,
-  propNames: string[],
-  functionName: keyof T,
-  ...args: any[]
-)
-{
-  propNames.forEach((name) => doToOne(collection, name, functionName, ...args));
 }

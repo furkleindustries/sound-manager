@@ -63,7 +63,6 @@ describe('playAudioSource unit tests.', () => {
     } as any;
 
     const audio = { play: jest.fn() } as any;
-
     playAudioSource(sound, audio);
 
     expect(updateMock).toBeCalledTimes(1);

@@ -33,7 +33,7 @@ export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| 
       audioElement,
       strings.PLAY_AUDIO_SOURCE_AUDIO_ELEMENT_INVALID,
     );
-  
+
     sound.updateAudioElementVolume();
 
     /* Just to be safe, we set the current time of the audio element to the
