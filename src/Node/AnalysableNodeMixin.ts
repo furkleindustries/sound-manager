@@ -21,7 +21,7 @@ import {
 } from 'ts-assertions';
 
 export function AnalysableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
-  return class AnalysableNodeMixin extends Base implements IAnalysableNode {
+  return class AnalysableNode extends Base implements IAnalysableNode {
     public readonly analysis: IAnalysisSuite | null = null;
     public readonly __analyserNode: AnalyserNode | null = null;
 

@@ -15,7 +15,7 @@
       "dom"
     ],
 
-    "experimentalDecorators": false,
+    "experimentalDecorators": true,
 
     "strict": true, /* Enable all strict type-checking options. */
 

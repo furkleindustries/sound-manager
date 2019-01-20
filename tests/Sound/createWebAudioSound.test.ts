@@ -57,11 +57,16 @@ describe('createWebAudioSound unit tests.', () => {
   });
 
   it('Passes the options to getFrozenObject before passing them to Sound.', async () => {
-    /*const opts = {
-
+    const opts = {
+      context: true,
+      url: 'whatever',
     };
+
     // @ts-ignore
-    await createWebAudioSound*/
+    await createWebAudioSound(opts);
+
+    expect(getFrozenObject).toBeCalledTimes(1);
+    expect(getFrozenObject).toBeCalledWith(opts);
   });
 
   it('Constructs a Sound with the audio buffer with other options if loadAudioBuffer resolves.', async () => {

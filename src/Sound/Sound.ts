@@ -64,7 +64,7 @@ import {
 } from 'ts-assertions';
 
 export class Sound
-  extends
+extends
     AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(

@@ -14,7 +14,7 @@ import {
   assertValid,
 } from 'ts-assertions';
 
-export function generateVolumeLevelsVisualizerComponent(node: IBaseNode & IAnalysableNode) {
+export function generateVolumeLevelVisualizerComponent(node: IBaseNode & IAnalysableNode) {
   const canvas = document.createElement('canvas');
   canvas.width = 150;
   canvas.height = 20;
@@ -30,8 +30,9 @@ export function generateVolumeLevelsVisualizerComponent(node: IBaseNode & IAnaly
     }
 
     analysis.getTimeDomainByte(arr);
-    const tAverage = arr.reduce((prev, curr) => prev + Math.abs(128 - curr)) /
-      arr.length / 128;
+    const tAverage = arr.reduce((prev, curr) => (
+      prev + Math.abs(128 - curr)) / arr.length / 128
+    );
 
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
     canvasCtx.fillStyle = 'rgb(255, 0, 0)';

@@ -8,7 +8,7 @@ import {
   assertValid,
 } from 'ts-assertions';
 
-export function generateVolumeLabelComponent(node: IBaseNode, uniqueId: string, name?: string) {
+export function generateVolumeLabelComponent(node: IBaseNode, uniqueId: string, name?: string): HTMLLabelElement {
   const label = document.createElement('label');
   label.className = 'sm-volumeInput-label';
 

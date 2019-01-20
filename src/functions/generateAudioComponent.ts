@@ -1,12 +1,18 @@
 import {
+  generateUniqueAudioPanelIdentifier,
+} from './generateUniqueAudioPanelIdentifier';
+import {
   generateVolumeInputComponent,
 } from './generateVolumeInputComponent';
 import {
   generateVolumeLabelComponent,
 } from './generateVolumeLabelComponent';
 import {
-  generateVolumeLevelsVisualizerComponent,
-} from './generateVolumeLevelsVisualizer';
+  generateVolumeLevelVisualizerComponent,
+} from './generateVolumeLevelVisualizer';
+import {
+  IAnalysableNode,
+} from '../Node/IAnalysableNode';
 import {
   IBaseNode,
 } from '../Node/IBaseNode';
@@ -14,49 +20,45 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
+  assert,
   assertValid,
 } from 'ts-assertions';
 
 export const strings = {
-  NAME_INVALID:
-    'The name argument was not provided to generateAudioComponent, but this ' +
-    'argument is necessary for NodeTypes other than Manager.',
-
   NODE_INVALID:
     'The node argument was not provided to generateAudioComponent.',
+
+  NODE_TYPE_INVALID:
+    'The node argument did not have a type property.',
 };
 
 export function generateAudioComponent(
-  node: IBaseNode,
+  node: IBaseNode & IAnalysableNode,
   name?: string,
 )
 {
-  const nodeType = assertValid<IBaseNode>(
+  assert(
     node,
     strings.NODE_INVALID,
-  ).type;
+  );
+
+  const nodeType = assertValid<NodeTypes>(
+    node.type,
+    strings.NODE_TYPE_INVALID,
+  );
 
   const container = document.createElement('div');
   container.className = 'sm-volumeInput-container ' +
                         `sm-volumeInput-container-${nodeType}`;
 
-  let uniqueName;
-  if (nodeType === NodeTypes.Manager && !name) {
-    uniqueName = Math.floor(Math.random() * 100000).toString(16);
-  } else {
-    uniqueName = assertValid<string>(
-      name,
-      strings.NAME_INVALID,
-    );
-  }
-
-  const uniqueId = `sm-volumeInput-${nodeType}-${uniqueName}`;
+  const uniqueId = generateUniqueAudioPanelIdentifier(node, name);
   container.appendChild(generateVolumeLabelComponent(node, uniqueId, name));
   container.appendChild(generateVolumeInputComponent(node, uniqueId));
+
+  /* Analysis is not possible in HTML Audio mode, so there's no reasonable
+   * method for visualizing volume level. */
   if (node.isWebAudio()) {
-    container.appendChild(generateVolumeLevelsVisualizerComponent(
-      node as any,
-    ));
+    container.appendChild(generateVolumeLevelVisualizerComponent(node));
   }
 
   return container;
