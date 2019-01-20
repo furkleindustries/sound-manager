@@ -1,48 +1,30 @@
 import {
-  IAnalysableNode,
-} from '../Node/IAnalysableNode';
-import {
-  IAnalysis,
-} from '../AnalysisSuite/IAnalysis';
+  getVolumeLevelRenderListener,
+} from '../AnalysisSuite/getVolumeLevelRenderListener';
 import {
   IAnalysisSuite,
 } from '../AnalysisSuite/IAnalysisSuite';
 import {
-  IBaseNode,
-} from '../Node/IBaseNode';
-import {
-  assertValid,
+  assert,
 } from 'ts-assertions';
 
-export function generateVolumeLevelVisualizerComponent(node: IBaseNode & IAnalysableNode) {
+const strings = {
+  ANALYSIS_SUITE_INVALID: 
+    'The analysisSuite argument was not provided to ' +
+    'generateVolumeLevelVisualizerComponent.',
+};
+
+export function generateVolumeLevelVisualizerComponent(analysisSuite: IAnalysisSuite) {
+  assert(
+    analysisSuite,
+    strings.ANALYSIS_SUITE_INVALID,
+  );
+
   const canvas = document.createElement('canvas');
   canvas.width = 150;
   canvas.height = 20;
-  const canvasCtx = assertValid<CanvasRenderingContext2D>(
-    canvas.getContext('2d'),
-  );
 
-  const analysisSuite = assertValid<IAnalysisSuite>(node.analysis);
-  let arr: Uint8Array;
-  analysisSuite.addRenderListener((analysis: IAnalysis) => {
-    if (!arr) {
-      arr = new Uint8Array(analysis.getBinCount());
-    }
-
-    analysis.getTimeDomainByte(arr);
-    const tAverage = arr.reduce((prev, curr) => (
-      prev + Math.abs(128 - curr)) / arr.length / 128
-    );
-
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    canvasCtx.fillStyle = 'rgb(255, 0, 0)';
-    canvasCtx.fillRect(
-      0,
-      canvas.height * (1 - tAverage),
-      canvas.width,
-      canvas.height,
-    );
-  });
+  analysisSuite.addRenderListener(getVolumeLevelRenderListener(canvas));
 
   return canvas;
 }

@@ -140,11 +140,13 @@ describe('generateAudioComponent unit tests.', () => {
     expect(container.contains(val)).toBe(true);
   });
 
-  it('Passes the node to generateVolumeLevelVisualizerComponent if the node is in Web Audio mode.', () => {
+  it('Passes the analysis suite to generateVolumeLevelVisualizerComponent if the node is in Web Audio mode.', () => {
     const val = document.createElement('input');
     (generateVolumeLevelVisualizerComponent as any).mockReturnValue(val);
 
+    const analysisSuite = {};
     const node = {
+      analysisSuite,
       isWebAudio: jest.fn(() => true),
       type: 'foo',
     } as any;
@@ -152,7 +154,7 @@ describe('generateAudioComponent unit tests.', () => {
     generateAudioComponent(node);
 
     expect(generateVolumeLevelVisualizerComponent).toBeCalledTimes(1);
-    expect(generateVolumeLevelVisualizerComponent).toBeCalledWith(node);
+    expect(generateVolumeLevelVisualizerComponent).toBeCalledWith(analysisSuite);
   });
 
   it('Does not pass the node to generateVolumeLevelVisualizerComponent if the node is in HTML Audio mode.', () => {
@@ -171,6 +173,7 @@ describe('generateAudioComponent unit tests.', () => {
     (generateVolumeInputComponent as any).mockReturnValue(val);
 
     const node = {
+      analysisSuite: {} as any,
       isWebAudio: jest.fn(() => true),
       type: 'foo',
     } as any;

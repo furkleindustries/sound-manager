@@ -14,6 +14,9 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
+  IAnalysisSuite,
+} from '../AnalysisSuite/IAnalysisSuite';
+import {
   IBaseNode,
 } from '../Node/IBaseNode';
 import {
@@ -25,6 +28,9 @@ import {
 } from 'ts-assertions';
 
 export const strings = {
+  ANALYSIS_SUITE_INVALID: 
+    'The node argument was in Web Audio mode, but it had no analysis suite.',
+
   NODE_INVALID:
     'The node argument was not provided to generateAudioComponent.',
 
@@ -58,7 +64,12 @@ export function generateAudioComponent(
   /* Analysis is not possible in HTML Audio mode, so there's no reasonable
    * method for visualizing volume level. */
   if (node.isWebAudio()) {
-    container.appendChild(generateVolumeLevelVisualizerComponent(node));
+    const suite = assertValid<IAnalysisSuite>(
+      node.analysisSuite,
+      strings.ANALYSIS_SUITE_INVALID,
+    );
+
+    container.appendChild(generateVolumeLevelVisualizerComponent(suite));
   }
 
   return container;
