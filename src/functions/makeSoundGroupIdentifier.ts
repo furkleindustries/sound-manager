@@ -1,12 +1,12 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   ISoundGroupIdentifier,
 } from '../interfaces/ISoundGroupIdentifier';
 import {
   TSoundGroupIdentifierArg,
 } from '../typeAliases/TSoundGroupIdentifierArg';
+import {
+  assert,
+} from 'ts-assertions';
 
 export function makeSoundGroupIdentifier(value: TSoundGroupIdentifierArg): ISoundGroupIdentifier {
   assert(value);
