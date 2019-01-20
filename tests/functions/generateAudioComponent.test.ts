@@ -2,9 +2,6 @@ import {
   generateAudioComponent,
   strings,
 } from '../../src/functions/generateAudioComponent';
-import {
-  NodeTypes,
-} from '../../src/enums/NodeTypes';
 
 describe('generateAudioComponent unit tests.', () => {
   it('Throws if the node argument is not provided.', () => {

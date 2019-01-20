@@ -21,7 +21,7 @@ describe('createHtmlHelper unit tests.', () => {
     (createHtmlAudioSound as any).mockClear();
     (createHtmlAudioSound as any).mockReturnValue(retSym);
     (getFrozenObject as any).mockClear();
-    (getFrozenObject as any).mockImplementation((aa) => aa);
+    (getFrozenObject as any).mockImplementation((aa: any) => aa);
   });
 
   it('Passes the options argument to getFrozenObject and then to createHtmlAudioSound.', () => {

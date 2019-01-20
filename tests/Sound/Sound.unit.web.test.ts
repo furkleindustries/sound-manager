@@ -2,9 +2,6 @@ import {
   EasingCurves,
 } from '../../src/Fade/EasingCurves';
 import {
-  IFade,
-} from '../../src/Fade/IFade';
-import {
   ISoundOptions,
 } from '../../src/Sound/ISoundOptions';
 import {
@@ -17,10 +14,10 @@ import {
   strings,
 } from '../../src/Sound/strings';
 
-jest.mock('../../src/functions/getFadeValueAtTime');
 import {
   getFadeValueAtTime,
 } from '../../src/functions/getFadeValueAtTime';
+jest.mock('../../src/functions/getFadeValueAtTime');
 
 const getContext = () => new AudioContext();
 const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 12000);
