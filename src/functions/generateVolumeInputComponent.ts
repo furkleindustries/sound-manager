@@ -1,12 +1,33 @@
 import {
   IBaseNode,
 } from '../Node/IBaseNode';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
-export function generateVolumeInputComponent(node: IBaseNode, uniqueName: string) {
+export const strings = {
+  NODE_INVALID:
+    'The node argument was not provided to generateVolumeInputComponent.',
+
+  UNIQUE_ID_INVALID:
+    'The uniqueId argument was not provided to generateVolumeInputComponent',
+};
+
+export function generateVolumeInputComponent(node: IBaseNode, uniqueId: string) {
+  assert(
+    node,
+    strings.NODE_INVALID,
+  );
+
   const input = document.createElement('input');
   input.className = 'sm-volumeInput-input';
 
-  input.id = uniqueName;
+  input.id = assertValid(
+    uniqueId,
+    strings.UNIQUE_ID_INVALID,
+  );
+
   input.type = 'range';
   input.value = String(node.getVolume());
   input.min = '0';
@@ -15,13 +36,13 @@ export function generateVolumeInputComponent(node: IBaseNode, uniqueName: string
 
   let evtType = 'input';
   /* Support non-conformant browsers which lack the input event. */
-  /* istanbul ignore next */
   if (!('oninput' in input)) {
+    /* istanbul ignore next */
     evtType = 'change';
   }
 
-  /* istanbul ignore next */
   input.addEventListener(evtType, (e) => (
+    /* istanbul ignore next */
     node.setVolume(Number((e.target as HTMLInputElement).value))
   ));
 
