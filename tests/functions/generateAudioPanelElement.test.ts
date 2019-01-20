@@ -1,5 +1,6 @@
 import {
   generateAudioPanelElement,
+  strings,
 } from '../../src/functions/generateAudioPanelElement';
 
 import {
@@ -11,6 +12,11 @@ describe('generateAudioPanelElement unit tests.', () => {
   beforeEach(() => {
     (generateAudioComponent as any).mockClear();
     (generateAudioComponent as any).mockReturnValue(document.createElement('div'));
+  });
+
+  it('Throws if the manager argument is not provided.', () => {
+    const func = generateAudioPanelElement;
+    expect(func).toThrow(strings.MANAGER_INVALID);
   });
 
   it('Outputs a div with the class sound-manager-panel.', () => {
@@ -48,9 +54,9 @@ describe('generateAudioPanelElement unit tests.', () => {
     generateAudioPanelElement(manager);
 
     expect(mock.mock.calls).toEqual([
-      [ 'one', ],
-      [ 'two', ],
-      [ 'three', ],
+      [ 'one' ],
+      [ 'two' ],
+      [ 'three' ],
     ]);
   });
 

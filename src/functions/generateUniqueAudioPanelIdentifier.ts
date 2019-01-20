@@ -5,7 +5,8 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
-  assertValid, assert,
+  assert,
+  assertValid,
 } from 'ts-assertions';
 
 export const strings = {
