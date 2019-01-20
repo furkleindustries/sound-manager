@@ -47,6 +47,6 @@
     "webpack-cli": "^3.2.1"
   },
   "dependencies": {
-    "ts-assertions": "^1.0.3"
+    "ts-assertions": "^1.0.4"
   }
 }

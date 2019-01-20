@@ -68,6 +68,9 @@ import {
   IManagerOptions,
 } from './IManagerOptions';
 import {
+  isValidVolume,
+} from '../functions/isValidVolume';
+import {
   log,
 } from '../logging/log';
 import {
@@ -99,23 +102,29 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   }
 
   constructor(options?: IManagerOptions) {
-    super(getFrozenObject(options!));
+    super({ ...options });
+
+    const opts = getFrozenObject(options!);
+    const {
+      groups,
+      volume,
+    } = opts;
 
     if (!this.__audioContext && ctxCtor) {
       this.__audioContext = new ctxCtor();
       this.__isWebAudio = true;
     }
 
-    const opts = options || {};
-    const {
-      groups,
-    } = opts;
 
     if (this.isWebAudio()) {
       this.__connectNodes();
     }
 
     this.__initializeGroups(groups);
+
+    if (isValidVolume(volume)) {;
+      this.setVolume(volume);
+    }
   }
 
   private __connectNodes() {
@@ -267,7 +276,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     name: string,
     options: ICreateSoundOptions,
     groupName?: string): Promise<ISound>;
-  public addSound(
+  public async addSound(
     name: string,
     options: string | ICreateSoundOptions,
     groupName: string = 'default',
@@ -286,12 +295,10 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       ...tempOpts,
     });
 
-    return new Promise((resolve) => {
-      createSound(opts).then((sound) => {
-        this.addSounds({ [name]: sound }, groupName);
-        return resolve(sound);
-      });
-    });
+    const sound = await createSound(opts);
+    this.addSounds({ [name]: sound }, groupName);
+
+    return sound;
   }
 
   public addSounds(sounds: ISoundsMap, groupName: string = 'default') {
@@ -591,16 +598,21 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   }
 
   public updateVolumePanelElement() {
-    assert(this.__volumePanelElement);
-    const newElem = updateAudioPanelElement(this, this.__volumePanelElement!);
+    const safeVolumePanelElement = assertValid<HTMLElement>(
+      this.__volumePanelElement,
+    );
+
+    const newElem = updateAudioPanelElement(this, safeVolumePanelElement);
     this.__volumePanelElement = newElem;
 
     return this;
   }
 
   public volumePanelRegister(node: IPanelRegisterableNode) {
-    assert(node);
-    node.__panelRegistered = true;
+    assertValid<IPanelRegisterableNode>(
+      node,
+    ).__panelRegistered = true;
+
     if (this.__volumePanelElement) {
       this.updateVolumePanelElement();
     }
@@ -609,8 +621,10 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   }
 
   public volumePanelDeregister(node: IPanelRegisterableNode) {
-    assert(node);
-    node.__panelRegistered = false;
+    assertValid<IPanelRegisterableNode>(
+      node,
+    ).__panelRegistered = false;
+
     if (this.__volumePanelElement) {
       this.updateVolumePanelElement();
     }

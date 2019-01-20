@@ -31,4 +31,6 @@ export function assertNodeIsWebAudio<T extends IBaseNode>(
       .replace('%METHOD_NAME%', methodNameStr)
       .replace('%NODE_TYPE%', node.type),
   );
+
+  return true;
 }

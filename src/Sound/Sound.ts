@@ -32,6 +32,9 @@ import {
   ISoundOptions,
 } from './ISoundOptions';
 import {
+  isValidVolume,
+} from '../functions/isValidVolume';
+import {
   loopIsValid,
 } from '../Playlist/loopIsValid';
 import {
@@ -105,6 +108,7 @@ export class Sound
       getManagerVolume,
       loop,
       trackPosition,
+      volume,
     } = options;
 
     const isWebAudio = this.isWebAudio();
@@ -132,6 +136,10 @@ export class Sound
     this.__initializeArgumentProperties(fade, loop, trackPosition);
     if (!isWebAudio) {
       this.updateAudioElementVolume();
+    }
+
+    if (isValidVolume(volume)) {;
+      this.setVolume(volume);
     }
   }
 

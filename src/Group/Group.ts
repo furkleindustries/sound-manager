@@ -21,6 +21,9 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
+  isValidVolume,
+} from '../functions/isValidVolume';
+import {
   BaseNode,
 } from '../Node/BaseNode';
 import {
@@ -57,6 +60,7 @@ export class Group
     const {
       context,
       sounds,
+      volume,
     } = options;
 
     if (context) {
@@ -65,6 +69,10 @@ export class Group
 
     if (sounds && typeof sounds === 'object') {
       this.addSounds(sounds);
+    }
+
+    if (isValidVolume(volume)) {;
+      this.setVolume(volume);
     }
   }
 
@@ -85,6 +93,7 @@ export class Group
   }
 
   public getAllSounds() {
+    console.log(this.sounds);
     return this.getSounds(Object.keys(this.sounds));
   }
 

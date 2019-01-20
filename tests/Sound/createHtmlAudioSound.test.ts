@@ -27,9 +27,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound();
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_HTML_AUDIO_SOUND_OPTIONS_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_OPTIONS_INVALID);
     }
   });
 
@@ -39,9 +37,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound({});
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_HTML_AUDIO_SOUND_URL_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_URL_INVALID);
     }
   });
 
@@ -51,9 +47,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound({ url: 'foobar' });
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_HTML_AUDIO_SOUND_GET_MANAGER_VOLUME_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_GET_MANAGER_VOLUME_INVALID);
     }
   });
 

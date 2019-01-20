@@ -24,11 +24,13 @@ export function assertNodeIsHtmlAudio<T extends IBaseNode>(
     strings.NODE_INVALID,
   );
 
-  const methodNameStr = String(methodName) || '(not provided)';
+  const methodNameStr = String(methodName || '(not provided)');
   assert(
     !node.isWebAudio(),
     strings.ASSERTION_FAILURE
       .replace('%METHOD_NAME%', methodNameStr)
       .replace('%NODE_TYPE%', node.type),
   );
+
+  return true;
 }

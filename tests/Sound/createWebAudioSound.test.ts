@@ -32,9 +32,7 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound();
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID);
     }
   });
 
@@ -44,9 +42,7 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound({});
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID);
     }
   });
 
@@ -56,9 +52,7 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound({ context: true });
     } catch (err) {
-      expect(err).toEqual(
-        new Error(strings.CREATE_WEB_AUDIO_SOUND_URL_INVALID)
-      );
+      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_URL_INVALID);
     }
   });
 

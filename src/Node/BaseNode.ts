@@ -32,17 +32,12 @@ export class BaseNode implements IBaseNode {
     const opts = options || {};
     const {
       context,
-      volume,
     } = opts;
 
     this.__audioContext = context || null;
     this.__isWebAudio = Boolean(this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
-    }
-
-    if (isValidVolume(volume)) {
-      this.setVolume(volume);
     }
   }
 

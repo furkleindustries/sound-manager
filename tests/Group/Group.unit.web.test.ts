@@ -74,7 +74,7 @@ describe('Group Web Audio unit tests.', () => {
 
   it('Allows setting the volume through the options object.', () => {
     const volume = 0.5;
-    const group = testGroupFactory({ volume, });
+    const group = testGroupFactory({ volume });
 
     expect(group.getVolume()).toBe(volume);
   });
