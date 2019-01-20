@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   createHtmlHelper,
 } from './createHtmlHelper';
 import {
@@ -19,6 +16,9 @@ import {
 import {
   strings,
 } from './strings';
+import {
+  assert,
+} from 'ts-assertions';
 
 export function createSound(options: ICreateSoundOptions): Promise<ISound> {
   assert(

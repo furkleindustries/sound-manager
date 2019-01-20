@@ -2,22 +2,22 @@ import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
-  assertValid,
-} from '../assertions/assertValid';
+  IBaseNode,
+} from './IBaseNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import {
-  INode,
-} from './INode';
 import {
   INodeOptions,
 } from './INodeOptions';
 import {
   isValidVolume,
 } from '../functions/isValidVolume';
+import {
+  assertValid,
+} from 'ts-assertions';
 
-export class ManagerNode implements INode {
+export class BaseNode implements IBaseNode {
   get type(): NodeTypes {
     throw new Error('Type not implemented.');
   }

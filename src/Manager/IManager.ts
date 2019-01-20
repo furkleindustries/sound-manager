@@ -2,6 +2,9 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
+  IBaseNode,
+} from '../Node/IBaseNode';
+import {
   ICreateSoundOptions,
 } from '../Sound/ICreateSoundOptions';
 import {
@@ -13,9 +16,6 @@ import {
 import {
   IGroupOptions,
 } from '../Group/IGroupOptions';
-import {
-  INode,
-} from '../Node/INode';
 import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
@@ -38,7 +38,7 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
-export interface IManager extends INode, IAnalysableNode {
+export interface IManager extends IBaseNode, IAnalysableNode {
   readonly type: NodeTypes.Manager;
 
   /* Node collection */

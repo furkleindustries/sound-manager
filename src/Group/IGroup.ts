@@ -2,6 +2,9 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
+  IBaseNode,
+} from '../Node/IBaseNode';
+import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
 import {
@@ -11,9 +14,6 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  INode,
-} from '../Node/INode';
-import {
   ITaggableNode,
 } from '../Node/ITaggableNode';
 import {
@@ -22,7 +22,7 @@ import {
 
 export interface IGroup
   extends
-    INode,
+    IBaseNode,
     IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode

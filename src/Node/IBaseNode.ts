@@ -2,7 +2,7 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
-export interface INode {
+export interface IBaseNode {
   readonly type: NodeTypes;
   isWebAudio(): boolean;
   getAudioContext(): AudioContext;
@@ -10,5 +10,5 @@ export interface INode {
   getGainNode(): GainNode;
   getInputNode(): AudioNode;
   getVolume(): number;
-  setVolume(value: number): INode;
+  setVolume(value: number): IBaseNode;
 }

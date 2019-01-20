@@ -1,8 +1,8 @@
 import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
 
-export function generateVolumeInputComponent(node: INode, uniqueName: string) {
+export function generateVolumeInputComponent(node: IBaseNode, uniqueName: string) {
   const input = document.createElement('input');
   input.className = 'sm-volumeInput-input';
 

@@ -2,14 +2,11 @@ import {
   AnalysableNodeMixin,
 } from '../Node/AnalysableNodeMixin';
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
-  assertValid,
-} from '../assertions/assertValid';
+  BaseNode,
+} from '../Node/BaseNode';
 import {
   createGroup,
 } from '../Group/createGroup';
@@ -74,9 +71,6 @@ import {
   log,
 } from '../logging/log';
 import {
-  ManagerNode,
-} from '../Node/Node';
-import {
   nameOrAllKeys,
 } from '../functions/nameOrAllKeys';
 import {
@@ -89,13 +83,17 @@ import {
   shouldLoopPlaylist,
 } from './shouldLoopPlaylist';
 import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
+import {
   updateAudioPanelElement,
 } from '../functions/updateAudioPanelElement';
 
 declare const webkitAudioContext: AudioContext;
 const ctxCtor = AudioContext || webkitAudioContext;
 
-export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManager {
+export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   get type(): NodeTypes.Manager {
     return NodeTypes.Manager;
   }
@@ -199,7 +197,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   }
 
   public getGroups(names: string[]) {
-    return names.map(this.getGroup);
+    return names.map((name) => this.getGroup(name));
   }
 
   public getAllGroups() {
@@ -375,20 +373,14 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return this.__playlists;
   }
   
-  public playGroup(name: string): Promise<Event[]> {
-    return new Promise((resolve, reject) => (
-      this.getGroup(name).playAllSounds()).then(resolve, reject)
-    );
+  public async playGroup(name: string): Promise<Event[]> {
+    return await this.getGroup(name).playAllSounds();
   }
 
-  public playGroups(names: string[]): Promise<Event[]> {
+  public async playGroups(names: string[]): Promise<Event[]> {
     assert(Array.isArray(names));
-    return new Promise((resolve, reject) => (
-      Promise.all(names.map(this.playGroup)).then(
-        (val) => resolve(shallowFlattenArray(val)),
-        reject,
-      )
-    ));
+    const val = await Promise.all(names.map((name) => this.playGroup(name)));
+    return shallowFlattenArray(val);
   }
 
   public playSound(name: string, groupName: string = 'default'): Promise<Event> {
@@ -400,18 +392,15 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
     return this.getGroup(groupName).playSounds(names);
   }
 
-  public playAllSounds(groupName?: string): Promise<Event[]> {
+  public async playAllSounds(groupName?: string): Promise<Event[]> {
     if (groupName) {
       return this.playGroup(groupName);
     } else {
-      return new Promise((resolve, reject) => (
-        Promise.all(
-          this.getAllGroups().map((group) => group.playAllSounds())
-        ).then(
-          (val) => resolve(shallowFlattenArray(val)),
-          reject,
-        )
-      ));
+      const val = await Promise.all(
+        this.getAllGroups().map((group) => group.playAllSounds())
+      );
+      
+      return shallowFlattenArray(val);
     }
   }
 
@@ -477,7 +466,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   }
 
   public getPlaylists(names: string[]) {
-    return names.map(this.getPlaylist);
+    return names.map((name) => this.getPlaylist(name));
   }
 
   public removePlaylist(name: string) {
@@ -588,7 +577,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
 
   public stopPlaylists(names: string[]) {
     assert(Array.isArray(names));
-    names.map(this.stopPlaylist);
+    names.map((name) => this.stopPlaylist(name));
 
     return this;
   }

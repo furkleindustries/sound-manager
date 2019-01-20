@@ -2,9 +2,6 @@ import {
   AnalysisSuite,
 } from '../AnalysisSuite/AnalysisSuite';
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
@@ -14,13 +11,16 @@ import {
   IAnalysisSuite,
 } from '../AnalysisSuite/IAnalysisSuite';
 import {
+  IBaseNode,
+} from './IBaseNode';
+import {
   IConstructor,
 } from '../interfaces/IConstructor';
 import {
-  INode,
-} from './INode';
+  assertValid,
+} from 'ts-assertions';
 
-export function AnalysableNodeMixin<T extends IConstructor<INode>>(Base: T) {
+export function AnalysableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
   return class AnalysableNodeMixin extends Base implements IAnalysableNode {
     public readonly analysis: IAnalysisSuite | null = null;
     public readonly __analyserNode: AnalyserNode | null = null;

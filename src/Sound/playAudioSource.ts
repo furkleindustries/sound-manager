@@ -1,15 +1,13 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   ISound,
 } from './ISound';
 import {
   strings,
 } from './strings';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| null) {
   assert(

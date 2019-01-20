@@ -244,7 +244,7 @@ describe('Group Web Audio unit tests.', () => {
       two: soundTwo,
     };
 
-    group.removeSounds('one');
+    group.removeSound('one');
 
     expect(group.sounds).toEqual({
       two: soundTwo,
@@ -293,7 +293,7 @@ describe('Group Web Audio unit tests.', () => {
     // @ts-ignore
     group.__sounds = { test: sound, };
 
-    group.removeSounds('test');
+    group.removeSound('test');
 
     expect(mock).toBeCalledTimes(1);
   });
@@ -315,7 +315,7 @@ describe('Group Web Audio unit tests.', () => {
       },
     } as any;
 
-    group.removeSounds('one');
+    group.removeSound('one');
 
     expect(mock).not.toBeCalled();
     expect(mock2).toBeCalledTimes(1);
@@ -728,6 +728,7 @@ describe('Group Web Audio unit tests.', () => {
       },
     } as any;
 
+    console.log(group.sounds);
     group.updateAllAudioElementsVolume();
 
     expect(mockOne).toBeCalledTimes(1);

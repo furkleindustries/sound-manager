@@ -1,10 +1,10 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   IAnalysis,
 } from './IAnalysis';
-import { assert } from '../assertions/assert';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export class Analysis implements IAnalysis {
   private __node: AnalyserNode;

@@ -1,15 +1,13 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   generateAudioPanelElement,
 } from './generateAudioPanelElement';
 import {
   IManager,
 } from '../Manager/IManager';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export function updateAudioPanelElement(
   manager: IManager,

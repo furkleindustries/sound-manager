@@ -1,6 +1,6 @@
 import {
   assert,
-} from '../assertions/assert';
+} from 'ts-assertions';
 
 export function getNewSourceNode(context: AudioContext, buffer: AudioBuffer) {
   assert(context);

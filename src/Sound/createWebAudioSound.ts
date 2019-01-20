@@ -1,7 +1,4 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
@@ -19,6 +16,9 @@ import {
 import {
   strings,
 } from '../../src/Sound/strings';
+import {
+  assertValid,
+} from 'ts-assertions';
 
 export async function createWebAudioSound(options: ICreateSoundOptions): Promise<ISound> {
   const {

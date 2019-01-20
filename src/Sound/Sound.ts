@@ -5,6 +5,9 @@ import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
+  BaseNode,
+} from '../Node/BaseNode';
+import {
   createFade,
 } from '../Fade/createFade';
 import {
@@ -31,9 +34,6 @@ import {
 import {
   loopIsValid,
 } from '../Playlist/loopIsValid';
-import {
-  ManagerNode,
-} from '../Node/Node';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
@@ -65,7 +65,7 @@ export class Sound
     AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(
-      ManagerNode
+      BaseNode
     )))
   implements ISound
 {

@@ -70,7 +70,7 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Allows setting the volume through the options object.', () => {
     const volume = 0.5;
-    const group = testGroupFactory({ volume, });
+    const group = testGroupFactory({ volume });
 
     expect(group.getVolume()).toBe(volume);
   });
@@ -168,7 +168,7 @@ describe('Group HTML5 Audio unit tests.', () => {
       two: soundTwo,
     };
 
-    group.removeSounds('one');
+    group.removeSound('one');
 
     expect(group.sounds).toEqual({
       two: soundTwo,

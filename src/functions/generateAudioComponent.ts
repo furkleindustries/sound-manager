@@ -1,7 +1,4 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   generateVolumeInputComponent,
 } from './generateVolumeInputComponent';
 import {
@@ -11,11 +8,14 @@ import {
   generateVolumeLevelsVisualizerComponent,
 } from './generateVolumeLevelsVisualizer';
 import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import {
+  assertValid,
+} from 'ts-assertions';
 
 export const strings = {
   NAME_INVALID:
@@ -27,11 +27,11 @@ export const strings = {
 };
 
 export function generateAudioComponent(
-  node: INode,
+  node: IBaseNode,
   name?: string,
 )
 {
-  const nodeType = assertValid<INode>(
+  const nodeType = assertValid<IBaseNode>(
     node,
     strings.NODE_INVALID,
   ).type;

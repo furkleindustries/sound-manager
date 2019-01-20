@@ -1,14 +1,14 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import {
+  assertValid,
+} from 'ts-assertions';
 
-export function generateVolumeLabelComponent(node: INode, uniqueId: string, name?: string) {
+export function generateVolumeLabelComponent(node: IBaseNode, uniqueId: string, name?: string) {
   const label = document.createElement('label');
   label.className = 'sm-volumeInput-label';
 

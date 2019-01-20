@@ -1,12 +1,12 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   generateAudioComponent,
 } from './generateAudioComponent';
 import {
   IManager,
 } from '../Manager/IManager';
+import {
+  assert,
+} from 'ts-assertions';
 
 export const strings = {
   MANAGER_INVALID:

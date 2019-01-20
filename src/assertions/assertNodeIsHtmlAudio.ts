@@ -2,13 +2,33 @@ import {
   assert,
 } from 'ts-assertions';
 import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
 
-export function assertNodeIsHtmlAudio<T extends INode>(node: T, methodName?: keyof T) {
+export const strings = {
+  ASSERTION_FAILURE:
+    'The method %METHOD_NAME% requires the %NODE_TYPE% calling it to be in ' +
+    'HTML Audio mode.',
+
+  NODE_INVALID:
+    'The node argument was not provided to assertNodeIsHtmlAudio.',
+};
+
+export function assertNodeIsHtmlAudio<T extends IBaseNode>(
+  node: T,
+  methodName?: keyof T,
+)
+{
+  assert(
+    node,
+    strings.NODE_INVALID,
+  );
+
+  const methodNameStr = String(methodName) || '(not provided)';
   assert(
     !node.isWebAudio(),
-    `The method ${methodName ? methodName : '(not provided)'} requires the ` +
-    `${node.type} calling it to be in HTML5 Audio mode.`
+    strings.ASSERTION_FAILURE
+      .replace('%METHOD_NAME%', methodNameStr)
+      .replace('%NODE_TYPE%', node.type),
   );
 }

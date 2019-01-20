@@ -2,8 +2,8 @@ import {
   assert,
 } from 'ts-assertions';
 import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
 
 export const strings = {
   ASSERTION_FAILURE:
@@ -12,9 +12,9 @@ export const strings = {
 
   NODE_INVALID:
     'The node argument was not provided to assertNodeIsWebAudio.',
-}
+};
 
-export function assertNodeIsWebAudio<T extends INode>(
+export function assertNodeIsWebAudio<T extends IBaseNode>(
   node: T,
   methodName?: keyof T,
 )

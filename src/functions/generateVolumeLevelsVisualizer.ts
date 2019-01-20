@@ -1,7 +1,4 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
@@ -11,10 +8,13 @@ import {
   IAnalysisSuite,
 } from '../AnalysisSuite/IAnalysisSuite';
 import {
-  INode,
-} from '../Node/INode';
+  IBaseNode,
+} from '../Node/IBaseNode';
+import {
+  assertValid,
+} from 'ts-assertions';
 
-export function generateVolumeLevelsVisualizerComponent(node: INode & IAnalysableNode) {
+export function generateVolumeLevelsVisualizerComponent(node: IBaseNode & IAnalysableNode) {
   const canvas = document.createElement('canvas');
   canvas.width = 150;
   canvas.height = 20;

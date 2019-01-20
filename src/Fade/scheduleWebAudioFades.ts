@@ -1,7 +1,4 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   IFade,
 } from './IFade';
 import {
@@ -13,6 +10,9 @@ import {
 import {
   scheduleWebAudioFadeOut,
 } from './scheduleWebAudioFadeOut';
+import {
+  assertValid,
+} from 'ts-assertions';
 
 export function scheduleWebAudioFades(sound: ISound) {
   const fade = assertValid<IFade>(sound.getFade());

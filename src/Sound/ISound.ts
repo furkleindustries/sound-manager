@@ -2,14 +2,14 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
+  IBaseNode,
+} from '../Node/IBaseNode';
+import {
   IFade,
 } from '../Fade/IFade';
 import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
-import {
-  INode,
-} from '../Node/INode';
 import {
   ITaggableNode,
 } from '../Node/ITaggableNode';
@@ -19,7 +19,7 @@ import {
 
 export interface ISound
   extends
-    INode,
+    IBaseNode,
     IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode

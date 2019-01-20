@@ -21,8 +21,8 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  ManagerNode,
-} from '../Node/Node';
+  BaseNode,
+} from '../Node/BaseNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
@@ -38,7 +38,7 @@ export class Group
     AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(
-      ManagerNode
+      BaseNode
     )))
   implements IGroup
 {
@@ -81,7 +81,7 @@ export class Group
 
   public getSounds(names: string[]) {
     assert(Array.isArray(names));
-    return names.map(this.getSound);
+    return names.map((name) => this.getSound(name));
   }
 
   public getAllSounds() {
@@ -162,7 +162,7 @@ export class Group
 
   public playSounds(names: string[]) {
     assert(Array.isArray(names));
-    return Promise.all(names.map(this.playSound));
+    return Promise.all(names.map((name) => this.playSound(name)));
   }
 
   public playAllSounds() {
@@ -176,7 +176,7 @@ export class Group
 
   public pauseSounds(names: string[]) {
     assert(Array.isArray(names));
-    names.map(this.pauseSound);
+    names.map((name) => this.pauseSound(name));
 
     return this;
   }
@@ -192,7 +192,7 @@ export class Group
 
   public stopSounds(names: string[]) {
     assert(Array.isArray(names));
-    names.map(this.stopSound);
+    names.map((name) => this.stopSound(name));
 
     return this;
   }
