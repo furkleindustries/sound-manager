@@ -6,6 +6,7 @@ const inDevMode = isDev();
 
 export function warn(...messages: any[]) {
   if (inDevMode) {
-    messages.forEach(console.warn.bind(console));
+    const bound = console.warn.bind(console);
+    messages.forEach(bound);
   }
 }

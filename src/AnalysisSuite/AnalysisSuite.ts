@@ -2,12 +2,6 @@ import {
   Analysis,
 } from './Analysis';
 import {
-  assert,
-} from '../assertions/assert';
-import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   IAnalysis,
 } from './IAnalysis';
 import {
@@ -16,6 +10,10 @@ import {
 import {
   IAnalysisSuite,
 } from './IAnalysisSuite';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export class AnalysisSuite implements IAnalysisSuite {
   private readonly __analyserNode: AnalyserNode;

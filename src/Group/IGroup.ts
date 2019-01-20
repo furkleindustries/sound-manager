@@ -2,6 +2,9 @@ import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';
 import {
+  IBaseNode,
+} from '../Node/IBaseNode';
+import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
 import {
@@ -11,27 +14,39 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
+  ITaggableNode,
+} from '../Node/ITaggableNode';
+import {
+  NodeTypes,
+} from '../enums/NodeTypes';
 
-export interface IGroup extends IManagerNode, IAnalysableNode, IPanelRegisterableNode {
+export interface IGroup
+  extends
+    IBaseNode,
+    IAnalysableNode,
+    IPanelRegisterableNode,
+    ITaggableNode
+{
+  readonly type: NodeTypes.Group;
   readonly sounds: ISoundsMap;
   getContextCurrentTime(): number;
-  getSounds(name: string): ISound;
+  getSound(name: string): ISound;
   getSounds(names: string[]): ISound[];
   getAllSounds(): ISound[];
+  getSoundsByTag(tag: string): ISound[];
+  getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all'): ISound[];
   addSound(name: string, sound: ISound): this;
   addSounds(sounds: ISoundsMap): this;
-  removeSounds(names: string): this;
+  removeSound(names: string): this;
   removeSounds(names: string[]): this;
   removeAllSounds(): this;
-  playSounds(name: string): Promise<Event>;
+  playSound(name: string): Promise<Event>;
   playSounds(names: string[]): Promise<Event[]>;
   playAllSounds(): Promise<Event[]>;
-  pauseSounds(name: string): this;
+  pauseSound(name: string): this;
   pauseSounds(names: string[]): this;
   pauseAllSounds(): this;
-  stopSounds(name: string): this;
+  stopSound(name: string): this;
   stopSounds(names: string[]): this;
   stopAllSounds(): this;
   updateAllAudioElementsVolume(): this;

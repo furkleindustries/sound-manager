@@ -1,48 +1,57 @@
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   IAnalysis,
 } from './IAnalysis';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export class Analysis implements IAnalysis {
   private __node: AnalyserNode;
-  private getNode() {
+  private __getNode() {
     return this.__node;
   }
 
-  private getBinCount() {
-    return this.getNode().frequencyBinCount;
+  public getBinCount() {
+    return this.__getNode().frequencyBinCount;
   }
 
   constructor(node: AnalyserNode) {
     this.__node = assertValid<AnalyserNode>(node);
   }
 
-  getFrequencyByte() {
-    const arr = new Uint8Array(this.getBinCount());
-    this.getNode().getByteFrequencyData(arr);
+  public getFrequencyByte(array?: Uint8Array) {
+    const binCount = this.getBinCount();
+    const arr = array || new Uint8Array(binCount);
+    assert(arr.length === binCount);
+    this.__getNode().getByteFrequencyData(arr);
 
     return arr;
   }
 
-  getFrequencyFloat() {
-    const arr = new Float32Array(this.getBinCount());
-    this.getNode().getFloatFrequencyData(arr);
+  public getFrequencyFloat(array?: Float32Array) {
+    const binCount = this.getBinCount();
+    const arr = array || new Float32Array(binCount);
+    assert(arr.length === binCount);
+    this.__getNode().getFloatFrequencyData(arr);
 
     return arr;
   }
 
-  getTimeDomainByte() {
-    const arr = new Uint8Array(this.getBinCount());
-    this.getNode().getByteTimeDomainData(arr);
+  public getTimeDomainByte(array?: Uint8Array) {
+    const binCount = this.getBinCount();
+    const arr = array || new Uint8Array(binCount);
+    assert(arr.length === binCount);
+    this.__getNode().getByteTimeDomainData(arr);
 
     return arr;
   }
 
-  getTimeDomainFloat() {
-    const arr = new Float32Array(this.getBinCount());
-    this.getNode().getFloatTimeDomainData(arr);
+  public getTimeDomainFloat(array?: Float32Array) {
+    const binCount = this.getBinCount();
+    const arr = array || new Float32Array(binCount);
+    assert(arr.length === binCount);
+    this.__getNode().getFloatTimeDomainData(arr);
 
     return arr;    
   }

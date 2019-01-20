@@ -1,20 +1,20 @@
 import {
-  generateVolumePanelElement,
-} from '../../src/functions/generateVolumePanelElement';
+  generateAudioPanelElement,
+} from '../../src/functions/generateAudioPanelElement';
 
 import {
-  generateVolumeComponent,
-} from '../../src/functions/generateVolumeComponent';
-jest.mock('../../src/functions/generateVolumeComponent');
+  generateAudioComponent,
+} from '../../src/functions/generateAudioComponent';
+jest.mock('../../src/functions/generateAudioComponent');
 
 describe('generateAudioPanelElement unit tests.', () => {
   beforeEach(() => {
-    (generateVolumeComponent as any).mockClear();
-    (generateVolumeComponent as any).mockReturnValue(document.createElement('input'));
+    (generateAudioComponent as any).mockClear();
+    (generateAudioComponent as any).mockReturnValue(document.createElement('div'));
   });
 
   it('Outputs a div with the class sound-manager-panel.', () => {
-    const panel = generateVolumePanelElement({
+    const panel = generateAudioPanelElement({
       groups: {},
     } as any);
 
@@ -42,10 +42,10 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroups: mock,
+      getGroup: mock,
     } as any;
 
-    generateVolumePanelElement(manager);
+    generateAudioPanelElement(manager);
 
     expect(mock.mock.calls).toEqual([
       [ 'one', ],
@@ -73,12 +73,12 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroups: jest.fn((name) => manager.groups[name]),
+      getGroup: jest.fn((name) => manager.groups[name]),
     } as any;
 
-    generateVolumePanelElement(manager);
+    generateAudioPanelElement(manager);
 
-    expect((generateVolumeComponent as any).mock.calls).toEqual([
+    expect((generateAudioComponent as any).mock.calls).toEqual([
       [
         manager,
       ],
@@ -99,7 +99,7 @@ describe('generateAudioPanelElement unit tests.', () => {
     const manager = {
       groups: {
         one: {
-          getSounds: jest.fn((name) => manager.getGroups('one').sounds[name]),
+          getSound: jest.fn((name) => manager.getGroup('one').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s1: {
@@ -109,7 +109,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
 
         two: {
-          getSounds: jest.fn((name) => manager.getGroups('two').sounds[name]),
+          getSound: jest.fn((name) => manager.getGroup('two').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s2: {
@@ -119,7 +119,7 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
 
         three: {
-          getSounds: jest.fn((name) => manager.getGroups('three').sounds[name]),
+          getSound: jest.fn((name) => manager.getGroup('three').sounds[name]),
           isPanelRegistered: jest.fn(),
           sounds: {
             s3: {
@@ -129,12 +129,12 @@ describe('generateAudioPanelElement unit tests.', () => {
         },
       },
 
-      getGroups: jest.fn((name) => manager.groups[name]),
+      getGroup: jest.fn((name) => manager.groups[name]),
     } as any;
 
-    generateVolumePanelElement(manager);
+    generateAudioPanelElement(manager);
 
-    expect((generateVolumeComponent as any).mock.calls).toEqual([
+    expect((generateAudioComponent as any).mock.calls).toEqual([
       [
         manager,
       ],

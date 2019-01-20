@@ -2,25 +2,25 @@ import {
   AnalysisSuite,
 } from '../AnalysisSuite/AnalysisSuite';
 import {
-  assertValid,
-} from '../assertions/assertValid';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
   IAnalysableNode,
 } from './IAnalysableNode';
 import {
-  IConstructor,
-} from '../interfaces/IConstructor';
-import {
   IAnalysisSuite,
 } from '../AnalysisSuite/IAnalysisSuite';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  IBaseNode,
+} from './IBaseNode';
+import {
+  IConstructor,
+} from '../interfaces/IConstructor';
+import {
+  assertValid,
+} from 'ts-assertions';
 
-export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
+export function AnalysableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
   return class AnalysableNodeMixin extends Base implements IAnalysableNode {
     public readonly analysis: IAnalysisSuite | null = null;
     public readonly __analyserNode: AnalyserNode | null = null;
@@ -40,12 +40,12 @@ export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: 
       }
     }
 
-    getAnalyserNode() {
-      assertNodeIsWebAudio(this as any, 'getAnalyserNode');
+    public getAnalyserNode() {
+      assertNodeIsWebAudio(this, 'getAnalyserNode');
       return assertValid<AnalyserNode>(this.__analyserNode);
     }
 
-    getOutputNode() {
+    public getOutputNode() {
       return this.getAnalyserNode();
     }
   };

@@ -1,9 +1,13 @@
 import {
+  INodeOptions,
+} from '../Node/INodeOptions';
+import {
   ISoundsMap,
 } from './ISoundsMap';
+import {
+  ITaggableNodeOptions,
+} from '../Node/ITaggableNodeOptions';
 
-export interface IGroupOptions {
-  context?: AudioContext;
+export interface IGroupOptions extends INodeOptions, ITaggableNodeOptions {
   sounds?: ISoundsMap;
-  volume?: number;
 }

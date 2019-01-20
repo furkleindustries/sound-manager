@@ -2,30 +2,33 @@ import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
-  assertValid,
-} from '../assertions/assertValid';
+  IBaseNode,
+} from './IBaseNode';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  INodeOptions,
+} from './INodeOptions';
 import {
-  IManagerNodeOptions,
-} from './IManagerNodeOptions';
-import { isValidVolume } from '../functions/isValidVolume';
+  isValidVolume,
+} from '../functions/isValidVolume';
+import {
+  assertValid,
+} from 'ts-assertions';
 
-export class ManagerNode implements IManagerNode {
+export class BaseNode implements IBaseNode {
   get type(): NodeTypes {
     throw new Error('Type not implemented.');
   }
 
   private __volume: number = 1;
-  protected __audioContext: AudioContext | null = null;
-  protected __isWebAudio: boolean;
-  protected __gainNode: GainNode | null = null;
+  private __gainNode: GainNode | null = null;
 
-  constructor(options?: IManagerNodeOptions) {
+  protected __isWebAudio: boolean;
+  protected __audioContext: AudioContext | null = null;
+
+  constructor(options?: INodeOptions) {
     const opts = options || {};
     const {
       context,

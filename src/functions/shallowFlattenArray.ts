@@ -1,3 +1,3 @@
-export function shallowFlattenArray(array: any[]) {
-  return array.reduce((prev, curr) => prev.concat(curr));
+export function shallowFlattenArray<T>(array: Array<T | T[]>): T[] {
+  return array.reduce<T[]>((prev, curr) => prev.concat(curr), []);
 }

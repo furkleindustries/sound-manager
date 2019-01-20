@@ -5,11 +5,62 @@ import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
 import {
+  BaseNode,
+} from '../Node/BaseNode';
+import {
+  createGroup,
+} from '../Group/createGroup';
+import {
+  createPlaylist,
+} from '../Playlist/createPlaylist';
+import {
+  createSound,
+} from '../Sound/createSound';
+import {
+  doToOneOrMany,
+} from '../functions/doToOneOrMany';
+import {
+  generateAudioPanelElement,
+} from '../functions/generateAudioPanelElement';
+import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
+  getPlaylistMessage,
+} from './getPlaylistMessage';
+import {
+  ICreateSoundOptions,
+} from '../Sound/ICreateSoundOptions';
+import {
+  IGroup,
+} from '../Group/IGroup';
+import {
+  IGroupOptions,
+} from '../Group/IGroupOptions';
+import {
   IGroupsMap,
 } from './IGroupsMap';
+import {
+  IPanelRegisterableNode,
+} from '../Node/IPanelRegisterableNode';
+import {
+  IPlaylist,
+} from '../Playlist/IPlaylist';
+import {
+  IPlaylistsMap,
+} from './IPlaylistsMap';
+import {
+  IPlaylistOptions,
+} from '../Playlist/IPlaylistOptions';
+import {
+  ISound,
+} from '../Sound/ISound';
+import {
+  ISoundGroupIdentifier,
+} from '../interfaces/ISoundGroupIdentifier';
+import {
+  ISoundsMap,
+} from '../Group/ISoundsMap';
 import {
   IManager,
 } from './IManager';
@@ -17,54 +68,53 @@ import {
   IManagerOptions,
 } from './IManagerOptions';
 import {
-  ManagerNode,
-} from '../Node/ManagerNode';
+  isValidVolume,
+} from '../functions/isValidVolume';
 import {
-  NodeCollectionSubmanagerMixin,
-} from './Submanagers/NodeCollectionSubmanagerMixin';
+  log,
+} from '../logging/log';
 import {
-  NodePlaySubmanagerMixin,
-} from './Submanagers/NodePlaySubmanagerMixin';
+  nameOrAllKeys,
+} from '../functions/nameOrAllKeys';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
-  VolumePanelSubmanagerMixin
-} from './Submanagers/VolumePanelSubmanagerMixin';
+  shallowFlattenArray,
+} from '../functions/shallowFlattenArray';
+import {
+  shouldLoopPlaylist,
+} from './shouldLoopPlaylist';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
+import {
+  updateAudioPanelElement,
+} from '../functions/updateAudioPanelElement';
 
 declare const webkitAudioContext: AudioContext;
 const ctxCtor = AudioContext || webkitAudioContext;
 
-export class Manager
-  extends
-    /* Mixins are added from bottom to top. The order of these *does*
-     * matter. */
-    AnalysableNodeMixin(
-    VolumePanelSubmanagerMixin(
-    NodePlaySubmanagerMixin(
-    NodeCollectionSubmanagerMixin(
-      ManagerNode
-    ))))
-  implements IManager
-{
-  get type() {
+export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
+  get type(): NodeTypes.Manager {
     return NodeTypes.Manager;
   }
 
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
+    const opts = getFrozenObject(options!);
+    const {
+      groups,
+      volume,
+    } = opts;
+
     if (!this.__audioContext && ctxCtor) {
-      /* any cast is for typedoc complaints. */
-      this.__audioContext = new (ctxCtor as any)();
+      this.__audioContext = new ctxCtor();
       this.__isWebAudio = true;
     }
 
-    const opts = options || {};
-    const {
-      groups,
-      masterVolume,
-    } = opts;
 
     if (this.isWebAudio()) {
       this.__connectNodes();
@@ -72,8 +122,8 @@ export class Manager
 
     this.__initializeGroups(groups);
 
-    if (typeof masterVolume !== 'undefined') {
-      this.setVolume(masterVolume);
+    if (isValidVolume(volume)) {;
+      this.setVolume(volume);
     }
   }
 
@@ -85,7 +135,7 @@ export class Manager
 
   private __initializeGroups(groups?: IGroupsMap) {
     /* Add the 'default' group. */
-    this.initializeDefaultGroup();
+    this.__initializeDefaultGroup();
 
     if (groups) {
       this.__groups = getFrozenObject(this.__groups, groups);
@@ -105,6 +155,479 @@ export class Manager
   public setVolume(value: number) {
     super.setVolume(value);
     this.updateAllAudioElementsVolume();
+
+    return this;
+  }
+
+  /* Node collection */
+  private __groups: IGroupsMap = getFrozenObject();
+  get groups() {
+    return this.__groups;
+  }
+
+  public addGroup(name: string, options?: IGroupOptions) {
+    const group = createGroup(options);
+    this.addGroups({ [name]: group });
+
+    return group;
+  }
+
+  public addGroups(groups: IGroupsMap) {
+    const names = Object.keys(groups);
+    names.forEach((groupName) => {
+      /* Throw if there is already a group with this name. */
+      assert(!(groupName in this.groups))
+      if (this.isWebAudio()) {
+        const group = groups[groupName];
+        if (group.isWebAudio()) {
+          /* Chain the group's output node to the manager's input node. */
+          group.getOutputNode().connect(this.getInputNode());
+        }
+      }
+    });
+
+    this.__groups = getFrozenObject(this.groups, groups);
+
+    return this;
+  }
+
+  private __initializeDefaultGroup() {
+    if (this.isWebAudio()) {
+      this.addGroup('default', { context: this.getAudioContext() });
+    } else {
+      this.addGroup('default');
+    }
+
+    return this;
+  }
+
+  public getGroup(name: string) {
+    return assertValid<IGroup>(this.__groups[name]);
+  }
+
+  public getGroups(names: string[]) {
+    return names.map((name) => this.getGroup(name));
+  }
+
+  public getAllGroups() {
+    return this.getGroups(Object.keys(this.groups));
+  }
+
+  public getGroupsByTag(tag: string) {
+    return this.getAllGroups().filter((group) => group.hasTag(tag));
+  }
+
+  public getGroupsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
+    if (matchOneOrAll === 'all') {
+      return this.getAllGroups().filter((group) => (
+        tags.filter(group.hasTag).length === tags.length
+      ));
+    }
+
+    return this.getAllGroups().filter((group) => (
+      tags.filter(group.hasTag).length >= 1
+    ));
+  }
+
+  public removeGroup(name: string) {
+    return this.removeGroups([ name ]);
+  }
+
+  public removeGroups(names: string | string[]) {
+    const arr: string[] = typeof names === 'string' ? [ names, ] : names;
+    const groups = { ...this.groups, };
+    arr.forEach((groupName) => {
+      const group = groups[groupName];
+      if (group.isWebAudio()) {
+        group.getOutputNode().disconnect();
+      }
+
+      delete groups[groupName];
+    });
+
+    this.__groups = getFrozenObject(groups);
+    if (!('default' in this.groups)) {
+      /* Re-add a (now-empty) default group. */
+      this.__initializeDefaultGroup();
+    }
+
+    return this;
+  }
+
+  public removeAllGroups() {
+    return this.removeGroups(Object.keys(this.groups));
+  }
+
+  public getGroupVolume(name: string = 'default') {
+    return this.getGroup(name).getVolume();
+  }
+
+  public setGroupVolume(value: number, groupName: string = 'default') {
+    this.getGroup(groupName).setVolume(value);
+    return this;
+  }
+
+  public addSound(
+    name: string,
+    options: string,
+    groupName?: string,
+  ): Promise<ISound>;
+  public addSound(
+    name: string,
+    options: ICreateSoundOptions,
+    groupName?: string): Promise<ISound>;
+  public async addSound(
+    name: string,
+    options: string | ICreateSoundOptions,
+    groupName: string = 'default',
+  ): Promise<ISound>
+  {
+    /* Allow a bare string to be used as an URL argument. */
+    const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
+      typeof options === 'string' ?
+        { url: options } :
+        { ...options };
+
+    const opts: ICreateSoundOptions = getFrozenObject({
+      isWebAudio: this.isWebAudio(),
+      context: this.getAudioContext(),
+      getManagerVolume: () => this.getVolume(),
+      ...tempOpts,
+    });
+
+    const sound = await createSound(opts);
+    this.addSounds({ [name]: sound }, groupName);
+
+    return sound;
+  }
+
+  public addSounds(sounds: ISoundsMap, groupName: string = 'default') {
+    this.getGroup(groupName).addSounds(sounds);
+    return this;
+  }
+
+  public getSound(name: string, groupName: string = 'default') {
+    return this.getGroup(groupName).getSound(name);
+  }
+
+  public getSounds(names: string[], groupName: string = 'default') {
+    return this.getGroup(groupName).getSounds(names);
+  }
+
+  public getAllSounds() {
+    return shallowFlattenArray(
+      this.getAllGroups().map((group) => group.getAllSounds())
+    );
+  }
+
+  public getSoundsByTag(tag: string) {
+    return shallowFlattenArray(
+      this.getAllGroups().map((group) => group.getSoundsByTag(tag))
+    );
+  }
+
+  public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
+    let collection: ISound[][];
+    if (matchOneOrAll === 'all') {
+      collection = this.getAllGroups().map((group) => (
+        group.getSoundsByTags(tags, matchOneOrAll)
+      ));
+    } else {
+      collection = this.getAllGroups().map((group) => (
+        group.getSoundsByTags(tags, matchOneOrAll)
+      ));
+    }
+
+    return shallowFlattenArray(collection);
+  }
+
+  public removeSound(name: string, groupName: string = 'default') {
+    this.getGroup(groupName).removeSound(name);
+    return this;
+  }
+
+  public removeSounds(names: string[], groupName: string = 'default') {
+    assert(Array.isArray(names));
+    names.forEach((name) => this.removeSound(name, groupName));
+
+    return this;
+  }
+
+  public removeAllSounds(groupName?: string) {
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'removeAllSounds');
+
+    return this;
+  }
+
+  public getSoundVolume(name: string, groupName: string = 'default') {
+    return this.getGroup(groupName).getSound(name).getVolume();
+  }
+
+  public setSoundVolume(name: string, value: number, groupName: string = 'default') {
+    this.getGroup(groupName).getSound(name).setVolume(value);
+    return this;
+  }
+
+  public updateAllAudioElementsVolume() {
+    this.getAllGroups().forEach((grp) => grp.updateAllAudioElementsVolume());
+    return this;
+  }
+
+  /* Player */
+  private __playlists: IPlaylistsMap = getFrozenObject();
+  get playlists() {
+    return this.__playlists;
+  }
+  
+  public async playGroup(name: string): Promise<Event[]> {
+    return await this.getGroup(name).playAllSounds();
+  }
+
+  public async playGroups(names: string[]): Promise<Event[]> {
+    assert(Array.isArray(names));
+    const val = await Promise.all(names.map((name) => this.playGroup(name)));
+    return shallowFlattenArray(val);
+  }
+
+  public playSound(name: string, groupName: string = 'default'): Promise<Event> {
+    return this.getGroup(groupName).playSound(name);
+  }
+
+  public playSounds(names: string[], groupName: string = 'default'): Promise<Event[]> {
+    assert(Array.isArray(names));
+    return this.getGroup(groupName).playSounds(names);
+  }
+
+  public async playAllSounds(groupName?: string): Promise<Event[]> {
+    if (groupName) {
+      return this.playGroup(groupName);
+    } else {
+      const val = await Promise.all(
+        this.getAllGroups().map((group) => group.playAllSounds())
+      );
+      
+      return shallowFlattenArray(val);
+    }
+  }
+
+  public pauseSound(name: string, groupName: string = 'default') {
+    this.getGroup(groupName).pauseSound(name);
+    return this;
+  }
+
+  public pauseSounds(names: string[], groupName: string = 'default') {
+    assert(Array.isArray(names));    
+    this.getGroup(groupName).pauseSounds(names);
+
+    return this;
+  }
+
+  public pauseAllSounds(groupName?: string) {
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'pauseAllSounds');
+
+    return this;
+  }
+
+  public stopSound(name: string, groupName: string = 'default') {
+    this.getGroup(groupName).stopSound(name);
+    return this;
+  }
+
+  public stopSounds(names: string[], groupName: string = 'default'): this {
+    this.getGroup(groupName).stopSounds(names);
+    return this;
+  }
+
+  public stopAllSounds(groupName?: string) {
+    const oneOrMany = nameOrAllKeys(groupName, this.groups);
+    doToOneOrMany(this.groups, oneOrMany, 'stopAllSounds');
+
+    return this;
+  }
+
+  public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string>): IPlaylist;
+  public addPlaylist(name: string, options: IPlaylistOptions): IPlaylist
+  public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions) {
+    const playlist = Array.isArray(options) ?
+      createPlaylist({ ids: getFrozenObject(options), }) :
+      createPlaylist(getFrozenObject(options));
+
+    this.addPlaylists({ [name]: playlist });
+
+    return playlist;
+  }
+
+  public addPlaylists(playlists: IPlaylistsMap) {
+    const playls = playlists || {};
+    const names = Object.keys(playls);
+    names.forEach((playlistName) => assert(!(playlistName in this.playlists)));
+    this.__playlists = getFrozenObject(this.playlists, playls);
+
+    return this;
+  }
+
+  public getPlaylist(name: string) {
+    return assertValid<IPlaylist>(this.playlists[name]);
+  }
+
+  public getPlaylists(names: string[]) {
+    return names.map((name) => this.getPlaylist(name));
+  }
+
+  public removePlaylist(name: string) {
+    return this.removePlaylists([ name ]);
+  }
+
+  public removePlaylists(names: string[]): this;
+  public removePlaylists(names: string | string[]): this {
+    const playls = { ...this.playlists, };
+    if (typeof names === 'string') {
+      delete playls[names];
+    } else {
+      names.forEach((name) => delete playls[name]);
+    }
+
+    this.__playlists = getFrozenObject(playls);
+
+    return this;
+  }
+
+  public removeAllPlaylists() {
+    return this.removePlaylists(Object.keys(this.playlists));
+  }
+
+  public async playPlaylist(name: string) {
+    const playlist = this.getPlaylist(name);
+    log(`Playing playlist ${name}.`);
+    const events: Event[] = [];
+    let playIndex = 0;
+    let loopedTimes = 0;
+    let sentinel = true;
+    while (sentinel) {
+      const id = playlist.ids[playIndex];
+      log(`${id.groupName}.${id.soundName} starting.`);
+      const {
+        ended,
+        looped,
+      } = await this.__playlistPlaySound(
+        playlist,
+        events,
+        playIndex,
+        loopedTimes,
+        name,
+      );
+
+      log(`${id.groupName}.${id.soundName} ending.`);
+
+      playIndex += 1;
+      if (looped) {
+        log(`Looping playlist ${name}.`);
+        playIndex = 0;
+        loopedTimes += 1;
+      }
+
+      sentinel = ended;
+    }
+  }
+
+  private async __playlistPlaySound(
+    playlist: IPlaylist,
+    events: Event[],
+    playIndex: number,
+    loopedTimes: number,
+    name?: string,
+  )
+  {
+    const id = playlist.ids[playIndex];
+    const sound = this.getSound(id.soundName, id.groupName);
+
+    const event = await sound.play(
+      /* Overrides the sound's fade with the playlist fade. This argument is
+        * ignored if it's falsy. */
+      playlist.fade,
+    );
+
+    events.push(event);
+
+    if (playIndex === playlist.ids.length - 1) {
+      /* Pass the events to the playlist's callback, if it exists. */
+      playlist.tryCallback(events, name);
+      /* Empty the list. */
+      events.splice(0, events.length);
+
+      if (shouldLoopPlaylist(playlist, loopedTimes)) {
+        /* This value is incremented when the loop begins a new iteration so
+          * it must be -1 rather than 0. */
+        return getPlaylistMessage(/* ended */ false, /* looped */ true);
+      }
+
+      return getPlaylistMessage(/* ended */ true, /* looped */ false);
+    }
+
+    return getPlaylistMessage(/* ended */ false, /* looped */ false);
+  }
+
+  public async playPlaylists(names: string[]) {
+    assert(Array.isArray(names));
+    await Promise.all(names.map(this.playPlaylist));
+  }
+
+  public stopPlaylist(name: string) {
+    this.getPlaylist(name).ids.forEach((id) => (
+      this.getSound(id.soundName, id.groupName).stop()  
+    ));
+
+    return this;
+  }
+
+  public stopPlaylists(names: string[]) {
+    assert(Array.isArray(names));
+    names.map((name) => this.stopPlaylist(name));
+
+    return this;
+  }
+
+  /* Volume panel */
+  private __volumePanelElement: HTMLElement | null = null;
+
+  public generateVolumePanelElement(): HTMLElement {
+    this.__volumePanelElement = generateAudioPanelElement(this);
+    return this.__volumePanelElement;
+  }
+
+  public updateVolumePanelElement() {
+    const safeVolumePanelElement = assertValid<HTMLElement>(
+      this.__volumePanelElement,
+    );
+
+    const newElem = updateAudioPanelElement(this, safeVolumePanelElement);
+    this.__volumePanelElement = newElem;
+
+    return this;
+  }
+
+  public volumePanelRegister(node: IPanelRegisterableNode) {
+    assertValid<IPanelRegisterableNode>(
+      node,
+    ).__panelRegistered = true;
+
+    if (this.__volumePanelElement) {
+      this.updateVolumePanelElement();
+    }
+
+    return this;
+  }
+
+  public volumePanelDeregister(node: IPanelRegisterableNode) {
+    assertValid<IPanelRegisterableNode>(
+      node,
+    ).__panelRegistered = false;
+
+    if (this.__volumePanelElement) {
+      this.updateVolumePanelElement();
+    }
 
     return this;
   }

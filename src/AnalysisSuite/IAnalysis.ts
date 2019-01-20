@@ -1,6 +1,7 @@
 export interface IAnalysis {
-  getFrequencyByte(): Uint8Array;
-  getFrequencyFloat(): Float32Array;
-  getTimeDomainByte(): Uint8Array;
-  getTimeDomainFloat(): Float32Array;
+  getBinCount(): number;
+  getFrequencyByte(array?: Uint8Array): Uint8Array;
+  getFrequencyFloat(array?: Float32Array): Float32Array;
+  getTimeDomainByte(array?: Uint8Array): Uint8Array;
+  getTimeDomainFloat(array?: Float32Array): Float32Array;
 }

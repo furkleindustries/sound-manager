@@ -1,12 +1,12 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   IFadeProperty,
 } from './IFadeProperty';
 import {
   TFadeArg,
 } from './TFadeArg';
+import {
+  assert,
+} from 'ts-assertions';
 
 export function fadeArgumentToFadeProperty<T>(arg: TFadeArg<T>, defaultValue: T | null, validator: (arg: T) => boolean): IFadeProperty<T> {
   const {
