@@ -23,8 +23,8 @@ import {
   doToOneOrMany,
 } from '../functions/doToOneOrMany';
 import {
-  generateVolumePanelElement,
-} from '../functions/generateVolumePanelElement';
+  generateAudioPanelElement,
+} from '../functions/generateAudioPanelElement';
 import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
@@ -75,7 +75,7 @@ import {
 } from '../logging/log';
 import {
   ManagerNode,
-} from '../Node/ManagerNode';
+} from '../Node/Node';
 import {
   nameOrAllKeys,
 } from '../functions/nameOrAllKeys';
@@ -597,7 +597,7 @@ export class Manager extends AnalysableNodeMixin(ManagerNode) implements IManage
   private __volumePanelElement: HTMLElement | null = null;
 
   public generateVolumePanelElement(): HTMLElement {
-    this.__volumePanelElement = generateVolumePanelElement(this);
+    this.__volumePanelElement = generateAudioPanelElement(this);
     return this.__volumePanelElement;
   }
 

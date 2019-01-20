@@ -1,9 +1,7 @@
 import {
   assert,
-} from '../assertions/assert';
-import {
   assertValid,
-} from '../assertions/assertValid';
+} from 'ts-assertions';
 import {
   ICollection,
 } from '../interfaces/ICollection';

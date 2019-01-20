@@ -11,16 +11,16 @@ import {
   IAnalysableNode,
 } from './IAnalysableNode';
 import {
-  IConstructor,
-} from '../interfaces/IConstructor';
-import {
   IAnalysisSuite,
 } from '../AnalysisSuite/IAnalysisSuite';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  IConstructor,
+} from '../interfaces/IConstructor';
+import {
+  INode,
+} from './INode';
 
-export function AnalysableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
+export function AnalysableNodeMixin<T extends IConstructor<INode>>(Base: T) {
   return class AnalysableNodeMixin extends Base implements IAnalysableNode {
     public readonly analysis: IAnalysisSuite | null = null;
     public readonly __analyserNode: AnalyserNode | null = null;

@@ -14,8 +14,8 @@ import {
   IGroupOptions,
 } from '../Group/IGroupOptions';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
+  INode,
+} from '../Node/INode';
 import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
@@ -38,7 +38,7 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 
-export interface IManager extends IManagerNode, IAnalysableNode {
+export interface IManager extends INode, IAnalysableNode {
   readonly type: NodeTypes.Manager;
 
   /* Node collection */

@@ -2,13 +2,13 @@ import {
   IConstructor,
 } from '../interfaces/IConstructor';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  INode,
+} from './INode';
 import {
   IPanelRegisterableNode,
 } from './IPanelRegisterableNode';
 
-export function PanelRegisterableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
+export function PanelRegisterableNodeMixin<T extends IConstructor<INode>>(Base: T) {
   return class PanelRegisterableNode extends Base implements IPanelRegisterableNode {
     public __panelRegistered: boolean = false;
 

@@ -45,5 +45,8 @@
     "web-audio-test-api": "^0.5.2",
     "webpack": "^4.27.1",
     "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "ts-assertions": "^1.0.2"
   }
 }

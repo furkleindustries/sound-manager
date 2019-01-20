@@ -1,11 +1,11 @@
 import {
   assert,
-} from './assert';
+} from 'ts-assertions';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
+  INode,
+} from '../Node/INode';
 
-export function assertNodeIsHtmlAudio<T extends IManagerNode>(node: T, methodName?: keyof T) {
+export function assertNodeIsHtmlAudio<T extends INode>(node: T, methodName?: keyof T) {
   assert(
     !node.isWebAudio(),
     `The method ${methodName ? methodName : '(not provided)'} requires the ` +

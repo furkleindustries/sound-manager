@@ -11,8 +11,8 @@ import {
   ISoundsMap,
 } from './ISoundsMap';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
+  INode,
+} from '../Node/INode';
 import {
   ITaggableNode,
 } from '../Node/ITaggableNode';
@@ -22,7 +22,7 @@ import {
 
 export interface IGroup
   extends
-    IManagerNode,
+    INode,
     IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode

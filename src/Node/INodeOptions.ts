@@ -1,4 +1,4 @@
-export interface IManagerNodeOptions {
+export interface INodeOptions {
   context?: AudioContext;
   volume?: number;
 }

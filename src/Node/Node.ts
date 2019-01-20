@@ -8,16 +8,16 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  INode,
+} from './INode';
 import {
-  IManagerNodeOptions,
-} from './IManagerNodeOptions';
+  INodeOptions,
+} from './INodeOptions';
 import {
   isValidVolume,
 } from '../functions/isValidVolume';
 
-export class ManagerNode implements IManagerNode {
+export class ManagerNode implements INode {
   get type(): NodeTypes {
     throw new Error('Type not implemented.');
   }
@@ -28,7 +28,7 @@ export class ManagerNode implements IManagerNode {
   protected __isWebAudio: boolean;
   protected __audioContext: AudioContext | null = null;
 
-  constructor(options?: IManagerNodeOptions) {
+  constructor(options?: INodeOptions) {
     const opts = options || {};
     const {
       context,

@@ -8,8 +8,8 @@ import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
 import {
-  IManagerNode,
-} from '../Node/IManagerNode';
+  INode,
+} from '../Node/INode';
 import {
   ITaggableNode,
 } from '../Node/ITaggableNode';
@@ -19,7 +19,7 @@ import {
 
 export interface ISound
   extends
-    IManagerNode,
+    INode,
     IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode

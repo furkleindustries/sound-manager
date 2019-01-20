@@ -3,10 +3,8 @@ import {
 } from '../Node/AnalysableNodeMixin';
 import {
   assert,
-} from '../assertions/assert';
-import {
   assertValid,
-} from '../assertions/assertValid';
+} from 'ts-assertions';
 import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
@@ -24,7 +22,7 @@ import {
 } from './ISoundsMap';
 import {
   ManagerNode,
-} from '../Node/ManagerNode';
+} from '../Node/Node';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';

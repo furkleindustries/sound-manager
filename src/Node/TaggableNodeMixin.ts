@@ -1,20 +1,20 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
   IConstructor,
 } from '../interfaces/IConstructor';
 import {
-  IManagerNode,
-} from './IManagerNode';
+  INode,
+} from './INode';
 import {
   ITaggableNode,
 } from './ITaggableNode';
+import {
+  assert,
+} from 'ts-assertions';
 
-export function TaggableNodeMixin<T extends IConstructor<IManagerNode>>(Base: T) {
+export function TaggableNodeMixin<T extends IConstructor<INode>>(Base: T) {
   return class TaggableNode extends Base implements ITaggableNode {
     public __tags: ReadonlyArray<string> = getFrozenObject([]);
     get tags(): ReadonlyArray<string> {

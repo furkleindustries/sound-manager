@@ -2,14 +2,8 @@ import {
   AnalysableNodeMixin,
 } from '../Node/AnalysableNodeMixin';
 import {
-  assert,
-} from '../assertions/assert';
-import {
   assertNodeIsWebAudio,
 } from '../assertions/assertNodeIsWebAudio';
-import {
-  assertValid,
-} from '../assertions/assertValid';
 import {
   createFade,
 } from '../Fade/createFade';
@@ -39,7 +33,7 @@ import {
 } from '../Playlist/loopIsValid';
 import {
   ManagerNode,
-} from '../Node/ManagerNode';
+} from '../Node/Node';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
@@ -61,6 +55,10 @@ import {
 import {
   TaggableNodeMixin,
 } from '../Node/TaggableNodeMixin';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export class Sound
   extends
