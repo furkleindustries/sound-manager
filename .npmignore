@@ -1,15 +1,20 @@
+coverage/
 documentation/
 samples/
+src/
 tests/
 typedocs/
 .vscode/
+
+/*.config.js
+/*.json
+/*.md
+/*.yml
 
 *.code-workspace
 *.log
 *.swp
 *.map
 
-/*.config.js
-/*.json
-/*.md
-/*.yml
+wallaby.js
+README.md
