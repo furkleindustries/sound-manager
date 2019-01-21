@@ -4,7 +4,7 @@
 
 ## Introduction
 
-A full-service sound manager designed for use with hypertext fiction systems like Twine or Accelerate.
+A full-service sound manager designed for use with hypertext fiction systems like Twine or Accelerator.
 
 ## Type documentation
 
