@@ -44,12 +44,12 @@ export function getVolumeLevelRenderListener(
       prev + Math.abs(128 - curr)
     )) / arr.length / 128;
 
-    drawVolumeLevel(
-      canvasCtx,
-      average,
-      canvas.width,
-      canvas.height,
+    drawVolumeLevel({
       color,
-    );
+      ctx: canvasCtx,
+      width: canvas.width,
+      height: canvas.height,
+      value: average,
+    });
   };
 }
