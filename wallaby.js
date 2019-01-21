@@ -14,10 +14,17 @@ module.exports = (wallaby) => ({
     ),
   },
 
+  compilers: {
+    '**/*.ts?(x)': wallaby.compilers.typeScript({ module: 'commonjs' }),
+  },
+
   files: [
     'src/**/*.js',
     'src/**/*.ts',
-    'tests/setup.js',
+    {
+      pattern: 'tests/setup.js',
+      instrument: false,
+    },
   ],
 
   tests: [

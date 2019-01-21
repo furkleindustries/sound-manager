@@ -9,6 +9,15 @@ module.exports = {
   devtool: 'source-map',
   mode,
 
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    library: 'soundManager',
+    libraryTarget: 'commonjs',
+  },
+
+  plugins: [],
+
   module: {
     rules: [
       {
@@ -26,13 +35,4 @@ module.exports = {
       '.js',
     ],
   },
-
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    library: 'soundManager',
-    libraryTarget: 'umd',
-  },
-
-  plugins: [],
 };
