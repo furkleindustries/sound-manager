@@ -24,7 +24,7 @@ export function assertNodeIsWebAudio<T extends IBaseNode>(
     strings.NODE_INVALID,
   );
 
-  const methodNameStr = String(methodName) || '(not provided)';
+  const methodNameStr = String(methodName || '(not provided)');
   assert(
     node.isWebAudio(),
     strings.ASSERTION_FAILURE

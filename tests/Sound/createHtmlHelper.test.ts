@@ -1,9 +1,7 @@
 import {
   createHtmlHelper,
-} from '../../src/Sound/createHtmlHelper';
-import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/createHtmlHelper';
 
 import {
   createHtmlAudioSound,
@@ -47,7 +45,7 @@ describe('createHtmlHelper unit tests.', () => {
       await createHtmlHelper({} as any);
     } catch (__err) {
       expect(__err).toEqual(
-        new Error(`${strings.CREATE_SOUND_HTML_AUDIO_FAILED}\n${err}`)
+        new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`)
       );
     }
   });

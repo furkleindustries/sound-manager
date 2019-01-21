@@ -54,7 +54,7 @@ import {
 } from '../Fade/scheduleWebAudioFades';
 import {
   strings,
-} from './strings';
+} from './Sound.strings';
 import {
   TaggableNodeMixin,
 } from '../Node/TaggableNodeMixin';
@@ -64,7 +64,7 @@ import {
 } from 'ts-assertions';
 
 export class Sound
-  extends
+extends
     AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(

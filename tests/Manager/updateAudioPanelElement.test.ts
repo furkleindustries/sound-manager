@@ -1,11 +1,11 @@
 import {
   updateAudioPanelElement,
-} from '../../src/functions/updateAudioPanelElement';
+} from '../../src/Manager/updateAudioPanelElement';
 
 import {
   generateAudioPanelElement,
-} from '../../src/functions/generateAudioPanelElement';
-jest.mock('../../src/functions/generateAudioPanelElement');
+} from '../../src/Manager/generateAudioPanelElement';
+jest.mock('../../src/Manager/generateAudioPanelElement');
 
 describe('updateAudioPanelElement unit tests.', () => {
   beforeEach(() => {

@@ -14,11 +14,21 @@ import {
   Sound,
 } from './Sound';
 import {
-  strings,
-} from '../../src/Sound/strings';
-import {
   assertValid,
 } from 'ts-assertions';
+
+export const strings = {
+  CONTEXT_INVALID:
+    'The context property of the argument object was not provided to ' +
+    'createWebAudioSound.',
+
+  OPTIONS_INVALID:
+    'The options argument was not provided to createWebAudioSound.',
+
+  URL_INVALID:
+    'The url property of the argument object was not provided to ' +
+    'createWebAudioSound.',
+};
 
 export async function createWebAudioSound(options: ICreateSoundOptions): Promise<ISound> {
   const {
@@ -26,17 +36,17 @@ export async function createWebAudioSound(options: ICreateSoundOptions): Promise
     url,
   } = assertValid<ICreateSoundOptions>(
     options,
-    strings.CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID,
+    strings.OPTIONS_INVALID,
   );
 
   const safeContext = assertValid<AudioContext>(
     context,
-    strings.CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID,
+    strings.CONTEXT_INVALID,
   );
   
   const safeUrl = assertValid<string>(
     url,
-    strings.CREATE_WEB_AUDIO_SOUND_URL_INVALID,
+    strings.URL_INVALID,
   );
 
   const buffer = await loadAudioBuffer(safeUrl, safeContext);

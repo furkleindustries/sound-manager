@@ -14,16 +14,18 @@ import {
   ISound,
 } from './ISound';
 import {
-  strings,
-} from './strings';
-import {
   assert,
 } from 'ts-assertions';
+
+export const strings = {
+  OPTIONS_INVALID:
+    'The options argument was not provided to createSound.',
+};
 
 export function createSound(options: ICreateSoundOptions): Promise<ISound> {
   assert(
     options,
-    strings.CREATE_SOUND_OPTIONS_INVALID,
+    strings.OPTIONS_INVALID,
   );
 
   const opts = getFrozenObject(options);

@@ -1,9 +1,7 @@
 import {
   createWebHelper,
-} from '../../src/Sound/createWebHelper';
-import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/createWebHelper';
 
 import {
   createHtmlHelper,
@@ -57,7 +55,7 @@ describe('createWebHelper unit tests.', () => {
     await createWebHelper({} as any);
     
     expect(warn).toBeCalledTimes(1);
-    expect(warn).toBeCalledWith(`${strings.CREATE_SOUND_WEB_AUDIO_FAILED}\n${err}`);
+    expect(warn).toBeCalledWith(`${strings.WEB_AUDIO_FAILED}\n${err}`);
   });
 
   it('Returns the value of createHtmlHelper if createWebAudioSound rejects and createHtmlHelper resolves.', async () => {
@@ -75,7 +73,7 @@ describe('createWebHelper unit tests.', () => {
       await createWebHelper({} as any);
     } catch (__err) {
       expect(__err).toEqual(
-        new Error(`${strings.CREATE_SOUND_BOTH_FAILED}\n${err}`)
+        new Error(`${strings.BOTH_FAILED}\n${err}`)
       );
     }
   });

@@ -3,7 +3,7 @@ import {
 } from './generateAudioComponent';
 import {
   IManager,
-} from '../Manager/IManager';
+} from './IManager';
 import {
   assert,
 } from 'ts-assertions';
@@ -14,10 +14,7 @@ export const strings = {
 };
 
 export function generateAudioPanelElement(manager: IManager) {
-  assert(
-    manager,
-    strings.MANAGER_INVALID,
-  );
+  assert(manager, strings.MANAGER_INVALID);
 
   const audioPanelElement = document.createElement('div');
   audioPanelElement.className = 'sound-manager-panel';

@@ -1,7 +1,4 @@
 import {
-  assert,
-} from '../assertions/assert';
-import {
   createFade,
 } from '../Fade/createFade';
 import {
@@ -22,6 +19,9 @@ import {
 import {
   makeSoundGroupIdentifier,
 } from '../functions/makeSoundGroupIdentifier';
+import {
+  assert,
+} from 'ts-assertions';
 
 export class Playlist implements IPlaylist {
   public readonly loop: boolean | number = false;

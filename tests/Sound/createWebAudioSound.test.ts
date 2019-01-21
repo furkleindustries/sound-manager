@@ -1,9 +1,7 @@
 import {
   createWebAudioSound,
-} from '../../src/Sound/createWebAudioSound';
-import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/createWebAudioSound';
 
 import {
   getFrozenObject,
@@ -32,7 +30,7 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound();
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_OPTIONS_INVALID);
+      expect(err.message).toBe(strings.OPTIONS_INVALID);
     }
   });
 
@@ -42,7 +40,7 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound({});
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_CONTEXT_INVALID);
+      expect(err.message).toBe(strings.CONTEXT_INVALID);
     }
   });
 
@@ -52,16 +50,21 @@ describe('createWebAudioSound unit tests.', () => {
       // @ts-ignore
       await createWebAudioSound({ context: true });
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_WEB_AUDIO_SOUND_URL_INVALID);
+      expect(err.message).toBe(strings.URL_INVALID);
     }
   });
 
   it('Passes the options to getFrozenObject before passing them to Sound.', async () => {
-    /*const opts = {
-
+    const opts = {
+      context: true,
+      url: 'whatever',
     };
+
     // @ts-ignore
-    await createWebAudioSound*/
+    await createWebAudioSound(opts);
+
+    expect(getFrozenObject).toBeCalledTimes(1);
+    expect(getFrozenObject).toBeCalledWith(opts);
   });
 
   it('Constructs a Sound with the audio buffer with other options if loadAudioBuffer resolves.', async () => {

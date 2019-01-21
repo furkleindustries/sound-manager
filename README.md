@@ -8,4 +8,4 @@ A full-service sound manager designed for use with hypertext fiction systems lik
 
 ## Type documentation
 
-There is a full set of type-oriented API documentation. This exists in a very attractive HTML format you can build with the commands `npm install` and `npm run build:docs`, and a significantly less attractive (but browser-accessible) Markdown version [here](/wiki/typedocs/).
+There is a full set of type-oriented API documentation. This exists in a very attractive HTML format you can build with the commands `npm install` and `npm run build:docs`, and a significantly less attractive (but browser-accessible) Markdown version soon to be added [here](/wiki/typedocs/).

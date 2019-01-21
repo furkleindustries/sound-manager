@@ -10,14 +10,16 @@ import {
 import {
   ISound,
 } from './ISound';
-import {
-  strings,
-} from './strings';
+
+export const strings = {
+  HTML_AUDIO_FAILED:
+    'Generating HTML5 Audio failed. Cannot construct Sound.',
+};
 
 export async function createHtmlHelper(options: ICreateSoundOptions): Promise<ISound> {
   try {
     return await createHtmlAudioSound(getFrozenObject(options));
   } catch (err) {
-    throw new Error(`${strings.CREATE_SOUND_HTML_AUDIO_FAILED}\n${err}`);
+    throw new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`);
   }
 }

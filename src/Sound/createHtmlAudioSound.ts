@@ -11,11 +11,20 @@ import {
   Sound,
 } from '../Sound/Sound';
 import {
-  strings,
-} from './strings';
-import {
   assertValid,
 } from 'ts-assertions';
+
+export const strings = {
+  GET_MANAGER_VOLUME_INVALID:
+    'The getManagerVolume argument property was not provided to ' +
+    'createHtmlAudioSound.',
+
+  OPTIONS_INVALID:
+    'The options argument was not provided to createHtmlAudioSound.',
+
+  URL_INVALID:
+    'The url argument property was not provided to createHtmlAudioSound.',
+};
 
 export async function createHtmlAudioSound(options: ICreateSoundOptions): Promise<ISound> {
   const {
@@ -23,12 +32,12 @@ export async function createHtmlAudioSound(options: ICreateSoundOptions): Promis
     url,
   } = assertValid<ICreateSoundOptions>(
     options,
-    strings.CREATE_HTML_AUDIO_SOUND_OPTIONS_INVALID,
+    strings.OPTIONS_INVALID,
   );
 
   const safeUrl = assertValid<string>(
     url,
-    strings.CREATE_HTML_AUDIO_SOUND_URL_INVALID,
+    strings.URL_INVALID,
   );
 
   const audioElement = new Audio(safeUrl);
@@ -36,7 +45,7 @@ export async function createHtmlAudioSound(options: ICreateSoundOptions): Promis
 
   const safeGetManagerVolume = assertValid<() => number>(
     getManagerVolume,
-    strings.CREATE_HTML_AUDIO_SOUND_GET_MANAGER_VOLUME_INVALID,
+    strings.GET_MANAGER_VOLUME_INVALID,
   );
 
   return new Sound(getFrozenObject({
