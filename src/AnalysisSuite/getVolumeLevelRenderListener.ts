@@ -1,4 +1,7 @@
 import {
+  drawVolumeLevel,
+} from '../functions/drawVolumeLevel';
+import {
   IAnalysis,
 } from './IAnalysis';
 import {
@@ -16,26 +19,14 @@ export const strings = {
 
   CANVAS_INVALID:
     'The canvas argument was not provided to getVolumeLevelRenderListener.',
-
-  COLOR_INVALID:
-    'The color argument provided to getVolumeRenderListener was empty or ' +
-    'invalid.',
 };
 
 export function getVolumeLevelRenderListener(
   canvas: HTMLCanvasElement,
-  color: string = 'rgb(255, 0, 0)',
+  color?: string,
 ): IAnalysisRenderCallback
 {
-  assert(
-    canvas,
-    strings.CANVAS_INVALID,
-  );
-
-  assert(
-    color,
-    strings.COLOR_INVALID,
-  );
+  assert(canvas, strings.CANVAS_INVALID);
 
   const canvasCtx = assertValid<CanvasRenderingContext2D>(
     canvas.getContext('2d'),
@@ -49,17 +40,16 @@ export function getVolumeLevelRenderListener(
     }
   
     analysis.getTimeDomainByte(arr);
-    const tAverage = arr.reduce((prev, curr) => (
+    const average = arr.reduce((prev, curr) => (
       prev + Math.abs(128 - curr)
     )) / arr.length / 128;
-  
-    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    canvasCtx.fillStyle = color;
-    canvasCtx.fillRect(
-      0,
-      canvas.height * (1 - tAverage),
+
+    drawVolumeLevel(
+      canvasCtx,
+      average,
       canvas.width,
       canvas.height,
+      color,
     );
   };
 }
