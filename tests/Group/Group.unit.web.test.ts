@@ -728,7 +728,6 @@ describe('Group Web Audio unit tests.', () => {
       },
     } as any;
 
-    console.log(group.sounds);
     group.updateAllAudioElementsVolume();
 
     expect(mockOne).toBeCalledTimes(1);

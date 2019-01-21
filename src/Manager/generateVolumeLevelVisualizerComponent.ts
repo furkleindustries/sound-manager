@@ -8,7 +8,7 @@ import {
   assert,
 } from 'ts-assertions';
 
-const strings = {
+export const strings = {
   ANALYSIS_SUITE_INVALID: 
     'The analysisSuite argument was not provided to ' +
     'generateVolumeLevelVisualizerComponent.',

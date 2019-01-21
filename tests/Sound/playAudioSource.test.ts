@@ -1,21 +1,19 @@
 import {
   playAudioSource, 
-} from '../../src/Sound/playAudioSource';
-import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/playAudioSource';
 
 describe('playAudioSource unit tests.', () => {
   it('Throws if the sound argument is not provided.', () => {
     // @ts-ignore
     const func = () => playAudioSource();
-    expect(func).toThrow(strings.PLAY_AUDIO_SOURCE_SOUND_INVALID);
+    expect(func).toThrow(strings.SOUND_INVALID);
   });
 
   it('Throws if the sound is playing.', () => {
     // @ts-ignore
     const func = () => playAudioSource({ isPlaying: jest.fn(() => true) });
-    expect(func).toThrow(strings.PLAY_AUDIO_SOURCE_SOUND_PLAYING);
+    expect(func).toThrow(strings.SOUND_PLAYING);
   });
 
   it('Gets the sound\'s track position.', () => {
@@ -81,7 +79,7 @@ describe('playAudioSource unit tests.', () => {
     // @ts-ignore
     const func = () => playAudioSource(sound);
 
-    expect(func).toThrow(strings.PLAY_AUDIO_SOURCE_AUDIO_ELEMENT_INVALID);
+    expect(func).toThrow(strings.AUDIO_ELEMENT_INVALID);
   });
 
   it('Calls the sound\'s updateAudioElement method if it is in HTML mode.', () => {

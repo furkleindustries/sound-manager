@@ -12,7 +12,7 @@ import {
 } from '../../src/Sound/Sound';
 import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/Sound.strings';
 
 const testSoundFactory = (options?: Partial<ISoundOptions>) => {
   const audioElement = {

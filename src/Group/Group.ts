@@ -93,7 +93,6 @@ export class Group
   }
 
   public getAllSounds() {
-    console.log(this.sounds);
     return this.getSounds(Object.keys(this.sounds));
   }
 

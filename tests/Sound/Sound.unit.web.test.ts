@@ -12,7 +12,7 @@ import {
 } from '../../src/Sound/Sound';
 import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/Sound.strings';
 
 import {
   getFadeValueAtTime,
