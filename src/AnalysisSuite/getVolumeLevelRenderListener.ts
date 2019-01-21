@@ -16,15 +16,25 @@ export const strings = {
 
   CANVAS_INVALID:
     'The canvas argument was not provided to getVolumeLevelRenderListener.',
+
+  COLOR_INVALID:
+    'The color argument provided to getVolumeRenderListener was empty or ' +
+    'invalid.',
 };
 
 export function getVolumeLevelRenderListener(
   canvas: HTMLCanvasElement,
+  color: string = 'rgb(255, 0, 0)',
 ): IAnalysisRenderCallback
 {
   assert(
     canvas,
     strings.CANVAS_INVALID,
+  );
+
+  assert(
+    color,
+    strings.COLOR_INVALID,
   );
 
   const canvasCtx = assertValid<CanvasRenderingContext2D>(
@@ -44,7 +54,7 @@ export function getVolumeLevelRenderListener(
     )) / arr.length / 128;
   
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-    canvasCtx.fillStyle = 'rgb(255, 0, 0)';
+    canvasCtx.fillStyle = color;
     canvasCtx.fillRect(
       0,
       canvas.height * (1 - tAverage),

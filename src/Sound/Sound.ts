@@ -54,7 +54,7 @@ import {
 } from '../Fade/scheduleWebAudioFades';
 import {
   strings,
-} from './strings';
+} from './Sound.strings';
 import {
   TaggableNodeMixin,
 } from '../Node/TaggableNodeMixin';

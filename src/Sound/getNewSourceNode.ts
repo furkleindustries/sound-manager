@@ -1,13 +1,25 @@
 import {
-  assert,
+  assertValid,
 } from 'ts-assertions';
 
+export const strings = {
+  BUFFER_INVALID:
+    'The buffer argument was not provided to getNewSourceNode.',
+    
+  CONTEXT_INVALID:
+    'The buffer argument was not provided to getNewSourceNode.',
+};
+
 export function getNewSourceNode(context: AudioContext, buffer: AudioBuffer) {
-  assert(context);
-  assert(buffer);
+  const sourceNode = assertValid<AudioContext>(
+    context,
+    strings.CONTEXT_INVALID,
+  ).createBufferSource();
 
-  const node = context.createBufferSource();
-  node.buffer = buffer;
+  sourceNode.buffer = assertValid<AudioBuffer>(
+    buffer,
+    strings.BUFFER_INVALID,
+  );
 
-  return node;
+  return sourceNode;
 }

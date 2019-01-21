@@ -3,7 +3,7 @@ import {
 } from './generateAudioPanelElement';
 import {
   IManager,
-} from '../Manager/IManager';
+} from './IManager';
 import {
   assert,
   assertValid,

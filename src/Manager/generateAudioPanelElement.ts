@@ -3,7 +3,7 @@ import {
 } from './generateAudioComponent';
 import {
   IManager,
-} from '../Manager/IManager';
+} from './IManager';
 import {
   assert,
 } from 'ts-assertions';

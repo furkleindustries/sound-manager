@@ -3,7 +3,7 @@ import {
 } from '../AnalysisSuite/IAnalysisSuite';
 
 export interface IAnalysableNode {
-  readonly analysis: IAnalysisSuite | null;
+  readonly analysisSuite: IAnalysisSuite | null;
   getAnalyserNode(): AnalyserNode;
   getOutputNode(): AnalyserNode;
 }

@@ -2,22 +2,31 @@ import {
   ISound,
 } from './ISound';
 import {
-  strings,
-} from './strings';
-import {
   assert,
   assertValid,
 } from 'ts-assertions';
 
+export const strings = {
+  AUDIO_ELEMENT_INVALID:
+    'The audio element argument was not present in playAudioSource. This ' +
+    'argument is necessary for a song to be played in HTML Audio mode.',
+
+  SOUND_INVALID:
+    'The sound argument was not provided to playAudioSource.',
+
+  SOUND_PLAYING:
+    'The Sound provided to playAudioSource was already playing.',
+};
+
 export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| null) {
   assert(
     sound,
-    strings.PLAY_AUDIO_SOURCE_SOUND_INVALID,
+    strings.SOUND_INVALID,
   );
 
   assert(
     !sound.isPlaying(),
-    strings.PLAY_AUDIO_SOURCE_SOUND_PLAYING,
+    strings.SOUND_PLAYING,
   );
 
   const trackPosition = sound.getTrackPosition();
@@ -29,7 +38,7 @@ export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| 
      * and sound volumes. */
     const safeAudioElement = assertValid<HTMLAudioElement>(
       audioElement,
-      strings.PLAY_AUDIO_SOURCE_AUDIO_ELEMENT_INVALID,
+      strings.AUDIO_ELEMENT_INVALID,
     );
 
     sound.updateAudioElementVolume();

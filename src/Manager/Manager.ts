@@ -21,7 +21,7 @@ import {
 } from '../functions/doToOneOrMany';
 import {
   generateAudioPanelElement,
-} from '../functions/generateAudioPanelElement';
+} from './generateAudioPanelElement';
 import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
@@ -91,7 +91,7 @@ import {
 } from 'ts-assertions';
 import {
   updateAudioPanelElement,
-} from '../functions/updateAudioPanelElement';
+} from './updateAudioPanelElement';
 
 declare const webkitAudioContext: AudioContext;
 const ctxCtor = AudioContext || webkitAudioContext;

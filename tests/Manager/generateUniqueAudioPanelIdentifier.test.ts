@@ -1,7 +1,7 @@
 import {
   generateUniqueAudioPanelIdentifier,
   strings,
-} from '../../src/functions/generateUniqueAudioPanelIdentifier';
+} from '../../src/Manager/generateUniqueAudioPanelIdentifier';
 import {
   NodeTypes,
 } from '../../src/enums/NodeTypes';

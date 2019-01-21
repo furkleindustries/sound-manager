@@ -1,7 +1,7 @@
 import {
   generateVolumeInputComponent,
   strings,
-} from "../../src/functions/generateVolumeInputComponent";
+} from "../../src/Manager/generateVolumeInputComponent";
 
 describe('generateVolumeInputComponent unit tests.', () => {
   it('Throws if the node argument is not provided.', () => {

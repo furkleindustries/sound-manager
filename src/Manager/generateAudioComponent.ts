@@ -9,7 +9,7 @@ import {
 } from './generateVolumeLabelComponent';
 import {
   generateVolumeLevelVisualizerComponent,
-} from './generateVolumeLevelVisualizer';
+} from './generateVolumeLevelVisualizerComponent';
 import {
   IAnalysableNode,
 } from '../Node/IAnalysableNode';

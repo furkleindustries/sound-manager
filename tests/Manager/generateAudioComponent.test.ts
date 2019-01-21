@@ -1,24 +1,24 @@
 import {
   generateAudioComponent,
   strings,
-} from '../../src/functions/generateAudioComponent';
+} from '../../src/Manager/generateAudioComponent';
 
 import {
   generateUniqueAudioPanelIdentifier,
-} from '../../src/functions/generateUniqueAudioPanelIdentifier';
-jest.mock('../../src/functions/generateUniqueAudioPanelIdentifier');
+} from '../../src/Manager/generateUniqueAudioPanelIdentifier';
+jest.mock('../../src/Manager/generateUniqueAudioPanelIdentifier');
 import {
   generateVolumeInputComponent,
-} from '../../src/functions/generateVolumeInputComponent';
-jest.mock('../../src/functions/generateVolumeInputComponent');
+} from '../../src/Manager/generateVolumeInputComponent';
+jest.mock('../../src/Manager/generateVolumeInputComponent');
 import {
   generateVolumeLabelComponent,
-} from '../../src/functions/generateVolumeLabelComponent';
-jest.mock('../../src/functions/generateVolumeLabelComponent');
+} from '../../src/Manager/generateVolumeLabelComponent';
+jest.mock('../../src/Manager/generateVolumeLabelComponent');
 import {
   generateVolumeLevelVisualizerComponent,
-} from '../../src/functions/generateVolumeLevelVisualizer';
-jest.mock('../../src/functions/generateVolumeLevelVisualizer');
+} from '../../src/Manager/generateVolumeLevelVisualizerComponent';
+jest.mock('../../src/Manager/generateVolumeLevelVisualizerComponent');
 
 describe('generateAudioComponent unit tests.', () => {
   beforeEach(() => {

@@ -1,9 +1,7 @@
 import {
   createHtmlAudioSound,
-} from '../../src/Sound/createHtmlAudioSound';
-import {
   strings,
-} from '../../src/Sound/strings';
+} from '../../src/Sound/createHtmlAudioSound';
 
 import {
   getFrozenObject,
@@ -27,7 +25,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound();
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_OPTIONS_INVALID);
+      expect(err.message).toBe(strings.OPTIONS_INVALID);
     }
   });
 
@@ -37,7 +35,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound({});
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_URL_INVALID);
+      expect(err.message).toBe(strings.URL_INVALID);
     }
   });
 
@@ -47,7 +45,7 @@ describe('createHtmlAudioSound unit tests.', () => {
       // @ts-ignore
       await createHtmlAudioSound({ url: 'foobar' });
     } catch (err) {
-      expect(err.message).toBe(strings.CREATE_HTML_AUDIO_SOUND_GET_MANAGER_VOLUME_INVALID);
+      expect(err.message).toBe(strings.GET_MANAGER_VOLUME_INVALID);
     }
   });
 
