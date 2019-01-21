@@ -5,14 +5,24 @@ import {
   isValidVolume,
 } from './isValidVolume';
 
-export function drawVolumeLevel(
+export function drawVolumeLevel(options: {
   ctx: CanvasRenderingContext2D,
   value: number,
   width: number,
   height: number,
   color?: string,
-)
+})
 {
+  assert(options);
+
+  const {
+    color,
+    ctx,
+    height,
+    value,
+    width,
+  } = options;
+
   assert(ctx);
   assert(isValidVolume(value));
   assert(width);

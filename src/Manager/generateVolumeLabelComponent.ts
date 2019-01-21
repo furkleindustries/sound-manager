@@ -5,7 +5,8 @@ import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
-  assertValid, assert,
+  assert,
+  assertValid,
 } from 'ts-assertions';
 
 export const strings = {
@@ -30,31 +31,20 @@ export function generateVolumeLabelComponent(node: IBaseNode, uniqueId: string, 
     strings.NODE_INVALID,
   ).type;
 
-  assert(
-    nodeType,
-    strings.NODE_TYPE_INVALID,
-  );
+  assert(nodeType, strings.NODE_TYPE_INVALID);
 
   const label = document.createElement('label');
   label.className = 'sm-volumeInput-label';
 
   if (nodeType === NodeTypes.Group || nodeType === NodeTypes.Sound || name) {
-    const checkedName = assertValid<string>(
-      name,
-      strings.NAME_INVALID,
-    );
-
+    const checkedName = assertValid<string>(name, strings.NAME_INVALID);
     const upperFirstChar = checkedName[0].toUpperCase();
     label.textContent = `${upperFirstChar}${checkedName.slice(1)}`;
   } else {
     label.textContent = 'Master volume';
   }
 
-  assert(
-    uniqueId,
-    strings.UNIQUE_ID_INVALID,
-  );
-
+  assert(uniqueId, strings.UNIQUE_ID_INVALID);
   label.setAttribute('for', uniqueId);
 
   return label;
