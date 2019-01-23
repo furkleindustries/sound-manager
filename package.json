@@ -20,8 +20,10 @@
     "url": "git+https://github.com/furkleindustries/sound-manager.git"
   },
   "keywords": [
-    "twine",
+    "audio",
     "sound",
+    "web audio",
+    "twine",
     "accelerator"
   ],
   "author": "furkle",
