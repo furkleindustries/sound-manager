@@ -10,6 +10,13 @@ module.exports = {
   entry: './src/index.ts',
   devtool: 'source-map',
 
+  output: {
+    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist'),
+    library: 'soundManager',
+    libraryTarget: 'commonjs',
+  },
+
   plugins: [],
 
   module: {

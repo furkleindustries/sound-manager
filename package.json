@@ -5,8 +5,8 @@
   "browser": "dist/index.js",
   "main": "dist/main.js",
   "scripts": {
-    "build": "tsc && cross-env NODE_ENV=development webpack --verbose",
-    "build:prod": "tsc && cross-env NODE_ENV=production webpack",
+    "build": "cross-env NODE_ENV=development webpack --verbose",
+    "build:prod": "cross-env NODE_ENV=production webpack",
     "build:docs": "npm run build:docs-md && npm run build:docs-html",
     "build:docs-md": "typedoc --theme markdown --options ./typedoc.json --out typedocs/markdown",
     "build:docs-html": "typedoc --options ./typedoc.json --out typedocs/html",
