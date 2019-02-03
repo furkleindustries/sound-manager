@@ -56,7 +56,7 @@ const nodeConfig = {
   },
 };
 
-return [
+module.exports = [
   browserConfig,
   nodeConfig,
 ];
