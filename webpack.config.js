@@ -44,7 +44,7 @@ const browserConfig = {
 const nodeConfig = {
   ...base,
   output: {
-    filename: 'node.js',
+    filename: 'index.js',
     path: path.join(__dirname, 'dist'),
     libraryTarget: 'commonjs',
   },
