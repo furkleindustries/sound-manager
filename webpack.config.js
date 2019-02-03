@@ -4,17 +4,11 @@ const mode = process.env.NODE_ENV === 'development' ?
   'development' :
   'production';
 
-const base = {
+module.exports = {
   mode,
 
   entry: './src/index.ts',
   devtool: 'source-map',
-
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist'),
-    library: 'soundManager',
-  },
 
   plugins: [],
 
@@ -36,27 +30,3 @@ const base = {
     ],
   },
 };
-
-const browserConfig = {
-  ...base,
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist', 'browser'),
-    library: 'soundManager',
-    libraryTarget: 'commonjs',
-  },
-};
-
-const nodeConfig = {
-  ...base,
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist', 'node'),
-    libraryTarget: 'esnext',
-  },
-};
-
-module.exports = [
-  browserConfig,
-  nodeConfig,
-];
