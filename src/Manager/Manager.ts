@@ -93,28 +93,18 @@ import {
   updateAudioPanelElement,
 } from './updateAudioPanelElement';
 
-declare const webkitAudioContext: AudioContext;
-const ctxCtor = AudioContext || webkitAudioContext;
-
 export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   get type(): NodeTypes.Manager {
     return NodeTypes.Manager;
   }
-
+  
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
-    const opts = getFrozenObject(options!);
     const {
       groups,
       volume,
-    } = opts;
-
-    if (!this.__audioContext && ctxCtor) {
-      this.__audioContext = new ctxCtor();
-      this.__isWebAudio = true;
-    }
-
+    } = getFrozenObject(options!);
 
     if (this.isWebAudio()) {
       this.__connectNodes();

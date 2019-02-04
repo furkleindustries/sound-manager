@@ -1,7 +1,6 @@
 coverage/
 documentation/
 samples/
-src/
 tests/
 typedocs/
 .vscode/

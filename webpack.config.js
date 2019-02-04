@@ -17,7 +17,7 @@ const base = {
       {
         test: /\.tsx?$/,
         use: 'ts-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
       }
     ]
   },
@@ -34,10 +34,10 @@ const base = {
 const browserConfig = {
   ...base,
   output: {
-    filename: 'browser.js',
+    filename: 'browser-script.js',
     path: path.join(__dirname, 'dist'),
     library: 'soundManager',
-    libraryTarget: 'commonjs',
+    libraryTarget: 'window',
   },
 };
 

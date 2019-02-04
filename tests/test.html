@@ -11,7 +11,7 @@
       background-color: red;
     }
     </style>
-    <script src="../dist/bundle.js"></script>
+    <script src="../dist/browser-script.js"></script>
   </head>
 
   <body>
@@ -25,12 +25,13 @@
 
     clicky.addEventListener('click', () => {
       if (played) {
-        if (manager.getSounds('test1').isPlaying()) {
+        const test = manager.getSound('test1');
+        if (test.isPlaying()) {
           return;
         }
 
         /* Play it again. */
-        return manager.getSounds('test1').play();
+        return test;
       } else {
         played = true;
         context = new AudioContext();
@@ -105,7 +106,7 @@
         visualizer.className = 'sm-visualizer';
         document.body.appendChild(visualizer);
 
-        manager.analysis.addRenderListener((analysis) => {
+        manager.analysisSuite.addRenderListener((analysis) => {
           const frequencyData = analysis.getFrequencyByte();
           const timeDomainData = analysis.getTimeDomainByte();
           const fAverage = frequencyData.reduce((prev, curr) => {
@@ -120,7 +121,7 @@
           //console.log(getColor(fAverage, tAverage));
         }, 'listener1');
 
-        manager.playSounds('test1').then(() => {
+        manager.playSound('test1').then(() => {
           console.log('All done!');
         }, (err) => {
           console.log(err);
