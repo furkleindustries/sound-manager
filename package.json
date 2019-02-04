@@ -1,6 +1,6 @@
 {
   "name": "sound-manager",
-  "version": "0.6.7",
+  "version": "0.6.8",
   "description": "A sound library for Twine, Accelerator, and other hypertext fiction frameworks.",
   "main": "dist/index.js",
   "scripts": {
