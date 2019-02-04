@@ -112,7 +112,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
 
     this.__initializeGroups(groups);
 
-    if (isValidVolume(volume)) {;
+    if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
   }
@@ -137,8 +137,8 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
 
   private __connectGroupNodes() {
     assertNodeIsWebAudio(this, '__connectGroupNodes' as any);
-    this.getAllGroups().forEach((group) => (
-      group.getOutputNode().connect(this.getInputNode())
+    this.getAllGroups().forEach(({ getOutputNode }) => (
+      getOutputNode().connect(this.getInputNode())
     ));
   }
 
@@ -166,12 +166,16 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     const names = Object.keys(groups);
     names.forEach((groupName) => {
       /* Throw if there is already a group with this name. */
-      assert(!(groupName in this.groups))
+      assert(!(groupName in this.groups));
       if (this.isWebAudio()) {
-        const group = groups[groupName];
-        if (group.isWebAudio()) {
+        const {
+          isWebAudio,
+          getOutputNode,
+        } = groups[groupName];
+
+        if (isWebAudio()) {
           /* Chain the group's output node to the manager's input node. */
-          group.getOutputNode().connect(this.getInputNode());
+          getOutputNode().connect(this.getInputNode());
         }
       }
     });
@@ -204,18 +208,18 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   }
 
   public getGroupsByTag(tag: string) {
-    return this.getAllGroups().filter((group) => group.hasTag(tag));
+    return this.getAllGroups().filter(({ hasTag }) => hasTag(tag));
   }
 
   public getGroupsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
     if (matchOneOrAll === 'all') {
-      return this.getAllGroups().filter((group) => (
-        tags.filter(group.hasTag).length === tags.length
+      return this.getAllGroups().filter(({ hasTag }) => (
+        tags.filter(hasTag).length === tags.length
       ));
     }
 
-    return this.getAllGroups().filter((group) => (
-      tags.filter(group.hasTag).length >= 1
+    return this.getAllGroups().filter(({ hasTag }) => (
+      tags.filter(hasTag).length >= 1
     ));
   }
 
@@ -225,11 +229,15 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
 
   public removeGroups(names: string | string[]) {
     const arr: string[] = typeof names === 'string' ? [ names, ] : names;
-    const groups = { ...this.groups, };
+    const groups = { ...this.groups };
     arr.forEach((groupName) => {
-      const group = groups[groupName];
-      if (group.isWebAudio()) {
-        group.getOutputNode().disconnect();
+      const {
+        isWebAudio,
+        getOutputNode,
+      } = groups[groupName];
+
+      if (isWebAudio()) {
+        getOutputNode().disconnect();
       }
 
       delete groups[groupName];
@@ -306,25 +314,25 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
 
   public getAllSounds() {
     return shallowFlattenArray(
-      this.getAllGroups().map((group) => group.getAllSounds())
+      this.getAllGroups().map(({ getAllSounds }) => getAllSounds())
     );
   }
 
   public getSoundsByTag(tag: string) {
     return shallowFlattenArray(
-      this.getAllGroups().map((group) => group.getSoundsByTag(tag))
+      this.getAllGroups().map(({ getSoundsByTag }) => getSoundsByTag(tag))
     );
   }
 
   public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
     let collection: ISound[][];
     if (matchOneOrAll === 'all') {
-      collection = this.getAllGroups().map((group) => (
-        group.getSoundsByTags(tags, matchOneOrAll)
+      collection = this.getAllGroups().map(({ getSoundsByTags }) => (
+        getSoundsByTags(tags, matchOneOrAll)
       ));
     } else {
-      collection = this.getAllGroups().map((group) => (
-        group.getSoundsByTags(tags, matchOneOrAll)
+      collection = this.getAllGroups().map(({ getSoundsByTags }) => (
+        getSoundsByTags(tags, matchOneOrAll)
       ));
     }
 
@@ -394,7 +402,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       return this.playGroup(groupName);
     } else {
       const val = await Promise.all(
-        this.getAllGroups().map((group) => group.playAllSounds())
+        this.getAllGroups().map(({ playAllSounds }) => playAllSounds())
       );
       
       return shallowFlattenArray(val);
@@ -565,8 +573,8 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   }
 
   public stopPlaylist(name: string) {
-    this.getPlaylist(name).ids.forEach((id) => (
-      this.getSound(id.soundName, id.groupName).stop()  
+    this.getPlaylist(name).ids.forEach(({ groupName, soundName, }) => (
+      this.getSound(soundName, groupName).stop()  
     ));
 
     return this;
