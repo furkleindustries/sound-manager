@@ -21,7 +21,9 @@ describe('generateAudioPanelElement unit tests.', () => {
 
   it('Outputs a div with the class sound-manager-panel.', () => {
     const panel = generateAudioPanelElement({
-      groups: {},
+      collection: {
+        groups: {},
+      },
     } as any);
 
     expect(panel).toBeInstanceOf(HTMLDivElement);
@@ -29,26 +31,27 @@ describe('generateAudioPanelElement unit tests.', () => {
   });
 
   it('Fetches each of the groups from the manager.', () => {
-    const mock = jest.fn((name) => manager.groups[name]);
+    const mock = jest.fn((name) => manager.collection.groups[name]);
     const manager = {
-      groups: {
-        one: {
-          isPanelRegistered: jest.fn(),
-          sounds: {},
-        },
+      collection: {
+        getGroup: mock,
+        groups: {
+          one: {
+            isPanelRegistered: jest.fn(),
+            sounds: {},
+          },
 
-        two: {
-          isPanelRegistered: jest.fn(),
-          sounds: {},
-        },
+          two: {
+            isPanelRegistered: jest.fn(),
+            sounds: {},
+          },
 
-        three: {
-          isPanelRegistered: jest.fn(),
-          sounds: {},
+          three: {
+            isPanelRegistered: jest.fn(),
+            sounds: {},
+          },
         },
       },
-
-      getGroup: mock,
     } as any;
 
     generateAudioPanelElement(manager);
@@ -62,24 +65,25 @@ describe('generateAudioPanelElement unit tests.', () => {
 
   it('Outputs an audio panel for the manager and every group which returns true to isPanelRegistered.', () => {
     const manager = {
-      groups: {
-        one: {
-          isPanelRegistered: jest.fn(() => true),
-          sounds: {},
-        },
-
-        two: {
-          isPanelRegistered: jest.fn(() => false),
-          sounds: {},
-        },
-
-        three: {
-          isPanelRegistered: jest.fn(() => true),
-          sounds: {},
+      collection: {
+        getGroup: jest.fn((name) => manager.collection.groups[name]),
+        groups: {
+          one: {
+            isPanelRegistered: jest.fn(() => true),
+            sounds: {},
+          },
+  
+          two: {
+            isPanelRegistered: jest.fn(() => false),
+            sounds: {},
+          },
+  
+          three: {
+            isPanelRegistered: jest.fn(() => true),
+            sounds: {},
+          },
         },
       },
-
-      getGroup: jest.fn((name) => manager.groups[name]),
     } as any;
 
     generateAudioPanelElement(manager);
@@ -90,52 +94,53 @@ describe('generateAudioPanelElement unit tests.', () => {
       ],
 
       [
-        manager.groups.one,
+        manager.collection.groups.one,
         'one',
       ],
 
       [
-        manager.groups.three,
+        manager.collection.groups.three,
         'three',
       ],
     ]);
   });
-
+  
   it('Outputs an audio panel for the manager and every sound which returns true to isPanelRegistered.', () => {
     const manager = {
-      groups: {
-        one: {
-          getSound: jest.fn((name) => manager.getGroup('one').sounds[name]),
-          isPanelRegistered: jest.fn(),
-          sounds: {
-            s1: {
-              isPanelRegistered: jest.fn(() => true),
+      collection: {
+        getGroup: jest.fn((name) => manager.collection.groups[name]),
+        groups: {
+          one: {
+            getSound: jest.fn((name) => manager.collection.getGroup('one').sounds[name]),
+            isPanelRegistered: jest.fn(),
+            sounds: {
+              s1: {
+                isPanelRegistered: jest.fn(() => true),
+              },
             },
           },
-        },
-
-        two: {
-          getSound: jest.fn((name) => manager.getGroup('two').sounds[name]),
-          isPanelRegistered: jest.fn(),
-          sounds: {
-            s2: {
-              isPanelRegistered: jest.fn(() => true),
-            }
+  
+          two: {
+            getSound: jest.fn((name) => manager.collection.getGroup('two').sounds[name]),
+            isPanelRegistered: jest.fn(),
+            sounds: {
+              s2: {
+                isPanelRegistered: jest.fn(() => true),
+              }
+            },
           },
-        },
-
-        three: {
-          getSound: jest.fn((name) => manager.getGroup('three').sounds[name]),
-          isPanelRegistered: jest.fn(),
-          sounds: {
-            s3: {
-              isPanelRegistered: jest.fn(() => false),
+  
+          three: {
+            getSound: jest.fn((name) => manager.collection.getGroup('three').sounds[name]),
+            isPanelRegistered: jest.fn(),
+            sounds: {
+              s3: {
+                isPanelRegistered: jest.fn(() => false),
+              },
             },
           },
         },
       },
-
-      getGroup: jest.fn((name) => manager.groups[name]),
     } as any;
 
     generateAudioPanelElement(manager);
@@ -146,12 +151,12 @@ describe('generateAudioPanelElement unit tests.', () => {
       ],
 
       [
-        manager.groups.one.sounds.s1,
+        manager.collection.groups.one.sounds.s1,
         's1',
       ],
 
       [
-        manager.groups.two.sounds.s2,
+        manager.collection.groups.two.sounds.s2,
         's2',
       ],
     ]);
