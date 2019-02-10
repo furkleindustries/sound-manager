@@ -123,9 +123,7 @@
 
         manager.playSound('test1').then(() => {
           console.log('All done!');
-        }, (err) => {
-          console.log(err);
-        });
+        }, console.log.bind(console));
       });
     });
 
