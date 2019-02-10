@@ -315,6 +315,12 @@ extends
 
     this.__updateSoundTimes();
 
+    /* Regenerate the source node. This *must* be called otherwise paused
+     * Sounds will throw. */
+    if (this.isWebAudio()) {
+      this.__regenerateSourceNode();
+    }
+
     /* If play() is called when the sound is already playing (and thus has
      * already emitted a promise), the emitted promise (and events) will be
      * respected and the original promise returned. */
@@ -337,8 +343,6 @@ extends
   }
 
   private __initializeForPlay(fadeOverride?: IFade, loopOverride?: boolean) {
-    this.__regenerateSourceNode();
-
     /* Sets the override properties e.g. if this sound is part of a
      * playlist. */
     if (fadeOverride) {
@@ -350,8 +354,8 @@ extends
     }
 
     const fade = this.getFade();
-    const audioElement = this.__audioElement;
     let timeUpdate: (() => void) | undefined = undefined;
+    const audioElement = this.__audioElement;
     if (fade) {
       /* Update the audio element volume on every tick, including fade
        * volume. */
@@ -455,7 +459,6 @@ extends
 
       /* Don't reject the emitted promise. */
       this.__rejectOnStop = () => {};
-
 
       /* Reset the track position of the sound after it ends. Also rejects
        * the old promise. */
