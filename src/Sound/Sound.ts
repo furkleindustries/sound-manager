@@ -439,6 +439,11 @@ extends
     );
 
     const ended = (e: Event) => {
+      /* Don't do anything if the track was paused. */
+      if (this.getTrackPosition() < this.getDuration()) {
+        return;
+      }
+
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
   
@@ -452,11 +457,9 @@ extends
       this.__rejectOnStop = () => {};
 
 
-      if (this.getTrackPosition() >= this.getDuration()) {
-        /* Reset the track position of the sound after it ends. Also rejects
-         * the old promise. */
-        this.stop();
-      }
+      /* Reset the track position of the sound after it ends. Also rejects
+       * the old promise. */
+      this.stop();
 
       /* Resolve the promise with the ended event. */
       return resolver(e);
