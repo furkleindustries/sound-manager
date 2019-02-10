@@ -315,9 +315,12 @@ extends
 
     this.__updateSoundTimes();
 
+    let contextTime = 0;
+
     /* Regenerate the source node. This *must* be called otherwise paused
-     * Sounds will throw. */
+     * Sounds in Web Audio mode will throw. */
     if (this.isWebAudio()) {
+      contextTime = this.getContextCurrentTime();
       this.__regenerateSourceNode();
     }
 
@@ -329,7 +332,7 @@ extends
       this.__initializeForPlay(fadeOverride, loopOverride);
     }
 
-    playAudioSource(this, this.__audioElement);
+    playAudioSource(this, this.__audioElement, contextTime);
 
     /* Reset the paused time. */
     this.__pausedTime = 0;
