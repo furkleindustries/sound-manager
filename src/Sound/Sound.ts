@@ -451,9 +451,12 @@ extends
       /* Don't reject the emitted promise. */
       this.__rejectOnStop = () => {};
 
-      /* Reset the track position of the sound after it ends. Also deletes
-       * the old promise. */
-      this.stop();
+
+      if (this.getTrackPosition() >= this.getDuration()) {
+        /* Reset the track position of the sound after it ends. Also rejects
+         * the old promise. */
+        this.stop();
+      }
 
       /* Resolve the promise with the ended event. */
       return resolver(e);
