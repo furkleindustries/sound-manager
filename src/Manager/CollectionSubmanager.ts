@@ -136,14 +136,11 @@ export class CollectionSubmanager implements ICollectionSubmanager {
       /* Throw if there is already a group with this name. */
       assert(!(groupName in this.groups));
       if (this.__isWebAudio()) {
-        const {
-          isWebAudio,
-          getOutputNode,
-        } = groups[groupName];
+        const group = groups[groupName];
 
-        if (isWebAudio()) {
+        if (group.isWebAudio()) {
           /* Chain the group's output node to the manager's input node. */
-          getOutputNode().connect(this.__getInputNode());
+          group.getOutputNode().connect(this.__getInputNode());
         }
       }
     });
