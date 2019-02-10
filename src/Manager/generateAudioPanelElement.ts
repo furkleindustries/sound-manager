@@ -27,8 +27,8 @@ export function generateAudioPanelElement(manager: IManager) {
   /* Add the master volume slider. */
   audioPanelElement.appendChild(generateAudioComponent(manager));
 
-  Object.keys(manager.groups).forEach((groupName) => {
-    const group = manager.getGroup(groupName);
+  Object.keys(manager.collection.groups).forEach((groupName) => {
+    const group = manager.collection.getGroup(groupName);
     if (group.isPanelRegistered()) {
       /* Add registered group sliders. */
       audioPanelElement.appendChild(generateAudioComponent(group, groupName));

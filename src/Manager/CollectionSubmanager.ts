@@ -1,19 +1,46 @@
 import {
+  createSound,
+} from '../Sound/createSound';
+import {
+  doToOneOrMany,
+} from '../functions/doToOneOrMany';
+import {
+  getFrozenObject,
+} from '../functions/getFrozenObject';
+import {
   ICollectionSubmanager,
 } from './ICollectionSubmanager';
-import { IGroupsMap } from './IGroupsMap';
-import { getFrozenObject } from '../functions/getFrozenObject';
-import { assert, assertValid } from 'ts-assertions';
-import { createGroup } from '../Group/createGroup';
-import { IGroupOptions } from '../Group/IGroupOptions';
-import { IGroup } from '../Group/IGroup';
-import { ISound } from '../Sound/ISound';
-import { ICreateSoundOptions } from '../Sound/ICreateSoundOptions';
-import { createSound } from '../Sound/createSound';
-import { ISoundsMap } from '../Group/ISoundsMap';
-import { shallowFlattenArray } from '../functions/shallowFlattenArray';
-import { doToOneOrMany } from '../functions/doToOneOrMany';
-import { nameOrAllKeys } from '../functions/nameOrAllKeys';
+import {
+  ICreateSoundOptions,
+} from '../Sound/ICreateSoundOptions';
+import {
+  createGroup,
+} from '../Group/createGroup';
+import {
+  IGroup,
+} from '../Group/IGroup';
+import {
+  IGroupsMap,
+} from './IGroupsMap';
+import {
+  IGroupOptions,
+} from '../Group/IGroupOptions';
+import {
+  ISound,
+} from '../Sound/ISound';
+import {
+  ISoundsMap,
+} from '../Group/ISoundsMap';
+import {
+  nameOrAllKeys,
+} from '../functions/nameOrAllKeys';
+import {
+  shallowFlattenArray,
+} from '../functions/shallowFlattenArray';
+import {
+  assert,
+  assertValid,
+} from 'ts-assertions';
 
 export class CollectionSubmanager implements ICollectionSubmanager {
   /* Node collection */
@@ -56,14 +83,12 @@ export class CollectionSubmanager implements ICollectionSubmanager {
       this.__isWebAudio = isWebAudio;
     }
 
-    if (this.__isWebAudio()) {
-      if (typeof getAudioContext === 'function') {
-        this.__getAudioContext = getAudioContext;
-      }
-  
-      if (typeof getInputNode === 'function') {
-        this.__getInputNode = getInputNode;
-      }
+    if (typeof getAudioContext === 'function') {
+      this.__getAudioContext = getAudioContext;
+    }
+
+    if (typeof getInputNode === 'function') {
+      this.__getInputNode = getInputNode;
     }
 
     this.__initializeGroups(groups);
@@ -224,9 +249,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   {
     /* Allow a bare string to be used as an URL argument. */
     const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
-      typeof options === 'string' ?
-        { url: options } :
-        { ...options };
+      typeof options === 'string' ? { url: options } : { ...options };
 
     const opts: ICreateSoundOptions = getFrozenObject({
       isWebAudio: this.__isWebAudio(),
