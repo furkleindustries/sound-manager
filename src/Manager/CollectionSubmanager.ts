@@ -240,7 +240,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   public addSound(
     name: string,
     options: ICreateSoundOptions,
-    groupName?: string): Promise<ISound>;
+    groupName?: string
+  ): Promise<ISound>;
   public async addSound(
     name: string,
     options: string | ICreateSoundOptions,
