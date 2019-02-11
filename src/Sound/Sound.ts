@@ -88,6 +88,7 @@ extends
   private __promise: Promise<Event> | null = null;
   private __sourceNode: AudioBufferSourceNode | null = null;
   private __startedTime: number = 0;
+  private __resolveOnEnd: (e: Event) => void = () => {};
   private __rejectOnStop: (message?: string) => void = () => {};
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
@@ -322,7 +323,6 @@ extends
     if (this.isWebAudio()) {
       contextTime = this.getContextCurrentTime();
     }
-
     
     this.__initializeForPlay(fadeOverride, loopOverride);
 
@@ -369,12 +369,14 @@ extends
         timeUpdate,
       );
     }
-  
+    
     /* If a promise is already on the Sound, it must be respected, and
      * a new one should not be constructed. */
-    if (!this.__promise) {
-      this.__initializePromiseForPlay(audioElement, timeUpdate);
+   if (!this.__promise) {
+     this.__initializePromiseForPlay();
     }
+
+    this.__initializeEventsForPlay(audioElement, timeUpdate);
   }
 
   /* When an AudioBufferSourceNode is stopped, it can never be used again.
@@ -421,6 +423,10 @@ extends
     }
   }
 
+  private __initializeStartResolver(resolve: Function) {
+    this.__resolveOnEnd = (...args: any[]) => resolve(...args);
+  }
+
   private __initializeStopRejector(reject: Function) {
     this.__rejectOnStop = (message?: string) => reject(
       message ||
@@ -428,13 +434,10 @@ extends
     );
   }
 
-  private __initializePromiseForPlay(
-    audioElement?: HTMLAudioElement | null,
-    timeUpdate?: () => void,
-  )
-  {
+  private __initializePromiseForPlay() {
     this.__promise = new Promise((resolve, reject) => {
-      this.__initializeEventsForPlay(resolve, audioElement, timeUpdate);
+      /* Allows the same promise to be used across pauses. */
+      this.__initializeStartResolver(resolve);
 
       /* Allow the promise to be rejected if the sound is stopped. */
       this.__initializeStopRejector(reject);
@@ -442,11 +445,9 @@ extends
   }
 
   private __initializeEventsForPlay(
-    resolver: (arg: Event) => void,
     audioElement?: HTMLAudioElement | null,
     timeUpdate?: () => void,
-  )
-  {
+  ) {
     const isWebAudio = this.isWebAudio();
     const source = assertValid<AudioBufferSourceNode | HTMLAudioElement>(
       isWebAudio ? this.getSourceNode() : audioElement,
@@ -475,13 +476,13 @@ extends
       this.stop();
 
       /* Resolve the promise with the ended event. */
-      return resolver(e);
+      this.__resolveOnEnd(e);
     };
 
     /* Register the ended export function to fire when the audio source emits the
      * 'ended' event. */
     source.addEventListener('ended', ended);
-  }  
+  }
 
   public pause() {
     /* Must be executed before __playing = false. */
