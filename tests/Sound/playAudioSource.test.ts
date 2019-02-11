@@ -25,9 +25,7 @@ describe('playAudioSource unit tests.', () => {
         getTrackPosition: mock,
         isWebAudio: jest.fn(() => true),
       } as any,
-      {
-        play: jest.fn(),
-      } as any,
+      { play: jest.fn() } as any,
       0,
     );
 
