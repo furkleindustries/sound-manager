@@ -321,16 +321,10 @@ extends
      * Sounds in Web Audio mode will throw. */
     if (this.isWebAudio()) {
       contextTime = this.getContextCurrentTime();
-      this.__regenerateSourceNode();
     }
 
-    /* If play() is called when the sound is already playing (and thus has
-     * already emitted a promise), the emitted promise (and events) will be
-     * respected and the original promise returned. */
-    if (!this.__promise) {
-      /* Generates the promise and registers events. */
-      this.__initializeForPlay(fadeOverride, loopOverride);
-    }
+    
+    this.__initializeForPlay(fadeOverride, loopOverride);
 
     playAudioSource(this, this.__audioElement, contextTime);
 
@@ -345,11 +339,17 @@ extends
     return assertValid<Promise<Event>>(this.__promise);
   }
 
+  /* Regenerates the source node, generates the promise if it does not already
+   * exist, registers events, etc. */
   private __initializeForPlay(fadeOverride?: IFade, loopOverride?: boolean) {
+    if (this.isWebAudio()) {
+      this.__regenerateSourceNode();
+    }
+
     /* Sets the override properties e.g. if this sound is part of a
      * playlist. */
     if (fadeOverride) {
-      this.__fadeOverride = getFrozenObject({ ...fadeOverride, });
+      this.__fadeOverride = getFrozenObject(fadeOverride);
     }
 
     if (typeof loopOverride === 'boolean') {
@@ -369,10 +369,17 @@ extends
         timeUpdate,
       );
     }
-
-    this.__initializePromiseForPlay(audioElement, timeUpdate);
+  
+    /* If a promise is already on the Sound, it must be respected, and
+     * a new one should not be constructed. */
+    if (!this.__promise) {
+      this.__initializePromiseForPlay(audioElement, timeUpdate);
+    }
   }
 
+  /* When an AudioBufferSourceNode is stopped, it can never be used again.
+   * Therefore, a new node must be generated to support the pause
+   * functionality. */
   private __regenerateSourceNode() {
     this.__sourceNode = getNewSourceNode(
       this.getAudioContext(),
@@ -446,11 +453,6 @@ extends
     );
 
     const ended = (e: Event) => {
-      /* Don't do anything if the track was paused. */
-      if (this.getTrackPosition() < this.getDuration()) {
-        return;
-      }
-
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
   
@@ -458,6 +460,11 @@ extends
       if (!isWebAudio && typeof timeUpdate === 'function') {
         /* Remove the 'timeupdate' event listener. */
         source.removeEventListener('timeupdate', timeUpdate);
+      }
+
+      /* Don't do anything if the track was paused. */
+      if (this.getTrackPosition() < this.getDuration()) {
+        return;
       }
 
       /* Don't reject the emitted promise. */
