@@ -1,6 +1,6 @@
 {
   "name": "sound-manager",
-  "version": "0.7.0",
+  "version": "0.7.10",
   "description": "A sound library for Twine, Accelerator, and other hypertext fiction frameworks.",
   "main": "dist/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "accelerator"
   ],
   "author": "furkle",
-  "license": "GPL-3.0",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/furkleindustries/sound-manager/issues"
   },

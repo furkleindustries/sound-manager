@@ -24,6 +24,11 @@ export interface ICollectionSubmanager {
   setGroupVolume(value: number, groupName?: string): this;
   addSound(
     name: string,
+    url: string,
+    groupName?: string,
+  ): Promise<ISound>;
+  addSound(
+    name: string,
     options: ICreateSoundOptions,
     groupName?: string,
   ): Promise<ISound>;

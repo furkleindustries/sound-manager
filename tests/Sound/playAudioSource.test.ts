@@ -18,15 +18,18 @@ describe('playAudioSource unit tests.', () => {
 
   it('Gets the sound\'s track position.', () => {
     const mock = jest.fn();
-    playAudioSource({
-      isPlaying: jest.fn(),
-      getSourceNode: jest.fn(() => ({ start: jest.fn() })),
-      getTrackPosition: mock,
-      isWebAudio: jest.fn(() => true),
-    } as any,
-    {
-      play: jest.fn(),
-    } as any);
+    playAudioSource(
+      {
+        isPlaying: jest.fn(),
+        getSourceNode: jest.fn(() => ({ start: jest.fn() })),
+        getTrackPosition: mock,
+        isWebAudio: jest.fn(() => true),
+      } as any,
+      {
+        play: jest.fn(),
+      } as any,
+      0,
+    );
 
     expect(mock).toBeCalledTimes(1);
   });
@@ -43,11 +46,11 @@ describe('playAudioSource unit tests.', () => {
       isWebAudio: jest.fn(() => true),
     } as any;
 
-    playAudioSource(sound);
+    playAudioSource(sound, null, 0);
 
     expect(gsnMock).toBeCalledTimes(1);
     expect(startMock).toBeCalledTimes(1);
-    expect(startMock).toBeCalledWith(trackPosition);
+    expect(startMock).toBeCalledWith(0, trackPosition);
   });
 
   it('Calls the sound\'s updateAudioElement method if it is in HTML mode.', () => {

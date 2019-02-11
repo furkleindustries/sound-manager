@@ -71,7 +71,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
 
     this.collection = new CollectionSubmanager({
       getManagerVolume: () => this.getVolume(),
-      isWebAudio: () => this.isWebAudio(),
+      isWebAudio: () => isWebAudio,
       getAudioContext: () => this.getAudioContext(),
       getInputNode: () => this.getInputNode(),
       groups: groups || {},

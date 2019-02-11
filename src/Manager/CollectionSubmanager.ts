@@ -118,8 +118,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
   private __connectGroupNodes() {
     assert(this.__isWebAudio());
-    this.getAllGroups().forEach(({ getOutputNode }) => (
-      getOutputNode().connect(this.__getInputNode())
+    this.getAllGroups().forEach((group) => (
+      group.getOutputNode().connect(this.__getInputNode())
     ));
   }
   
@@ -136,14 +136,11 @@ export class CollectionSubmanager implements ICollectionSubmanager {
       /* Throw if there is already a group with this name. */
       assert(!(groupName in this.groups));
       if (this.__isWebAudio()) {
-        const {
-          isWebAudio,
-          getOutputNode,
-        } = groups[groupName];
+        const group = groups[groupName];
 
-        if (isWebAudio()) {
+        if (group.isWebAudio()) {
           /* Chain the group's output node to the manager's input node. */
-          getOutputNode().connect(this.__getInputNode());
+          group.getOutputNode().connect(this.__getInputNode());
         }
       }
     });
@@ -175,18 +172,18 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   }
 
   public getGroupsByTag(tag: string) {
-    return this.getAllGroups().filter(({ hasTag }) => hasTag(tag));
+    return this.getAllGroups().filter((group) => group.hasTag(tag));
   }
 
   public getGroupsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
     if (matchOneOrAll === 'all') {
-      return this.getAllGroups().filter(({ hasTag }) => (
-        tags.filter(hasTag).length === tags.length
+      return this.getAllGroups().filter((group) => (
+        tags.filter(group.hasTag).length === tags.length
       ));
     }
 
-    return this.getAllGroups().filter(({ hasTag }) => (
-      tags.filter(hasTag).length >= 1
+    return this.getAllGroups().filter((group) => (
+      tags.filter(group.hasTag).length >= 1
     ));
   }
 
@@ -240,7 +237,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   public addSound(
     name: string,
     options: ICreateSoundOptions,
-    groupName?: string): Promise<ISound>;
+    groupName?: string
+  ): Promise<ISound>;
   public async addSound(
     name: string,
     options: string | ICreateSoundOptions,
@@ -292,25 +290,25 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
   public getAllSounds() {
     return shallowFlattenArray(
-      this.getAllGroups().map(({ getAllSounds }) => getAllSounds())
+      this.getAllGroups().map((group) => group.getAllSounds())
     );
   }
 
   public getSoundsByTag(tag: string) {
     return shallowFlattenArray(
-      this.getAllGroups().map(({ getSoundsByTag }) => getSoundsByTag(tag))
+      this.getAllGroups().map((group) => group.getSoundsByTag(tag))
     );
   }
 
   public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
     let collection: ISound[][];
     if (matchOneOrAll === 'all') {
-      collection = this.getAllGroups().map(({ getSoundsByTags }) => (
-        getSoundsByTags(tags, matchOneOrAll)
+      collection = this.getAllGroups().map((group) => (
+        group.getSoundsByTags(tags, matchOneOrAll)
       ));
     } else {
-      collection = this.getAllGroups().map(({ getSoundsByTags }) => (
-        getSoundsByTags(tags, matchOneOrAll)
+      collection = this.getAllGroups().map((group) => (
+        group.getSoundsByTags(tags, matchOneOrAll)
       ));
     }
 

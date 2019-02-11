@@ -18,7 +18,12 @@ export const strings = {
     'The Sound provided to playAudioSource was already playing.',
 };
 
-export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| null) {
+export function playAudioSource(
+  sound: ISound,
+  audioElement?: HTMLAudioElement| null,
+  contextTime?: number,
+)
+{
   assert(
     sound,
     strings.SOUND_INVALID,
@@ -31,8 +36,9 @@ export function playAudioSource(sound: ISound, audioElement?: HTMLAudioElement| 
 
   const trackPosition = sound.getTrackPosition();
   if (sound.isWebAudio()) {
+    assert(contextTime! >= 0);
     /* Play the source node, respecting a possible pause. */
-    sound.getSourceNode().start(trackPosition);
+    sound.getSourceNode().start(contextTime, trackPosition);
   } else {
     /* Set the actual audio element volume to the product of manager, group,
      * and sound volumes. */
