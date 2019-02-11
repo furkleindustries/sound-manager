@@ -470,7 +470,7 @@ extends
       source.removeEventListener('ended', ended);
   
       /* istanbul ignore next */
-      if (!this.isWebAudio() && typeof timeUpdate === 'function') {
+      if (typeof timeUpdate === 'function' && !this.isWebAudio()) {
         /* Remove the 'timeupdate' event listener. */
         source.removeEventListener('timeupdate', timeUpdate);
       }
