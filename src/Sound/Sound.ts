@@ -453,12 +453,24 @@ extends
       isWebAudio ? this.getSourceNode() : audioElement,
     );
 
+    /* Register the ended export function to fire when the audio source emits the
+     * 'ended' event. */
+    source.addEventListener(
+      'ended',
+      this.__getEndEventHandler(source, timeUpdate),
+    );
+  }
+
+  private __getEndEventHandler(
+    source: AudioBufferSourceNode | HTMLAudioElement,
+    timeUpdate?: () => void,
+  ) {
     const ended = (e: Event) => {
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
   
       /* istanbul ignore next */
-      if (!isWebAudio && typeof timeUpdate === 'function') {
+      if (!this.isWebAudio() && typeof timeUpdate === 'function') {
         /* Remove the 'timeupdate' event listener. */
         source.removeEventListener('timeupdate', timeUpdate);
       }
@@ -479,9 +491,7 @@ extends
       this.__resolveOnEnd(e);
     };
 
-    /* Register the ended export function to fire when the audio source emits the
-     * 'ended' event. */
-    source.addEventListener('ended', ended);
+    return ended;
   }
 
   public pause() {
