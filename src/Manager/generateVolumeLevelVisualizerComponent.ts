@@ -21,7 +21,7 @@ export function generateVolumeLevelVisualizerComponent(analysisSuite: IAnalysisS
   );
 
   const canvas = document.createElement('canvas');
-  canvas.width = 10;
+  canvas.width = 8;
   canvas.height = 20;
 
   analysisSuite.addRenderListener(getVolumeLevelRenderListener(canvas));
