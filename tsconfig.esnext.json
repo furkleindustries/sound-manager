@@ -1,5 +1,0 @@
-{
-  "extends": "tsconfig.json",
-  "declaration": true,
-  "sourceMap": true
-}
