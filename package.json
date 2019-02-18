@@ -1,14 +1,14 @@
 {
   "name": "sound-manager",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "A sound library for Twine, Accelerator, and other hypertext fiction frameworks.",
   "esnext": "dist/esnext/index.js",
-  "main": "dist/browser/index.js",
+  "main": "dist/esnext/index.js",
   "browser": "dist/browser/index.js",
   "scripts": {
     "build": "rimraf dist/ && cross-env NODE_ENV=production npm run build:browser && cross-env NODE_ENV=production npm run build:esnext",
     "build:browser": "webpack",
-    "build:esnext": "tsc",
+    "build:esnext": "tsc --config tsconfig.esnext.json",
     "build:dev": "cross-env NODE_ENV=development webpack",
     "build:debug": "npm run build -- --verbose",
     "build:docs": "npm run build:docs-md && npm run build:docs-html",
