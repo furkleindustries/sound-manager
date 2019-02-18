@@ -8,7 +8,7 @@
   "scripts": {
     "build": "rimraf dist/ && cross-env NODE_ENV=production npm run build:browser && cross-env NODE_ENV=production npm run build:esnext",
     "build:browser": "webpack",
-    "build:esnext": "tsc --config tsconfig.esnext.json",
+    "build:esnext": "tsc --project tsconfig.esnext.json",
     "build:dev": "cross-env NODE_ENV=development webpack",
     "build:debug": "npm run build -- --verbose",
     "build:docs": "npm run build:docs-md && npm run build:docs-html",
