@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "outDir": "dist",
+    "outDir": "dist/esnext/",
     "rootDir": "src/",
     "moduleResolution": "node",
     "module": "esnext",
-    "declaration": true,
-    "sourceMap": true,
     //"inlineSourceMap": true,
     "esModuleInterop": true, /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     

@@ -5,13 +5,16 @@ const mode = process.env.NODE_ENV === 'development' ?
   'production';
 
 const base = {
-  mode,
+};
 
+const config = {
+  mode,
+  
   entry: './src/index.ts',
   devtool: 'source-map',
-
+  
   plugins: [],
-
+  
   module: {
     rules: [
       {
@@ -20,6 +23,13 @@ const base = {
         exclude: /node_modules/,
       }
     ]
+  },
+  
+  output: {
+    filename: 'index.js',
+    path: path.join(__dirname, 'dist', 'browser'),
+    library: 'soundManager',
+    libraryTarget: 'window',
   },
 
   resolve: {
@@ -31,26 +41,6 @@ const base = {
   },
 };
 
-const browserConfig = {
-  ...base,
-  output: {
-    filename: 'browser-script.js',
-    path: path.join(__dirname, 'dist'),
-    library: 'soundManager',
-    libraryTarget: 'window',
-  },
-};
-
-const nodeConfig = {
-  ...base,
-  output: {
-    filename: 'index.js',
-    path: path.join(__dirname, 'dist'),
-    libraryTarget: 'commonjs',
-  },
-};
-
 module.exports = [
-  browserConfig,
-  nodeConfig,
+  config,
 ];
