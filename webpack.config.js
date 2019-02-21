@@ -5,11 +5,8 @@ const mode = process.env.NODE_ENV === 'development' ?
   'production';
 
 const base = {
-};
-
-const config = {
   mode,
-  
+
   entry: './src/index.ts',
   devtool: 'source-map',
   
@@ -24,13 +21,6 @@ const config = {
       }
     ]
   },
-  
-  output: {
-    filename: 'index.js',
-    path: path.join(__dirname, 'dist', 'browser'),
-    library: 'soundManager',
-    libraryTarget: 'window',
-  },
 
   resolve: {
     extensions: [
@@ -41,6 +31,30 @@ const config = {
   },
 };
 
+const cjsConfig = {
+  ...base,
+
+  target: 'node',
+  output: {
+    filename: 'index.js',
+    path: path.join(__dirname, 'dist', 'cjs'),
+    libraryTarget: 'commonjs',
+  },
+};
+
+const webConfig = {
+  ...base,
+
+  target: 'web',
+  output: {
+    filename: 'index.js',
+    path: path.join(__dirname, 'dist', 'browser'),
+    library: 'soundManager',
+    libraryTarget: 'window',
+  },
+};
+
 module.exports = [
-  config,
+  cjsConfig,
+  webConfig,
 ];
