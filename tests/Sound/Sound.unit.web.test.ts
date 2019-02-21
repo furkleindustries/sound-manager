@@ -376,7 +376,7 @@ describe('Sound Web Audio unit tests.', () => {
     sound.getFade = jest.fn(() => ({
       easingCurve: {},
       length: {},
-    }));
+    } as any));
 
     expect(sound.getFadeVolume()).toBe(1);
   });
