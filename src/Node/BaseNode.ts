@@ -41,32 +41,30 @@ export class BaseNode implements IBaseNode {
     }
   }
 
-  public isWebAudio() {
-    return this.__isWebAudio;
-  }
+  public readonly isWebAudio = () => Boolean(this.__isWebAudio);
 
-  public getAudioContext() {
+  public readonly getAudioContext = () => {
     assertNodeIsWebAudio(this, 'getAudioContext');
     return assertValid<AudioContext>(this.__audioContext);
-  }
+  };
 
-  public getContextCurrentTime() {
-    return this.getAudioContext().currentTime;
-  }
+  public readonly getContextCurrentTime = () => (
+    this.getAudioContext().currentTime
+  );
 
-  public getGainNode() {
+  public getGainNode = () => {
     assertNodeIsWebAudio(this, 'getGainNode');
     return assertValid<GainNode>(this.__gainNode);
-  }
+  };
 
-  public getInputNode(): AudioNode {
-    return this.getGainNode();
-  }
+  public readonly getInputNode = (): AudioNode => this.getGainNode();
 
-  public getVolume() {
-    return this.__volume;
-  }
+  public readonly getVolume = () => this.__volume;
 
+  /**
+   * TODO: Figure out why this can't be an arrow function.
+   * (Probably because it needs to exist on the prototype.)
+   */
   public setVolume(value: number) {
     assertValid(value, '', isValidVolume);
     this.__volume = value;

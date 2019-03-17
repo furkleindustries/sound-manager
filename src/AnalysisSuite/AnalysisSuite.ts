@@ -26,29 +26,26 @@ export class AnalysisSuite implements IAnalysisSuite {
   private __autoIdCounter = -1;
 
   constructor(analyserNode: AnalyserNode) {
-    this.__analyserNode = assertValid<AnalyserNode>(analyserNode);
+    this.__analyserNode = assertValid<AnalyserNode>(
+      analyserNode,
+    );
   }
 
-  public getAnalysis(): IAnalysis {
-    return new Analysis(this.node);
-  }
+  public readonly getAnalysis = (): IAnalysis => new Analysis(this.node);
 
-  public addRenderListener(
+  public readonly addRenderListener = (
     renderCallback: IAnalysisRenderCallback,
     name: string = this.__getNewId(),
-  )
-  {
+  ) => {
     assert(typeof renderCallback === 'function');
     assert(!(name in this.__eventMap));
     this.__eventMap[name] = renderCallback;
     this.__init(name, renderCallback);
 
     return this;
-  }
+  };
 
-  public removeRenderListener(name: string): this;
-  public removeRenderListener(names: string): this;
-  public removeRenderListener(names: string | string[]) {
+  public readonly removeRenderListener = (names: string | string[]) => {
     let arr: string[];
     if (Array.isArray(names)) {
       arr = names;
@@ -59,9 +56,9 @@ export class AnalysisSuite implements IAnalysisSuite {
     arr.forEach((name) => delete this.__eventMap[name]);
 
     return this;
-  }
+  };
 
-  private __init(name: string, renderCallback: IAnalysisRenderCallback) {
+  private readonly __init = (name: string, renderCallback: IAnalysisRenderCallback) => {
     const loop = () => {
       /* Ends event loop if render callback is removed from the map. */
       if (this.__eventMap[name] === renderCallback) {
@@ -71,9 +68,7 @@ export class AnalysisSuite implements IAnalysisSuite {
     };
 
     loop();
-  }
+  };
 
-  private __getNewId() {
-    return String(this.__autoIdCounter += 1);
-  }
+  private readonly __getNewId = () => String(this.__autoIdCounter += 1);
 }

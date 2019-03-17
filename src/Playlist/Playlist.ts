@@ -57,11 +57,9 @@ export class Playlist implements IPlaylist {
     }
   }
 
-  public loopIsValid() {
-    return loopIsValid(this.loop);
-  }
+  public readonly loopIsValid = () => loopIsValid(this.loop);
 
-  public tryCallback(events: Event[], name?: string) {
+  public readonly tryCallback = (events: Event[], name?: string) => {
     if (typeof this.callback === 'function') {
       console.log(
         `Firing playlist ${name ? name : '(no name provided)'} callback.`
@@ -69,5 +67,5 @@ export class Playlist implements IPlaylist {
 
       this.callback(events);
     }
-  }
+  };
 }

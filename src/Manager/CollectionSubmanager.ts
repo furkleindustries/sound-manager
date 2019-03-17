@@ -94,7 +94,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     this.__initializeGroups(groups);
   }
 
-  private __initializeGroups(groups?: IGroupsMap) {
+  private readonly __initializeGroups = (groups?: IGroupsMap) => {
     /* Add the 'default' group. */
     this.__initializeDefaultGroup();
 
@@ -104,9 +104,9 @@ export class CollectionSubmanager implements ICollectionSubmanager {
         this.__connectGroupNodes();
       }
     }
-  }
+  };
 
-  private __initializeDefaultGroup() {
+  private readonly __initializeDefaultGroup = () => {
     if (this.__isWebAudio()) {
       this.addGroup('default', { context: this.__getAudioContext() });
     } else {
@@ -114,23 +114,23 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     }
 
     return this;
-  }
+  };
 
-  private __connectGroupNodes() {
+  private readonly __connectGroupNodes = () => {
     assert(this.__isWebAudio());
     this.getAllGroups().forEach((group) => (
       group.getOutputNode().connect(this.__getInputNode())
     ));
-  }
-  
-  public addGroup(name: string, options?: IGroupOptions) {
+  };
+
+  public readonly addGroup = (name: string, options?: IGroupOptions) => {
     const group = createGroup(options);
     this.addGroups({ [name]: group });
 
     return group;
-  }
+  };
 
-  public addGroups(groups: IGroupsMap) {
+  public readonly addGroups = (groups: IGroupsMap) => {
     const names = Object.keys(groups);
     names.forEach((groupName) => {
       /* Throw if there is already a group with this name. */
@@ -148,34 +148,36 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     this.__groups = getFrozenObject(this.groups, groups);
 
     return this;
-  }
+  };
 
-  public hasGroup(name: string) {
-    return name in this.groups;
-  }
+  public readonly hasGroup = (name: string) => (name in this.groups);
 
-  public hasGroups(names: string[]) {
-    return names.filter((groupName) => (
+  public readonly hasGroups = (names: string[]) => (
+    names.filter((groupName) => (
       !(groupName in this.groups)
-    )).length === 0;
-  }
-  public getGroup(name: string) {
-    return assertValid<IGroup>(this.__groups[name]);
-  }
+    )).length === 0
+  );
 
-  public getGroups(names: string[]) {
-    return names.map((name) => this.getGroup(name));
-  }
+  public readonly getGroup = (name: string) => (
+    assertValid<IGroup>(this.__groups[name])
+  );
 
-  public getAllGroups() {
-    return this.getGroups(Object.keys(this.groups));
-  }
+  public readonly getGroups = (names: string[]) => (
+    names.map((name) => this.getGroup(name))
+  );
 
-  public getGroupsByTag(tag: string) {
-    return this.getAllGroups().filter((group) => group.hasTag(tag));
-  }
+  public readonly getAllGroups = () => (
+    this.getGroups(Object.keys(this.groups))
+  );
 
-  public getGroupsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
+  public readonly getGroupsByTag = (tag: string) => (
+    this.getAllGroups().filter((group) => group.hasTag(tag))
+  );
+
+  public readonly getGroupsByTags = (
+    tags: string[],
+    matchOneOrAll: 'one' | 'all' = 'one',
+  ) => {
     if (matchOneOrAll === 'all') {
       return this.getAllGroups().filter((group) => (
         tags.filter(group.hasTag).length === tags.length
@@ -185,13 +187,11 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     return this.getAllGroups().filter((group) => (
       tags.filter(group.hasTag).length >= 1
     ));
-  }
+  };
 
-  public removeGroup(name: string) {
-    return this.removeGroups([ name ]);
-  }
+  public readonly removeGroup = (name: string) => this.removeGroups([ name ]);
 
-  public removeGroups(names: string | string[]) {
+  public readonly removeGroups = (names: string | string[]) => {
     const arr: string[] = typeof names === 'string' ? [ names, ] : names;
     const groups = { ...this.groups };
     arr.forEach((groupName) => {
@@ -214,36 +214,29 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     }
 
     return this;
-  }
+  };
 
-  public removeAllGroups() {
-    return this.removeGroups(Object.keys(this.groups));
-  }
+  public readonly removeAllGroups = () => (
+    this.removeGroups(Object.keys(this.groups))
+  );
 
-  public getGroupVolume(name: string = 'default') {
-    return this.getGroup(name).getVolume();
-  }
+  public readonly getGroupVolume = (name: string = 'default') => (
+    this.getGroup(name).getVolume()
+  );
 
-  public setGroupVolume(value: number, groupName: string = 'default') {
+  public readonly setGroupVolume = (
+    value: number,
+    groupName: string = 'default',
+  ) => {
     this.getGroup(groupName).setVolume(value);
     return this;
-  }
+  };
 
-  public addSound(
-    name: string,
-    options: string,
-    groupName?: string,
-  ): Promise<ISound>;
-  public addSound(
-    name: string,
-    options: ICreateSoundOptions,
-    groupName?: string
-  ): Promise<ISound>;
-  public async addSound(
+  public readonly addSound = async (
     name: string,
     options: string | ICreateSoundOptions,
     groupName: string = 'default',
-  ): Promise<ISound>
+  ): Promise<ISound> =>
   {
     /* Allow a bare string to be used as an URL argument. */
     const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
@@ -260,47 +253,53 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     this.addSounds({ [name]: sound }, groupName);
 
     return sound;
-  }
+  };
 
-  public addSounds(sounds: ISoundsMap, groupName: string = 'default') {
+  public readonly addSounds = (
+    sounds: ISoundsMap,
+    groupName: string = 'default',
+  ) => {
     this.getGroup(groupName).addSounds(sounds);
     return this;
-  }
+  };
 
-  public hasSound(name: string, groupName: string = 'default') {
+  public readonly hasSound = (name: string, groupName: string = 'default') => {
     assert(this.groups[groupName]);
     return name in this.groups[groupName].sounds;
-  }
+  };
 
-  public getSound(name: string, groupName: string = 'default') {
-    return this.getGroup(groupName).getSound(name);
-  }
+  public readonly getSound = (name: string, groupName: string = 'default') => (
+    this.getGroup(groupName).getSound(name)
+  );
 
-  public hasSounds(names: string[], groupName: string = 'default') {
-    expect(this.groups[groupName]);
+  public readonly hasSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ) => {
+    assert(this.groups[groupName]);
 
     return names.filter((soundName) => (
       !(soundName in this.groups[groupName])
     )).length === 0;
-  }
+  };
 
-  public getSounds(names: string[], groupName: string = 'default') {
-    return this.getGroup(groupName).getSounds(names);
-  }
+  public readonly getSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ) => this.getGroup(groupName).getSounds(names);
 
-  public getAllSounds() {
-    return shallowFlattenArray(
-      this.getAllGroups().map((group) => group.getAllSounds())
-    );
-  }
+  public readonly getAllSounds = () => shallowFlattenArray(
+    this.getAllGroups().map((group) => group.getAllSounds())
+  );
 
-  public getSoundsByTag(tag: string) {
-    return shallowFlattenArray(
-      this.getAllGroups().map((group) => group.getSoundsByTag(tag))
-    );
-  }
+  public readonly getSoundsByTag = (tag: string) => shallowFlattenArray(
+    this.getAllGroups().map((group) => group.getSoundsByTag(tag))
+  );
 
-  public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
+  public readonly getSoundsByTags = (
+    tags: string[],
+    matchOneOrAll: 'one' | 'all' = 'one',
+  ) => {
     let collection: ISound[][];
     if (matchOneOrAll === 'all') {
       collection = this.getAllGroups().map((group) => (
@@ -315,36 +314,44 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     return shallowFlattenArray(collection);
   }
 
-  public removeSound(name: string, groupName: string = 'default') {
+  public readonly removeSound = (name: string, groupName: string = 'default') => {
     this.getGroup(groupName).removeSound(name);
     return this;
-  }
+  };
 
-  public removeSounds(names: string[], groupName: string = 'default') {
+  public readonly removeSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ) => {
     assert(Array.isArray(names));
     names.forEach((name) => this.removeSound(name, groupName));
 
     return this;
   }
 
-  public removeAllSounds(groupName?: string) {
+  public readonly removeAllSounds = (groupName?: string) => {
     const oneOrMany = nameOrAllKeys(groupName, this.groups);
     doToOneOrMany(this.groups, oneOrMany, 'removeAllSounds');
 
     return this;
-  }
+  };
 
-  public getSoundVolume(name: string, groupName: string = 'default') {
-    return this.getGroup(groupName).getSound(name).getVolume();
-  }
+  public readonly getSoundVolume = (
+    name: string,
+    groupName: string = 'default',
+  ) => this.getGroup(groupName).getSound(name).getVolume();
 
-  public setSoundVolume(name: string, value: number, groupName: string = 'default') {
+  public readonly setSoundVolume = (
+    name: string,
+    value: number,
+    groupName: string = 'default',
+  ) => {
     this.getGroup(groupName).getSound(name).setVolume(value);
     return this;
-  }
+  };
 
-  public updateAllAudioElementsVolume() {
+  public readonly updateAllAudioElementsVolume = () => {
     this.getAllGroups().forEach((grp) => grp.updateAllAudioElementsVolume());
     return this;
-  }
+  };
 }

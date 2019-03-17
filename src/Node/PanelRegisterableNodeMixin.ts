@@ -12,18 +12,16 @@ export function PanelRegisterableNodeMixin<T extends IConstructor<IBaseNode>>(Ba
   return class PanelRegisterableNode extends Base implements IPanelRegisterableNode {
     public __panelRegistered: boolean = false;
 
-    public isPanelRegistered() {
-      return this.__panelRegistered;
-    }
+    public readonly isPanelRegistered = () =>this.__panelRegistered;
 
-    public panelRegister() {
+    public readonly panelRegister = () => {
       this.__panelRegistered = true;
       return this;
-    }
+    };
 
-    public panelUnregister() {
+    public readonly panelUnregister = () => {
       this.__panelRegistered = false;
       return this;
-    }
+    };
   }
 }

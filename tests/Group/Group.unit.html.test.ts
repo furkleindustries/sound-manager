@@ -198,7 +198,7 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has a clearAllSounds function which passes the entire sounds map to removeSounds.', () => {
     const group = testGroupFactory();
-    group.removeSounds = jest.fn();
+    (group as any).removeSounds = jest.fn();
 
     const soundOne = { isWebAudio: jest.fn(), } as any;
     const soundTwo = { isWebAudio: jest.fn(), } as any;
@@ -261,7 +261,7 @@ describe('Group HTML5 Audio unit tests.', () => {
   it('Has a playAllSounds property which passes all of the keys in sounds to playSounds.', () => {
     const group = testGroupFactory();
     const mock = jest.fn();
-    group.playSounds = mock;
+    (group as any).playSounds = mock;
     const sounds = {
       testOne: { isWebAudio: jest.fn(), },
       testTwo: { isWebAudio: jest.fn(), },
@@ -339,7 +339,7 @@ describe('Group HTML5 Audio unit tests.', () => {
   it('Has a pauseAllSounds property which passes all of the keys in sounds to pauseSounds.', () => {
     const group = testGroupFactory();
     const mock = jest.fn();
-    group.pauseSounds = mock;
+    (group as any).pauseSounds = mock;
     const sounds = {
       testOne: { isWebAudio: jest.fn(), },
       testTwo: { isWebAudio: jest.fn(), },
@@ -448,7 +448,7 @@ describe('Group HTML5 Audio unit tests.', () => {
   it('Has a stopAllSounds property which passes all of the keys in sounds to stopSounds.', () => {
     const group = testGroupFactory();
     const mock = jest.fn();
-    group.stopSounds = mock;
+    (group as any).stopSounds = mock;
     const sounds = {
       testOne: { isWebAudio: jest.fn(), },
       testTwo: { isWebAudio: jest.fn(), },

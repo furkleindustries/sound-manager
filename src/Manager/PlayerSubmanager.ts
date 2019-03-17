@@ -60,30 +60,37 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     getCollection: () => ICollectionSubmanager,
   })
   {
-    assert(typeof getCollection === 'function');
-    this.__getCollection = getCollection;
+    this.__getCollection = assertValid<() => ICollectionSubmanager>(getCollection);
   }
 
-  public async playGroup(name: string): Promise<Event[]> {
-    return await this.__getCollection().getGroup(name).playAllSounds();
-  }
+  public readonly playGroup = async (name: string): Promise<Event[]> => (
+    this.__getCollection().getGroup(name).playAllSounds()
+  );
 
-  public async playGroups(names: string[]): Promise<Event[]> {
+  public readonly playGroups = async (names: string[]): Promise<Event[]> => {
     assert(Array.isArray(names));
     const val = await Promise.all(names.map((name) => this.playGroup(name)));
     return shallowFlattenArray(val);
-  }
+  };
 
-  public playSound(name: string, groupName: string = 'default'): Promise<Event> {
-    return this.__getCollection().getGroup(groupName).playSound(name);
-  }
+  public readonly playSound = (
+    name: string,
+    groupName: string = 'default',
+  ): Promise<Event> => (
+    this.__getCollection().getGroup(groupName).playSound(name)
+  );
 
-  public playSounds(names: string[], groupName: string = 'default'): Promise<Event[]> {
+  public readonly playSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ): Promise<Event[]> => {
     assert(Array.isArray(names));
     return this.__getCollection().getGroup(groupName).playSounds(names);
-  }
+  };
 
-  public async playAllSounds(groupName?: string): Promise<Event[]> {
+  public readonly playAllSounds = async (
+    groupName?: string,
+  ): Promise<Event[]> => {
     if (groupName) {
       return this.playGroup(groupName);
     } else {
@@ -95,47 +102,60 @@ export class PlayerSubmanager implements IPlayerSubmanager {
 
       return shallowFlattenArray(val);
     }
-  }
+  };
 
-  public pauseSound(name: string, groupName: string = 'default') {
+  public readonly pauseSound = (
+    name: string,
+    groupName: string = 'default',
+  ) => {
     this.__getCollection().getGroup(groupName).pauseSound(name);
     return this;
-  }
+  };
 
-  public pauseSounds(names: string[], groupName: string = 'default') {
+  public readonly pauseSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ) => {
     assert(Array.isArray(names));    
     this.__getCollection().getGroup(groupName).pauseSounds(names);
 
     return this;
-  }
+  };
 
-  public pauseAllSounds(groupName?: string) {
+  public readonly pauseAllSounds = (groupName?: string) => {
     const oneOrMany = nameOrAllKeys(groupName, this.__getCollection().groups);
     doToOneOrMany(this.__getCollection().groups, oneOrMany, 'pauseAllSounds');
 
     return this;
-  }
+  };
 
-  public stopSound(name: string, groupName: string = 'default') {
+  public readonly stopSound = (
+    name: string,
+    groupName: string = 'default',
+  ) => {
     this.__getCollection().getGroup(groupName).stopSound(name);
     return this;
-  }
+  };
 
-  public stopSounds(names: string[], groupName: string = 'default'): this {
+  public readonly stopSounds = (
+    names: string[],
+    groupName: string = 'default',
+  ) => {
     this.__getCollection().getGroup(groupName).stopSounds(names);
     return this;
-  }
+  };
 
-  public stopAllSounds(groupName?: string) {
+  public readonly stopAllSounds = (groupName?: string) => {
     const oneOrMany = nameOrAllKeys(groupName, this.__getCollection().groups);
     doToOneOrMany(this.__getCollection().groups, oneOrMany, 'stopAllSounds');
 
     return this;
-  }
+  };
 
-  public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string>): IPlaylist;
-  public addPlaylist(name: string, options: IPlaylistOptions): IPlaylist
-  public addPlaylist(name: string, options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions) {
+  public readonly addPlaylist = (
+    name: string,
+    options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions,
+  ) => {
     const playlist = Array.isArray(options) ?
       createPlaylist({ ids: getFrozenObject(options), }) :
       createPlaylist(getFrozenObject(options));
@@ -143,41 +163,38 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     this.addPlaylists({ [name]: playlist });
 
     return playlist;
-  }
+  };
 
-  public addPlaylists(playlists: IPlaylistsMap) {
+  public readonly addPlaylists = (playlists: IPlaylistsMap) => {
     const playls = playlists || {};
     const names = Object.keys(playls);
     names.forEach((playlistName) => assert(!(playlistName in this.playlists)));
     this.__playlists = getFrozenObject(this.playlists, playls);
 
     return this;
-  }
+  };
 
-  public hasPlaylist(name: string) {
-    return name in this.playlists;
-  }
+  public readonly hasPlaylist = (name: string) => (name in this.playlists);
 
-  public getPlaylist(name: string) {
-    return assertValid<IPlaylist>(this.playlists[name]);
-  }
+  public readonly getPlaylist = (name: string) => (
+    assertValid<IPlaylist>(this.playlists[name])
+  );
 
-  public hasPlaylists(names: string[]) {
-    return names.filter((playlistName) => (
+  public readonly hasPlaylists = (names: string[]) => (
+    names.filter((playlistName) => (
       !(playlistName in this.playlists)
-    )).length === 0;
-  }
+    )).length === 0
+  );
 
-  public getPlaylists(names: string[]) {
-    return names.map((name) => this.getPlaylist(name));
-  }
+  public readonly getPlaylists = (names: string[]) => (
+    names.map((name) => this.getPlaylist(name))
+  );
 
-  public removePlaylist(name: string) {
-    return this.removePlaylists([ name ]);
-  }
+  public readonly removePlaylist = (name: string) => (
+    this.removePlaylists([ name ])
+  );
 
-  public removePlaylists(names: string[]): this;
-  public removePlaylists(names: string | string[]): this {
+  public readonly removePlaylists = (names: string | string[]) => {
     const playls = { ...this.playlists, };
     if (typeof names === 'string') {
       delete playls[names];
@@ -188,13 +205,13 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     this.__playlists = getFrozenObject(playls);
 
     return this;
-  }
+  };
 
-  public removeAllPlaylists() {
-    return this.removePlaylists(Object.keys(this.playlists));
-  }
+  public readonly removeAllPlaylists = () => (
+    this.removePlaylists(Object.keys(this.playlists))
+  );
 
-  public async playPlaylist(name: string) {
+  public readonly playPlaylist = async (name: string) => {
     const playlist = this.getPlaylist(name);
     log(`Playing playlist ${name}.`);
     const events: Event[] = [];
@@ -226,16 +243,15 @@ export class PlayerSubmanager implements IPlayerSubmanager {
 
       sentinel = ended;
     }
-  }
+  };
 
-  private async __playlistPlaySound(
+  private readonly  __playlistPlaySound = async (
     playlist: IPlaylist,
     events: Event[],
     playIndex: number,
     loopedTimes: number,
     name?: string,
-  )
-  {
+  ) => {
     const id = playlist.ids[playIndex];
     const sound = this.__getCollection().getSound(id.soundName, id.groupName);
 
@@ -263,25 +279,25 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     }
 
     return getPlaylistMessage(/* ended */ false, /* looped */ false);
-  }
+  };
 
-  public async playPlaylists(names: string[]) {
+  public readonly playPlaylists = async (names: string[]) => {
     assert(Array.isArray(names));
     await Promise.all(names.map(this.playPlaylist));
-  }
+  };
 
-  public stopPlaylist(name: string) {
+  public readonly stopPlaylist = (name: string) => {
     this.getPlaylist(name).ids.forEach(({ groupName, soundName, }) => (
       this.__getCollection().getSound(soundName, groupName).stop()  
     ));
 
     return this;
-  }
+  };
 
-  public stopPlaylists(names: string[]) {
+  public readonly stopPlaylists = (names: string[]) => {
     assert(Array.isArray(names));
     names.map((name) => this.stopPlaylist(name));
 
     return this;
-  }
+  };
 }

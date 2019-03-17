@@ -19,11 +19,6 @@ export function generateAudioPanelElement(manager: IManager) {
   const audioPanelElement = document.createElement('div');
   audioPanelElement.className = 'sound-manager-panel';
 
-  const title = document.createElement('h2');
-  title.className = 'sound-manager-title';
-  title.textContent = 'Sound Manager Options';
-  audioPanelElement.appendChild(title);
-
   /* Add the master volume slider. */
   audioPanelElement.appendChild(generateAudioComponent(manager));
 
