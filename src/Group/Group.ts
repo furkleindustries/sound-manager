@@ -71,7 +71,7 @@ export class Group
       this.addSounds(sounds);
     }
 
-    if (isValidVolume(volume)) {;
+    if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
   }

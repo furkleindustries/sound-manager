@@ -61,7 +61,11 @@ export class BaseNode implements IBaseNode {
 
   public readonly getVolume = () => this.__volume;
 
-  public readonly setVolume = (value: number) => {
+  /**
+   * TODO: Figure out why this can't be an arrow function.
+   * (Probably because it needs to exist on the prototype.)
+   */
+  public setVolume(value: number) {
     assertValid(value, '', isValidVolume);
     this.__volume = value;
     if (this.isWebAudio()) {
@@ -70,5 +74,5 @@ export class BaseNode implements IBaseNode {
     }
 
     return this;
-  };
+  }
 }

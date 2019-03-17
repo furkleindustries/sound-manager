@@ -136,7 +136,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
     const newVol = 0.5;
     const mock = jest.fn();
     const sound = testSoundFactory();
-    sound.updateAudioElementVolume = mock;
+    (sound as any).updateAudioElementVolume = mock;
     sound.setVolume(newVol);
 
     expect(sound.getVolume()).toBe(newVol);
@@ -155,7 +155,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a getTrackPosition function which returns the currentTime property of the audio element if isPlaying method returns true.', () => {
     const currentTime = 15;
     const sound = testSoundFactory();
-    sound.isPlaying = jest.fn(() => true);
+    (sound as any).isPlaying = jest.fn(() => true);
     // @ts-ignore
     sound.__audioElement = {
       // @ts-ignore
@@ -169,7 +169,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a getTrackPosition function which returns the __pausedTime property if the isPlaying method returns false.', () => {
     const sym = Symbol('paused')
     const sound = testSoundFactory();
-    sound.isPlaying = jest.fn();
+    (sound as any).isPlaying = jest.fn();
     // @ts-ignore
     sound.__pausedTime = sym;
 
@@ -178,7 +178,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a getTrackPosition function which throws if the audio element is not present.', () => {
     const sound = testSoundFactory();
-    sound.isPlaying = jest.fn(() => true);
+    (sound as any).isPlaying = jest.fn(() => true);
     // @ts-ignore
     delete sound.__audioElement;
     const func = () => sound.getTrackPosition();
@@ -205,7 +205,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
   it('Has a setTrackPosition function which sets audio element\'s currentTime property if the isPlaying method returns true.', () => {
     const sound = testSoundFactory();
     const newVal = 12;
-    sound.isPlaying = jest.fn(() => true);
+    (sound as any).isPlaying = jest.fn(() => true);
     sound.setTrackPosition(newVal);
 
     // @ts-ignore
@@ -223,7 +223,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Has a setTrackPosition function which throws if the sound is playing and the audio element is falsy.', () => {
     const sound = testSoundFactory();
-    sound.isPlaying = jest.fn(() => true);
+    (sound as any).isPlaying = jest.fn(() => true);
     // @ts-ignore
     delete sound.__audioElement;
     const func = () => sound.setTrackPosition(53);

@@ -165,8 +165,8 @@ describe('Sound Web Audio unit tests.', () => {
     const contextTime = 15;
     const startedTime = 10;
     const sound = testSoundFactory();
-    sound.isPlaying = jest.fn(() => true);
-    sound.getContextCurrentTime = jest.fn(() => contextTime);
+    (sound as any).isPlaying = jest.fn(() => true);
+    (sound as any).getContextCurrentTime = jest.fn(() => contextTime);
     // @ts-ignore
     sound.__startedTime = startedTime;
 
@@ -373,7 +373,7 @@ describe('Sound Web Audio unit tests.', () => {
 
   it('Returns 1 from getFadeVolume if there is a fade but it is not during the in or out fading windows.', () => {
     const sound = testSoundFactory();
-    sound.getFade = jest.fn(() => ({
+    (sound as any).getFade = jest.fn(() => ({
       easingCurve: {},
       length: {},
     } as any));
