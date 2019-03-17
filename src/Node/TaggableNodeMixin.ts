@@ -37,16 +37,16 @@ export function TaggableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
       }
     }
 
-    public hasTag(tag: string) {
+    public readonly hasTag = (tag: string) => {
       assert(
         tag && typeof tag === 'string',
         'TaggableNode.hasTag was called with a non-string or empty argument.',
       );
 
       return this.tags.indexOf(tag) !== -1;
-    }
+    };
 
-    public addTag(tag: string) {
+    public readonly addTag = (tag: string) => {
       /* Don't add this if it's already in the tags array. Will throw if tag
        * is invalid. */
       if (this.hasTag(tag)) {
@@ -56,11 +56,11 @@ export function TaggableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
       this.__tags = this.tags.concat([ tag ]);
 
       return this;
-    }
+    };
 
-    public removeTag(tag: string) {
+    public readonly removeTag = (tag: string) => {
       this.__tags = getFrozenObject(this.tags.filter((aa) => aa !== tag));
       return this;
-    }
+    };
   };
 }

@@ -40,13 +40,13 @@ export function AnalysableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) 
       }
     }
 
-    public getAnalyserNode() {
+    public readonly getAnalyserNode = () => {
       assertNodeIsWebAudio(this, 'getAnalyserNode');
       return assertValid<AnalyserNode>(this.__analyserNode);
-    }
+    };
 
-    public getOutputNode() {
+    public readonly getOutputNode = () => {
       return this.getAnalyserNode();
-    }
+    };
   };
 }

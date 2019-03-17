@@ -76,47 +76,44 @@ export class Group
     }
   }
 
-  public setVolume(value: number) {
+  public readonly setVolume = (value: number) => {
     super.setVolume(value);
     this.updateAllAudioElementsVolume();
 
     return this;
-  }
+  };
 
-  public getSound(name: string) {
-    return assertValid<ISound>(this.sounds[name]);
-  }
+  public readonly getSound = (name: string) => assertValid<ISound>(
+    this.sounds[name],
+  );
 
-  public getSounds(names: string[]) {
+  public readonly getSounds = (names: string[]) => {
     assert(Array.isArray(names));
     return names.map((name) => this.getSound(name));
-  }
+  };
 
-  public getAllSounds() {
-    return this.getSounds(Object.keys(this.sounds));
-  }
+  public readonly getAllSounds = () => (
+    this.getSounds(Object.keys(this.sounds))
+  );
 
-  public getSoundsByTag(tag: string) {
-    return this.getAllSounds().filter((sound) => sound.hasTag(tag));
-  }
+  public readonly getSoundsByTag = (tag: string) => (
+    this.getAllSounds().filter((sound) => sound.hasTag(tag))
+  );
 
-  public getSoundsByTags(tags: string[], matchOneOrAll: 'one' | 'all' = 'one') {
-    if (matchOneOrAll === 'all') {
-      return this.getAllSounds().filter((sound) => (
-        tags.filter(sound.hasTag).length === tags.length
-      ));
-    }
-
-    return this.getAllSounds().filter((sound) => (
+  public readonly getSoundsByTags = (
+    tags: string[],
+    matchOneOrAll: 'one' | 'all' = 'one',
+  ) => this.getAllSounds().filter((sound) => (
+    matchOneOrAll === 'all' ?
+      tags.filter(sound.hasTag).length === tags.length :
       tags.filter(sound.hasTag).length >= 1
-    ));
-  }
+  ));
 
-  public addSound(name: string, sound: ISound) {
-    return this.addSounds({ [name]: sound, });
-  }
+  public readonly addSound = (name: string, sound: ISound) => (
+    this.addSounds({ [name]: sound, })
+  );
 
-  public addSounds(sounds: ISoundsMap) {
+  public readonly addSounds = (sounds: ISoundsMap) => {
     const names = Object.keys(sounds);
     const isWebAudio = this.isWebAudio();
     names.forEach((soundName) => {
@@ -136,14 +133,14 @@ export class Group
     this.__sounds = getFrozenObject(this.sounds, sounds);
 
     return this;
-  }
+  };
 
-  public removeSound(name: string) {
+  public readonly removeSound = (name: string) => {
     this.removeSounds([ name ]);
     return this;
-  }
+  };
 
-  public removeSounds(names: string[]) {
+  public readonly removeSounds = (names: string[]) => {
     assert(Array.isArray(names));
     const sounds = { ...this.sounds, };
     names.forEach((soundName: string) => {
@@ -154,62 +151,60 @@ export class Group
 
       delete sounds[soundName];
     });
-    
+
     this.__sounds = getFrozenObject(sounds);
 
     return this;
-  }
+  };
 
-  public removeAllSounds() {
-    return this.removeSounds(Object.keys(this.sounds));
-  }
+  public readonly removeAllSounds = () => (
+    this.removeSounds(Object.keys(this.sounds))
+  );
 
-  public playSound(name: string) {
-    return this.getSound(name).play();
-  }
+  public readonly playSound = (name: string) => this.getSound(name).play();
 
-  public playSounds(names: string[]) {
+  public readonly playSounds = (names: string[]) => {
     assert(Array.isArray(names));
     return Promise.all(names.map((name) => this.playSound(name)));
-  }
+  };
 
-  public playAllSounds() {
-    return this.playSounds(Object.keys(this.sounds));
-  }
+  public readonly playAllSounds = () => (
+    this.playSounds(Object.keys(this.sounds))
+  );
 
-  public pauseSound(name: string) {
+  public readonly pauseSound = (name: string) => {
     this.getSound(name).pause();
     return this;
-  }
+  };
 
-  public pauseSounds(names: string[]) {
+  public readonly pauseSounds = (names: string[]) => {
     assert(Array.isArray(names));
     names.map((name) => this.pauseSound(name));
 
     return this;
-  }
+  };
 
-  public pauseAllSounds() {
-    return this.pauseSounds(Object.keys(this.sounds));
-  }
+  public readonly pauseAllSounds = () => (
+    this.pauseSounds(Object.keys(this.sounds))
+  );
 
-  public stopSound(name: string) {
+  public readonly stopSound = (name: string) => {
     this.getSound(name).stop();
     return this;
-  }
+  };
 
-  public stopSounds(names: string[]) {
+  public readonly stopSounds = (names: string[]) => {
     assert(Array.isArray(names));
     names.map((name) => this.stopSound(name));
 
     return this;
-  }
+  };
 
-  public stopAllSounds() {
-    return this.stopSounds(Object.keys(this.sounds));
-  }
+  public readonly stopAllSounds = () => (
+    this.stopSounds(Object.keys(this.sounds))
+  );
 
-  public updateAllAudioElementsVolume() {
+  public readonly updateAllAudioElementsVolume = () => {
     this.getAllSounds().forEach((sound) => {
       if (!sound.isWebAudio()) {
         sound.updateAudioElementVolume();
@@ -217,5 +212,5 @@ export class Group
     });
 
     return this;
-  }
+  };
 }

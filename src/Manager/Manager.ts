@@ -55,7 +55,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   public readonly collection: ICollectionSubmanager;
 
   public readonly player: IPlayerSubmanager;
-  
+
   constructor(options?: IManagerOptions) {
     super({ ...options });
 
@@ -86,28 +86,28 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     }
   }
 
-  private __connectNodes() {
+  private readonly __connectNodes = () => {
     assertNodeIsWebAudio(this, '__connectNodes' as any);
     this.getInputNode().connect(this.getOutputNode());
     this.getOutputNode().connect(this.getAudioContext().destination);
-  }
+  };
 
-  public setVolume(value: number) {
+  public readonly setVolume = (value: number) => {
     super.setVolume(value);
     this.collection.updateAllAudioElementsVolume();
 
     return this;
-  }
+  };
 
   /* Volume panel */
   private __volumePanelElement: HTMLElement | null = null;
 
-  public generateVolumePanelElement(): HTMLElement {
+  public readonly generateVolumePanelElement = (): HTMLElement => {
     this.__volumePanelElement = generateAudioPanelElement(this);
     return this.__volumePanelElement;
-  }
+  };
 
-  public updateVolumePanelElement() {
+  public readonly updateVolumePanelElement = () => {
     const safeVolumePanelElement = assertValid<HTMLElement>(
       this.__volumePanelElement,
     );
@@ -116,9 +116,9 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     this.__volumePanelElement = newElem;
 
     return this;
-  }
+  };
 
-  public volumePanelRegister(node: IPanelRegisterableNode) {
+  public readonly volumePanelRegister = (node: IPanelRegisterableNode) => {
     assertValid<IPanelRegisterableNode>(
       node,
     ).__panelRegistered = true;
@@ -128,9 +128,9 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     }
 
     return this;
-  }
+  };
 
-  public volumePanelDeregister(node: IPanelRegisterableNode) {
+  public readonly volumePanelDeregister = (node: IPanelRegisterableNode) => {
     assertValid<IPanelRegisterableNode>(
       node,
     ).__panelRegistered = false;
@@ -140,5 +140,5 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     }
 
     return this;
-  }
+  };
 }
