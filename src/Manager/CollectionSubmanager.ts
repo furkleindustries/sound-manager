@@ -177,17 +177,11 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   public readonly getGroupsByTags = (
     tags: string[],
     matchOneOrAll: 'one' | 'all' = 'one',
-  ) => {
-    if (matchOneOrAll === 'all') {
-      return this.getAllGroups().filter((group) => (
-        tags.filter(group.hasTag).length === tags.length
-      ));
-    }
-
-    return this.getAllGroups().filter((group) => (
+  ) => this.getAllGroups().filter((group) => (
+    matchOneOrAll === 'all' ?
+      tags.filter(group.hasTag).length === tags.length :
       tags.filter(group.hasTag).length >= 1
-    ));
-  };
+  ));
 
   public readonly removeGroup = (name: string) => this.removeGroups([ name ]);
 
@@ -220,22 +214,19 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     this.removeGroups(Object.keys(this.groups))
   );
 
-  public readonly getGroupVolume = (name: string = 'default') => (
+  public readonly getGroupVolume = (name = 'default') => (
     this.getGroup(name).getVolume()
   );
 
   public readonly setGroupVolume = (
     value: number,
-    groupName: string = 'default',
-  ) => {
-    this.getGroup(groupName).setVolume(value);
-    return this;
-  };
+    groupName = 'default',
+  ) => this.getGroup(groupName).setVolume(value) && this;
 
   public readonly addSound = async (
     name: string,
     options: string | ICreateSoundOptions,
-    groupName: string = 'default',
+    groupName = 'default',
   ): Promise<ISound> =>
   {
     /* Allow a bare string to be used as an URL argument. */
@@ -249,43 +240,45 @@ export class CollectionSubmanager implements ICollectionSubmanager {
       ...tempOpts,
     });
 
+    this.__registerIntentToAddSound(name, groupName);
     const sound = await createSound(opts);
     this.addSounds({ [name]: sound }, groupName);
+    this.__deregisterIntentToAddSound(name, groupName);
 
     return sound;
   };
 
+  private readonly __registerIntentToAddSound = (
+    name: string,
+    groupName = 'default',
+  ) => this.getGroup(groupName).registerIntentToAddSound(name);
+
+  private readonly __deregisterIntentToAddSound = (
+    name: string,
+    groupName = 'default',
+  ) => this.getGroup(groupName).deregisterIntentToAddSound(name);
+
   public readonly addSounds = (
     sounds: ISoundsMap,
-    groupName: string = 'default',
-  ) => {
-    this.getGroup(groupName).addSounds(sounds);
-    return this;
-  };
+    groupName = 'default',
+  ) => this.getGroup(groupName).addSounds(sounds) && this;
 
-  public readonly hasSound = (name: string, groupName: string = 'default') => {
-    assert(this.groups[groupName]);
-    return name in this.groups[groupName].sounds;
-  };
+  public readonly hasSound = (name: string, groupName = 'default') => (
+    this.getGroup(groupName).hasSound(name)
+  );
 
-  public readonly getSound = (name: string, groupName: string = 'default') => (
+  public readonly getSound = (name: string, groupName = 'default') => (
     this.getGroup(groupName).getSound(name)
   );
 
   public readonly hasSounds = (
     names: string[],
-    groupName: string = 'default',
-  ) => {
-    assert(this.groups[groupName]);
-
-    return names.filter((soundName) => (
-      !(soundName in this.groups[groupName])
-    )).length === 0;
-  };
+    groupName = 'default',
+  ) => this.getGroup(groupName).hasSounds(names);
 
   public readonly getSounds = (
     names: string[],
-    groupName: string = 'default',
+    groupName = 'default',
   ) => this.getGroup(groupName).getSounds(names);
 
   public readonly getAllSounds = () => shallowFlattenArray(
@@ -299,35 +292,25 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   public readonly getSoundsByTags = (
     tags: string[],
     matchOneOrAll: 'one' | 'all' = 'one',
-  ) => {
-    let collection: ISound[][];
-    if (matchOneOrAll === 'all') {
-      collection = this.getAllGroups().map((group) => (
-        group.getSoundsByTags(tags, matchOneOrAll)
-      ));
-    } else {
-      collection = this.getAllGroups().map((group) => (
-        group.getSoundsByTags(tags, matchOneOrAll)
-      ));
-    }
+  ) => shallowFlattenArray(
+    this.getAllGroups().map((group) => (
+      group.getSoundsByTags(tags, matchOneOrAll)
+    ))
+  );
 
-    return shallowFlattenArray(collection);
-  }
-
-  public readonly removeSound = (name: string, groupName: string = 'default') => {
-    this.getGroup(groupName).removeSound(name);
-    return this;
-  };
+  public readonly removeSound = (name: string, groupName = 'default') => (
+    this.getGroup(groupName).removeSound(name) && this
+  );
 
   public readonly removeSounds = (
     names: string[],
-    groupName: string = 'default',
+    groupName = 'default',
   ) => {
     assert(Array.isArray(names));
     names.forEach((name) => this.removeSound(name, groupName));
 
     return this;
-  }
+  };
 
   public readonly removeAllSounds = (groupName?: string) => {
     const oneOrMany = nameOrAllKeys(groupName, this.groups);
@@ -338,17 +321,14 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
   public readonly getSoundVolume = (
     name: string,
-    groupName: string = 'default',
+    groupName = 'default',
   ) => this.getGroup(groupName).getSound(name).getVolume();
 
   public readonly setSoundVolume = (
     name: string,
     value: number,
-    groupName: string = 'default',
-  ) => {
-    this.getGroup(groupName).getSound(name).setVolume(value);
-    return this;
-  };
+    groupName = 'default',
+  ) => this.getGroup(groupName).getSound(name).setVolume(value) && this;
 
   public readonly updateAllAudioElementsVolume = () => {
     this.getAllGroups().forEach((grp) => grp.updateAllAudioElementsVolume());
