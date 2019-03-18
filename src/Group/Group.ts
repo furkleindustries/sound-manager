@@ -83,14 +83,21 @@ export class Group
     return this;
   };
 
+  public readonly hasSound = (name: string) => (
+    name in this.sounds || name in this.__registeredAdditionIntents
+  );
+
+  public readonly hasSounds = (names: string[]) => (
+    !names.find((name) => !this.hasSound(name))
+  );
+
   public readonly getSound = (name: string) => assertValid<ISound>(
     this.sounds[name],
   );
 
-  public readonly getSounds = (names: string[]) => {
-    assert(Array.isArray(names));
-    return names.map((name) => this.getSound(name));
-  };
+  public readonly getSounds = (names: string[]) => (
+    assert(Array.isArray(names)) && names.map((name) => this.getSound(name))
+  );
 
   public readonly getAllSounds = () => (
     this.getSounds(Object.keys(this.sounds))
@@ -109,8 +116,20 @@ export class Group
       tags.filter(sound.hasTag).length >= 1
   ));
 
+  private readonly __registeredAdditionIntents: Record<string, boolean> = {};
+  public readonly registerIntentToAddSound = (name: string) => {
+    assert(!(name in this.__registeredAdditionIntents));
+    this.__registeredAdditionIntents[name] = true;
+
+    return this;
+  };
+
+  public readonly deregisterIntentToAddSound = (name: string) => (
+    void delete this.__registeredAdditionIntents[name]
+  );
+
   public readonly addSound = (name: string, sound: ISound) => (
-    this.addSounds({ [name]: sound, })
+    this.addSounds({ [name]: sound })
   );
 
   public readonly addSounds = (sounds: ISoundsMap) => {

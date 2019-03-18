@@ -29,8 +29,11 @@ export interface IGroup
 {
   readonly type: NodeTypes.Group;
   readonly sounds: ISoundsMap;
+  deregisterIntentToAddSound(name: string): void;
   getContextCurrentTime(): number;
+  hasSound(name: string): boolean;
   getSound(name: string): ISound;
+  hasSounds(names: string[]): boolean;
   getSounds(names: string[]): ISound[];
   getAllSounds(): ISound[];
   getSoundsByTag(tag: string): ISound[];
@@ -46,6 +49,7 @@ export interface IGroup
   pauseSound(name: string): this;
   pauseSounds(names: string[]): this;
   pauseAllSounds(): this;
+  registerIntentToAddSound(name: string): this;
   stopSound(name: string): this;
   stopSounds(names: string[]): this;
   stopAllSounds(): this;
