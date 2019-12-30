@@ -248,6 +248,11 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     return sound;
   };
 
+  public readonly hasIntentToAddSound = (
+    name: string,
+    groupName = 'default',
+  ) => this.getGroup(groupName).hasIntentToAddSound(name);
+
   private readonly __registerIntentToAddSound = (
     name: string,
     groupName = 'default',

@@ -31,6 +31,7 @@ export interface IGroup
   readonly sounds: ISoundsMap;
   deregisterIntentToAddSound(name: string): void;
   getContextCurrentTime(): number;
+  hasIntentToAddSound(name: string, groupName?: string): boolean;
   hasSound(name: string): boolean;
   getSound(name: string): ISound;
   hasSounds(names: string[]): boolean;

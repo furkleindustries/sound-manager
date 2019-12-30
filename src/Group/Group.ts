@@ -84,7 +84,7 @@ export class Group
   };
 
   public readonly hasSound = (name: string) => (
-    name in this.sounds || name in this.__registeredAdditionIntents
+    name in this.sounds
   );
 
   public readonly hasSounds = (names: string[]) => (
@@ -126,6 +126,10 @@ export class Group
 
   public readonly deregisterIntentToAddSound = (name: string) => (
     void delete this.__registeredAdditionIntents[name]
+  );
+
+  public readonly hasIntentToAddSound = (name: string) => (
+    name in this.__registeredAdditionIntents
   );
 
   public readonly addSound = (name: string, sound: ISound) => (

@@ -22,6 +22,7 @@ export interface ICollectionSubmanager {
   removeAllGroups(): this;
   getGroupVolume(name?: string): number;
   setGroupVolume(value: number, groupName?: string): this;
+  hasIntentToAddSound(name: string, groupName?: string): boolean;
   addSound(
     name: string,
     url: string,
