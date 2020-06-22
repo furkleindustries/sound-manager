@@ -231,7 +231,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   {
     /* Allow a bare string to be used as an URL argument. */
     const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
-      typeof options === 'string' ? { url: options } : { ...options };
+      typeof options === 'string' ? { url: options } : { ...options } as any;
 
     const opts: ICreateSoundOptions = getFrozenObject({
       isWebAudio: this.__isWebAudio(),

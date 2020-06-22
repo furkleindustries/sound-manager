@@ -157,7 +157,7 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     options: Array<ISoundGroupIdentifier | string> | IPlaylistOptions,
   ) => {
     const playlist = Array.isArray(options) ?
-      createPlaylist({ ids: getFrozenObject(options), }) :
+      createPlaylist({ ids: getFrozenObject(options) as any }) :
       createPlaylist(getFrozenObject(options));
 
     this.addPlaylists({ [name]: playlist });

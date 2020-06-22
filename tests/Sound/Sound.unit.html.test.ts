@@ -56,6 +56,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
       audioElement: obj,
     });
 
+    // @ts-ignore
     expect(sound.__audioElement).toBe(obj);
   });
 
@@ -67,6 +68,7 @@ describe('Sound HTML5 Audio unit tests.', () => {
       audioElement: {},
     });
 
+    // @ts-ignore
     expect(sound.getManagerVolume).toBe(mock);
   });
 
