@@ -29,12 +29,9 @@ export function createSound(options: ICreateSoundOptions): Promise<ISound> {
   );
 
   const opts = getFrozenObject(options);
-  const {
-    isWebAudio,
-  } = opts;
 
   /* Default to web audio and require very explicit opt-out. */
-  if (isWebAudio === false) {
+  if (opts.isWebAudio === false) {
     return createHtmlHelper(opts);
   } else {
     return createWebHelper(opts);

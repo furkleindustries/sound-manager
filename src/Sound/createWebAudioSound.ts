@@ -18,6 +18,9 @@ import {
 } from 'ts-assertions';
 
 export const strings = {
+  BUFFER_INVALID:
+    'The buffer argument was provided, but was out of band.',
+
   CONTEXT_INVALID:
     'The context property of the argument object was not provided to ' +
     'createWebAudioSound.',
@@ -32,6 +35,7 @@ export const strings = {
 
 export async function createWebAudioSound(options: ICreateSoundOptions): Promise<ISound> {
   const {
+    buffer,
     context,
     url,
   } = assertValid<ICreateSoundOptions>(
@@ -43,16 +47,30 @@ export async function createWebAudioSound(options: ICreateSoundOptions): Promise
     context,
     strings.CONTEXT_INVALID,
   );
-  
-  const safeUrl = assertValid<string>(
-    url,
-    strings.URL_INVALID,
-  );
 
-  const buffer = await loadAudioBuffer(safeUrl, safeContext);
+  let safeUrl: string;
+  let safeBuffer: AudioBuffer;
+
+  if (url !== undefined) {
+    safeUrl = assertValid<string>(
+      url,
+      strings.URL_INVALID,
+    );
+
+    safeBuffer = await loadAudioBuffer(safeUrl, safeContext);
+  } else if (buffer !== undefined) {
+    safeBuffer = assertValid(await context?.decodeAudioData(
+      assertValid<Buffer>(
+        buffer,
+        strings.BUFFER_INVALID,
+      ),
+    ));
+  } else {
+    throw new Error('Neither an url or buffer argument was provided to createWebAudioSound.');
+  }
 
   return new Sound(getFrozenObject({
     ...options,
-    buffer,
+    buffer: safeBuffer,
   }));
 };

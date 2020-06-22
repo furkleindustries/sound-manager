@@ -4,7 +4,9 @@ import {
 
 export interface ICreateSoundOptions {
   isWebAudio: boolean;
-  url: string;
+  // Must have buffer or url.
+  buffer?: Buffer;
+  url?: string;
   context?: AudioContext;
   fade?: IFadeOptions | boolean;
   loop?: boolean;
