@@ -3,11 +3,11 @@ import {
 } from '../Fade/IFadeOptions';
 
 export interface ICreateSoundOptions {
+  context: AudioContext;
   isWebAudio: boolean;
   // Must have buffer or url.
   buffer?: AudioBuffer;
   url?: string;
-  context?: AudioContext;
   fade?: IFadeOptions | boolean;
   loop?: boolean;
   trackPosition?: number;
