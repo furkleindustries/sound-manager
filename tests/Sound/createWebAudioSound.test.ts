@@ -44,13 +44,13 @@ describe('createWebAudioSound unit tests.', () => {
     }
   });
 
-  it('Throws if the url property is missing from the options.', async () => {
+  it('Throws if the url and buffer properties are missing from the options.', async () => {
     expect.assertions(1);
     try {
       // @ts-ignore
       await createWebAudioSound({ context: true });
     } catch (err) {
-      expect(err.message).toBe(strings.URL_INVALID);
+      expect(err.message).toBe(strings.NO_VALID_ARG);
     }
   });
 

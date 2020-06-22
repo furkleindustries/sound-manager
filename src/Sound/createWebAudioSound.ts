@@ -25,6 +25,9 @@ export const strings = {
     'The context property of the argument object was not provided to ' +
     'createWebAudioSound.',
 
+  NO_VALID_ARG:
+    'Neither an url or buffer argument was provided to createWebAudioSound.',
+
   OPTIONS_INVALID:
     'The options argument was not provided to createWebAudioSound.',
 
@@ -59,14 +62,12 @@ export async function createWebAudioSound(options: ICreateSoundOptions): Promise
 
     safeBuffer = await loadAudioBuffer(safeUrl, safeContext);
   } else if (buffer !== undefined) {
-    safeBuffer = assertValid(await context?.decodeAudioData(
-      assertValid<Buffer>(
-        buffer,
-        strings.BUFFER_INVALID,
-      ),
-    ));
+    safeBuffer = assertValid<AudioBuffer>(
+      buffer,
+      strings.BUFFER_INVALID,
+    );
   } else {
-    throw new Error('Neither an url or buffer argument was provided to createWebAudioSound.');
+    throw new Error(strings.NO_VALID_ARG);
   }
 
   return new Sound(getFrozenObject({
