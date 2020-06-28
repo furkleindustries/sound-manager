@@ -51,6 +51,7 @@ export async function createHtmlAudioSound(options: ICreateSoundOptions): Promis
   return new Sound(getFrozenObject({
     ...options,
     audioElement,
+    context: undefined,
     getManagerVolume: safeGetManagerVolume,
   }));
 };
