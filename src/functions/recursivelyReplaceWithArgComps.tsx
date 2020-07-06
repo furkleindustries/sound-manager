@@ -1,3 +1,5 @@
+import voids from 'void-elements';
+
 import * as React from 'react';
 
 export const recursivelyReplaceWithArgComps = (
@@ -6,6 +8,11 @@ export const recursivelyReplaceWithArgComps = (
 ): React.ReactNode => {
   const mapKeys = Object.keys(map);
   if (!React.isValidElement(node)) {
+    return node;
+  }
+
+  const isVoidElem = Object.keys(voids).includes(node.type as string);
+  if (isVoidElem) {
     return node;
   }
 

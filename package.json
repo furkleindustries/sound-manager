@@ -1,17 +1,12 @@
 {
   "name": "sound-manager",
-  "version": "0.17.0",
+  "version": "0.17.4",
   "description": "A sound library for Accelerator, Twine, and other hypertext fiction frameworks.",
-  "esnext": "src/index.ts",
-  "main": "dist/cjs/index.js",
-  "browser": "dist/browser/index.js",
-  "types": "dist/esnext/index.d.ts",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "rimraf dist/ && cross-env NODE_ENV=production npm run build:browser && cross-env NODE_ENV=production npm run build:esnext",
     "build:browser": "webpack",
     "build:esnext": "tsc",
     "build:dev": "cross-env NODE_ENV=development webpack",
-    "build:debug": "npm run build -- --verbose",
     "build:docs": "npm run build:docs-md && npm run build:docs-html",
     "build:docs-md": "typedoc --theme markdown --options ./typedoc.json --out typedocs/markdown",
     "build:docs-html": "typedoc --options ./typedoc.json --out typedocs/html",
@@ -19,7 +14,7 @@
     "test-watch": "jest --watch",
     "test-coverage": "jest --coverage",
     "test-coverage-watch": "jest --coverage --watch",
-    "prepublishOnly": "npm run test && npm run build"
+    "prepublishOnly": "npm run test"
   },
   "repository": {
     "type": "git",
@@ -57,11 +52,13 @@
   },
   "dependencies": {
     "@types/react": "^16.9.41",
+    "@types/void-elements": "^3.1.0",
     "bufferutil": "^4.0.1",
     "canvas": "^2.6.1",
     "classnames": "^2.2.6",
     "react": "^16.13.1",
     "ts-assertions": "^2.0.5",
-    "utf-8-validate": "^5.0.2"
+    "utf-8-validate": "^5.0.2",
+    "void-elements": "^3.1.0"
   }
 }
