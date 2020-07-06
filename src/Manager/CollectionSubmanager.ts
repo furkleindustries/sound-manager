@@ -235,8 +235,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
     const opts: ICreateSoundOptions = getFrozenObject({
       isWebAudio: this.__isWebAudio(),
-      context: this.__getAudioContext(),
-      getManagerVolume: () => this.__getManagerVolume(),
+      context: this.__isWebAudio() ? this.__getAudioContext() : undefined,
+      getManagerVolume: this.__isWebAudio() ? undefined : () => this.__getManagerVolume(),
       ...tempOpts,
     });
 

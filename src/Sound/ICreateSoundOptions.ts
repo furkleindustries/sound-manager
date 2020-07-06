@@ -3,7 +3,7 @@ import {
 } from '../Fade/IFadeOptions';
 
 export interface ICreateSoundOptions {
-  context: AudioContext;
+  context?: AudioContext;
   isWebAudio: boolean;
   // Must have buffer or url.
   buffer?: AudioBuffer;
