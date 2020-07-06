@@ -213,6 +213,15 @@ export class Sound
     return this;
   };
 
+  public readonly addVolumeChangeCallback = (
+    name: string,
+    cb: (name: string, volume: number) => void,
+  ): this => super.addVolumeChangeCallback(name, cb) as this;
+
+  public readonly removeVolumeChangeCallback = (name: string): this => (
+    super.removeVolumeChangeCallback(name) as this
+  );
+
   public readonly getTrackPosition = () => {
     if (this.isPlaying()) {
       if (this.isWebAudio()) {

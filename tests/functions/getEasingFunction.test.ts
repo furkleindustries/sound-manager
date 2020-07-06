@@ -1,6 +1,6 @@
 import {
   EasingCurves,
-} from '../../src/Fade/EasingCurves';
+} from '../../src/enums/EasingCurves';
 import {
   getEasingFunction,
 } from '../../src/functions/getEasingFunction';

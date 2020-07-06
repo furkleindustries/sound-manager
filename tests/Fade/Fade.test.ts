@@ -3,7 +3,7 @@ import {
 } from '../../src/Fade/Fade';
 import {
   EasingCurves,
-} from '../../src/Fade/EasingCurves';
+} from '../../src/enums/EasingCurves';
 
 describe('Fade unit tests.', () => {
   it('Sets the easingCurve properties to quadratic by default.', () => {

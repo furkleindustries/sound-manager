@@ -1,6 +1,6 @@
 import {
   EasingCurves,
-} from '../../src/Fade/EasingCurves';
+} from '../../src/enums/EasingCurves';
 import {
   ISoundOptions,
 } from '../../src/Sound/ISoundOptions';
