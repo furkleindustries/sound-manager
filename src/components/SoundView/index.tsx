@@ -33,6 +33,8 @@ export class SoundView extends React.PureComponent<ISoundViewProps> {
           'sound-view',
           className,
         )}
+
+        key="sound-view"
       >
         <SoundViewLabel
           components={components}

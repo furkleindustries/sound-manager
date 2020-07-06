@@ -63,15 +63,19 @@ export class SoundControllerView extends React.PureComponent<
           'sound-controller-view',
           className,
         )}
+
+        key="sound-controller-view"
       >
         <input
           className="sound-controller-view-volume"
-          onInput={volumeSetter}
+          onChange={volumeSetter}
+          key="sound-controller-view-volume"
           value={volume}
         />
 
         <button 
           className="sound-controller-view-play"
+          key="sound-controller-view-play"
           onClick={playSetter}
           value={volume}
         >

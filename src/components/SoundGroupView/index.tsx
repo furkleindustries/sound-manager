@@ -26,10 +26,12 @@ export class SoundGroupView extends React.PureComponent<ISoundGroupViewProps> {
           'sound-group-view',
           className,
         )}
+
+        key="sound-group-view"
       >
         <ul>
           {Object.keys(sounds).map((key) => (
-            <li>
+            <li key={key}>
               <SoundView
                 name={key}
                 key={key}

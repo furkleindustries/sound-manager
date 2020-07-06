@@ -15,6 +15,16 @@ export * from './Sound/ISound';
 export * from './Sound/ISoundOptions';
 export * from './Sound/createSound';
 
+export * from './Node/AnalysableNodeMixin';
+export * from './Node/BaseNode';
+export * from './Node/IAnalysableNode';
+export * from './Node/IBaseNode';
+export * from './Node/INodeOptions';
+export * from './Node/IPanelRegisterableNode';
+export * from './Node/ISoundLabel';
+export * from './Node/ITaggableNode';
+export * from './Node/ITaggableNodeOptions';
+
 export * from './Playlist/createPlaylist';
 export * from './Playlist/Playlist';
 export * from './Playlist/IPlaylist';
@@ -50,7 +60,7 @@ export * from './AnalysisSuite/IAnalysis';
 export * from './AnalysisSuite/IAnalysisOptions';
 export * from './AnalysisSuite/IAnalysisRenderCallback';
 export * from './AnalysisSuite/IGetAnalysisOptions';
- 
+
 export * from './components/SoundControllerView';
 export * from './components/SoundGroupView';
 export * from './components/SoundManagerView';

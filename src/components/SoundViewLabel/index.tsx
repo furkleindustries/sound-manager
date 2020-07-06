@@ -26,25 +26,54 @@ export class SoundViewLabel extends React.PureComponent<ISoundViewLabelProps> {
       components,
       <div
         className={classNames(
-          'sound-view',
+          'sound-view-label',
           className,
         )}
+
+        key="sound-view-label"
       >
-        <h6 className="sound-view-title">{title || name}</h6>
+        <h6
+          className="sound-view-label-title"
+          key="sound-view-label-title"
+        >
+          {title || name}
+        </h6>
   
         {artistName ?
-          <p className="sound-view-artist-name">
-            <strong className="sound-view-artist-name-text">{artistName}</strong>
+          <p
+            className="sound-view-label-artist-name"
+            key="sound-view-label-artist-name"
+          >
+            <strong
+              className="sound-view-label-artist-name-text"
+              key="sound-view-label-artist-name-text"
+            >
+              {artistName}
+            </strong>
           </p> :
   
           null}
   
         {contributors.length ?
-          <ul className="sound-view-contributors-list">
+          <ul
+            className="sound-view-label-contributors-list"
+            key="sound-view-label-contributors-list"
+          >
             {contributors.map((item) => (
-              <li className="sound-view-contributors-list-item">
-                <p className="sound-view-contributor">
-                  <em className="sound-view-contributor-text">{item}</em>
+              <li
+                className="sound-view-label-contributors-list-item"
+                key={item}
+              >
+                <p
+                  className="sound-view-label-contributor"
+                  key="sound-view-label-contributor"
+                >
+                  <em
+                    className="sound-view-label-contributor-text"
+                    key="sound-view-label-contributor-text"
+                  >
+                    {item}
+                  </em>
                 </p>
               </li>
             ))}
