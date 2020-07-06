@@ -13,6 +13,7 @@ import {
 jest.mock('../../src/functions/getFrozenObject');
 
 const getOpts = () => ({
+  context: {} as any,
   getManagerVolume: jest.fn(() => 1),
   isWebAudio: true,
   url: 'foobar',

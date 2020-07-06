@@ -13,6 +13,7 @@ import {
 } from '../../src/functions/getFrozenObject';
 
 const getOpts = () => ({
+  context: null as any,
   getManagerVolume: jest.fn(() => 1),
   isWebAudio: false,
   url: 'foobar',
