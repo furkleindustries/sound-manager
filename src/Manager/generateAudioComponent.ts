@@ -59,7 +59,8 @@ export function generateAudioComponent(
 
   const uniqueId = generateUniqueAudioPanelIdentifier(node, name);
   container.appendChild(generateVolumeLabelComponent(node, uniqueId, name));
-  container.appendChild(generateVolumeInputComponent(node, uniqueId));
+  const input = generateVolumeInputComponent(node, uniqueId);
+  container.appendChild(input);
 
   /* Analysis is not possible in HTML Audio mode, so there's no reasonable
    * method for visualizing volume level. */
@@ -70,6 +71,17 @@ export function generateAudioComponent(
     );
 
     container.appendChild(generateVolumeLevelVisualizerComponent(suite));
+  } else {
+    let timerId: any = null;
+
+    setInterval(() => {
+      try {
+        input.value = node.getVolume().toFixed(4);
+      } catch (err) {
+        clearTimeout(timerId);
+        timerId = null;
+      }
+    }, 55);
   }
 
   return container;
