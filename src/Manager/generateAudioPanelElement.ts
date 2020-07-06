@@ -7,7 +7,6 @@ import {
 import {
   assert,
 } from 'ts-assertions';
-import { updateAudioPanelElement } from './updateAudioPanelElement';
 
 export const strings = {
   MANAGER_INVALID:
@@ -41,17 +40,6 @@ export function generateAudioPanelElement(manager: IManager) {
       }
     });
   });
-
-  let timerId: any = null;
-  
-  setInterval(() => {
-    try {
-      updateAudioPanelElement(manager, audioPanelElement);
-    } catch (err) {
-      clearTimeout(timerId);
-      timerId = null;
-    }
-  }, 55);
 
   return audioPanelElement;
 };

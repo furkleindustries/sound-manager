@@ -32,7 +32,7 @@ describe('generateVolumeInputComponent unit tests.', () => {
       'foo',
     );
 
-    expect(elem.value).toBe(String(volume));
+    expect(elem.value).toBe(volume.toFixed(4));
   });
 
   it('Sets the min of the returned element to 0.', () => {

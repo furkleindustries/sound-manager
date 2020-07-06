@@ -19,7 +19,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * time / duration + initial
+    change * (time / duration) + initial
   ),
 
   [EasingCurves.EqualPower]: (
@@ -29,7 +29,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * Math.cos(time / duration * 0.5 * Math.PI) + initial 
+    change * Math.sqrt((1 + time / duration) * 0.5) + initial
   ),
 
   [EasingCurves.Quadratic]: (
@@ -39,7 +39,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * (time /= duration) * time + initial
+    change * (time / duration) * time + initial
   ),
 
   [EasingCurves.Cubic]: (
@@ -49,7 +49,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * (time /= duration) * time * time + initial
+    change * (time / duration) * time * time + initial
   ),
 
   [EasingCurves.Quartic]: (
@@ -59,7 +59,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * (time /= duration) * time * time * time + initial 
+    change * (time / duration) * time * time * time + initial 
   ),
 
   [EasingCurves.Quintic]: (
@@ -69,7 +69,7 @@ const funcs = {
     duration: number,
   ) =>
   (
-    change * (time /= duration) * time * time * time * time + initial
+    change * (time / duration) * time * time * time * time + initial
   ),
 
   [EasingCurves.Exponential]: (

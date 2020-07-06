@@ -29,7 +29,13 @@ export function generateVolumeInputComponent(node: IBaseNode, uniqueId: string) 
   );
 
   input.type = 'range';
-  input.value = String(node.getVolume());
+  try {
+    input.value = node.getVolume().toFixed(4);
+  } catch (err) {
+    console.log(err);
+    
+  }
+
   input.min = '0';
   input.max = '1';
   input.step = '0.01';
@@ -45,6 +51,20 @@ export function generateVolumeInputComponent(node: IBaseNode, uniqueId: string) 
     /* istanbul ignore next */
     node.setVolume(Number((e.target as HTMLInputElement).value))
   ));
+
+  
+  let timerId: any = null;
+
+  setInterval(() => {
+    try {
+      input.value = String(node.getVolume().toFixed(4));
+    } catch (err) {
+      console.log(err);
+      
+      clearTimeout(timerId);
+      timerId = null;
+    }
+  }, 55);
 
   return input;
 }

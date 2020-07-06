@@ -71,17 +71,6 @@ export function generateAudioComponent(
     );
 
     container.appendChild(generateVolumeLevelVisualizerComponent(suite));
-  } else {
-    let timerId: any = null;
-
-    setInterval(() => {
-      try {
-        input.value = node.getVolume().toFixed(4);
-      } catch (err) {
-        clearTimeout(timerId);
-        timerId = null;
-      }
-    }, 55);
   }
 
   return container;
