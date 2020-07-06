@@ -79,6 +79,8 @@ const funcs = {
     duration: number,
   ) =>
   (
-    (time === 0) ? initial : change * (Math.pow(2, 10 * (time / duration - 1)) + initial)
+    (time === 0) ?
+      initial :
+      change * (Math.pow(2, 10 * (time / duration - 1)) + initial)
   ),
 };

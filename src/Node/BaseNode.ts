@@ -16,17 +16,25 @@ import {
 import {
   assertValid,
 } from 'ts-assertions';
+import { ISoundLabel } from './ISoundLabel';
 
 export class BaseNode implements IBaseNode {
   get type(): NodeTypes {
     throw new Error('Type not implemented.');
   }
 
-  private __volume: number = 1;
-  private __gainNode: GainNode | null = null;
-
-  protected __isWebAudio: boolean;
   protected __audioContext: AudioContext | null = null;
+  protected __gainNode: GainNode | null = null;
+  protected __isWebAudio: boolean;
+  protected __label: ISoundLabel = {
+    artistName: '',
+    contributors: [],
+    license: '',
+    title: '',
+  };
+
+  protected __volume: number = 1;
+  protected __volumeChangeCallbacks: Record<string, (name: string, volume: number) => void> = {};
 
   constructor(options?: INodeOptions) {
     const opts = options || {};
@@ -59,6 +67,32 @@ export class BaseNode implements IBaseNode {
 
   public readonly getInputNode = (): AudioNode => this.getGainNode();
 
+  public readonly getLabel = (): ISoundLabel => this.__label;
+
+  public setLabel(label: Partial<ISoundLabel>) {
+    const newLabel = { ...this.getLabel() };
+
+    if (label.artistName) {
+      newLabel.artistName = label.artistName;
+    }
+
+    if (Array.isArray(label.contributors)) {
+      newLabel.contributors = label.contributors;
+    }
+
+    if (label.license) {
+      newLabel.license = label.license;
+    }
+
+    if (label.title) {
+      newLabel.title = label.title;
+    }
+
+    this.__label = { ...newLabel };
+
+    return this;
+  };
+
   public readonly getVolume = () => this.__volume;
 
   /**
@@ -73,6 +107,24 @@ export class BaseNode implements IBaseNode {
       this.getGainNode().gain.setValueAtTime(value, currentTime);
     }
 
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      const callback = this.__volumeChangeCallbacks[key];
+      callback(key, this.getVolume());
+    });
+
+    return this;
+  }
+
+  public addVolumeChangeCallback(
+    name: string,
+    cb: (name: string, volume: number) => void,
+  ) {
+    this.__volumeChangeCallbacks[name] = cb;
+    return this;
+  }
+
+  public removeVolumeChangeCallback(name: string) {
+    delete this.__volumeChangeCallbacks[name];
     return this;
   }
 }

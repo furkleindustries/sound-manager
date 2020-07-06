@@ -246,6 +246,11 @@ export class Sound
       this.__pausedTime = seconds;
     }
 
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
     return this;
   };
 
@@ -292,6 +297,11 @@ export class Sound
       ).loop = loop;
     }
 
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
     return this;
   };
 
@@ -299,6 +309,12 @@ export class Sound
 
   public readonly setFade = (fade: IFade | null) => {
     this.__fade = fade;
+
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
     return this;
   };
 
@@ -326,6 +342,11 @@ export class Sound
 
     /* Ensure the sound knows it's playing. */
     this.__playing = true;
+
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
 
     /* Emit the promise that was either just generated or emitted on previous
      * unfinished plays. */
@@ -505,6 +526,11 @@ export class Sound
     this.__playing = false;
     this.__clearScheduledFades();
 
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
     return this;
   };
 
@@ -531,16 +557,35 @@ export class Sound
       assertValid<HTMLAudioElement>(this.__audioElement).currentTime = 0;
     }
 
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
     return this;
   };
 
-  public readonly rewind = (seconds: number) => (
-    this.setTrackPosition(this.getTrackPosition() - seconds)
-  );
+  public readonly rewind = (seconds: number) => {
+    this.setTrackPosition(this.getTrackPosition() - seconds);
 
-  public readonly fastForward = (seconds: number) => (
-    this.setTrackPosition(this.getTrackPosition() + seconds)    
-  );
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
+    return this;
+  };
+
+  public readonly fastForward = (seconds: number) => {
+    const currentVolume = this.getVolume();
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      this.__volumeChangeCallbacks[key](key, currentVolume);
+    });
+
+    this.setTrackPosition(this.getTrackPosition() + seconds);
+
+    return this;
+  };
 
   public readonly updateAudioElementVolume = () => {
     /* Set the audio element volume to the product of manager, group, and

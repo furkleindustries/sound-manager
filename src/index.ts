@@ -29,3 +29,9 @@ export * from './AnalysisSuite/IAnalysisRenderCallback';
 export * from './AnalysisSuite/IGetAnalysisOptions';
 
 export * from './functions/loadAudioBuffer';
+
+export * from './components/SoundControllerView';
+export * from './components/SoundGroupView';
+export * from './components/SoundManagerView';
+export * from './components/SoundView';
+export * from './components/SoundViewLabel';

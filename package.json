@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/furkleindustries/sound-manager#readme",
   "devDependencies": {
+    "@types/classnames": "^2.2.10",
     "@types/jest": "^24.9.1",
     "@types/node": "^11.15.16",
     "babel-core": "^6.26.3",
@@ -55,6 +56,12 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "ts-assertions": "^2.0.5"
+    "@types/react": "^16.9.41",
+    "bufferutil": "^4.0.1",
+    "canvas": "^2.6.1",
+    "classnames": "^2.2.6",
+    "react": "^16.13.1",
+    "ts-assertions": "^2.0.5",
+    "utf-8-validate": "^5.0.2"
   }
 }
