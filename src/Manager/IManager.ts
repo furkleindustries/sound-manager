@@ -19,13 +19,8 @@ import {
 
 export interface IManager extends IBaseNode, IAnalysableNode {
   readonly type: NodeTypes.Manager;
-
   readonly collection: ICollectionSubmanager;
   readonly player: IPlayerSubmanager;
-
-  /* Audio panel */
-  generateVolumePanelElement(): HTMLElement;
-  updateVolumePanelElement(): this;
   volumePanelRegister(node: IPanelRegisterableNode): this;
-  volumePanelDeregister(node: IPanelRegisterableNode): this;
+  volumePanelUnregister(node: IPanelRegisterableNode): this;
 }

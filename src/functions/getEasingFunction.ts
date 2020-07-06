@@ -2,7 +2,7 @@
 
 import {
   EasingCurves,
-} from '../Fade/EasingCurves';
+} from '../enums/EasingCurves';
 
 export const getEasingFunction = (type: EasingCurves) => funcs[type];
 

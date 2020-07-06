@@ -1,6 +1,6 @@
 import {
   EasingCurves,
-} from './EasingCurves';
+} from '../enums/EasingCurves';
 import {
   fadeArgumentToFadeProperty,
 } from './fadeUtils';

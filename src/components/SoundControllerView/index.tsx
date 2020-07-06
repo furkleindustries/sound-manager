@@ -8,8 +8,15 @@ import {
 
 import * as React from 'react';
 
-export class SoundControllerView extends React.PureComponent<ISoundControllerViewProps> {
+export class SoundControllerView extends React.PureComponent<
+  ISoundControllerViewProps,
+  { readonly volume: number }
+> {
   private changeId = '';
+
+  public readonly state: { readonly volume: number} = {
+    volume: 1,
+  };
 
   public readonly render = () => {
     const {
@@ -17,24 +24,18 @@ export class SoundControllerView extends React.PureComponent<ISoundControllerVie
       components = {},
       sound: {
         addVolumeChangeCallback,
-        getLoop,
         getVolume,
-        isPanelRegistered,
         isPlaying,
-        isWebAudio,
         pause,
         play,
-        rewind,
-        setLoop,
         setVolume,
-        stop,
       },
     } = this.props;
 
     this.changeId = String(Math.random() * 555555555);
 
-    addVolumeChangeCallback(this.changeId, (name: string, volume: number) => {
-      this.forceUpdate();
+    addVolumeChangeCallback(this.changeId, (_, volume) => {
+      this.setState({ volume });
     });
 
     const volumeSetter = (e: React.FormEvent<HTMLInputElement>) => {
@@ -46,8 +47,8 @@ export class SoundControllerView extends React.PureComponent<ISoundControllerVie
         pause();
       } else {
         play().then(
-          () => this.forceUpdate(),
-          () => this.forceUpdate(),
+          () => {},
+          () => {},
         );
       }
     };

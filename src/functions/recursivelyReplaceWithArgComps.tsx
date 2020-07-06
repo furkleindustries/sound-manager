@@ -2,22 +2,27 @@ import * as React from 'react';
 
 export const recursivelyReplaceWithArgComps = (
   map: Record<string, React.ComponentType> = {},
-  element: React.ReactElement<Record<string, any> & { children?: React.ReactNode }>,
-) => {
+  node: React.ReactNode,
+): React.ReactNode => {
   const mapKeys = Object.keys(map);
-  const recursor = recursivelyReplaceWithArgComps.bind(null, map);
+  if (!React.isValidElement(node)) {
+    return node;
+  }
+
   return React.cloneElement(
-    element,
-    element.props,
-    React.Children.toArray(element).map((child) => {
+    node,
+    node.props,
+    React.Children.toArray(node.props.children).map((child) => {
       if (React.isValidElement(child)) {
-        return React.cloneElement(
-          mapKeys.includes(child.type as any) ?
-            mapKeys[String(child.type)] :
-            child,
+        return React.createElement(
+          mapKeys.includes(child.type as string) ?
+            map[child.type as string] :
+            child.type,
 
           child.props,
-          React.Children.toArray(recursor),
+          React.Children.toArray(child.props.children).map((subchild) => (
+            recursivelyReplaceWithArgComps(map, subchild)
+          )),
         );
       }
 

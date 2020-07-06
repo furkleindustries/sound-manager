@@ -16,12 +16,6 @@ export class SoundGroupView extends React.PureComponent<ISoundGroupViewProps> {
       components = {},
       group: {
         sounds,
-        isPanelRegistered,
-        isWebAudio,
-        pauseAllSounds,
-        setVolume,
-        stopAllSounds,
-        updateAllAudioElementsVolume,
       },
     } = this.props;
 
@@ -38,6 +32,7 @@ export class SoundGroupView extends React.PureComponent<ISoundGroupViewProps> {
             <li>
               <SoundView
                 name={key}
+                key={key}
                 sound={sounds[key]}
               />
             </li>

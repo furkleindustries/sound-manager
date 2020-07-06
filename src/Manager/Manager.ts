@@ -11,9 +11,6 @@ import {
   CollectionSubmanager,
 } from './CollectionSubmanager';
 import {
-  generateAudioPanelElement,
-} from './generateAudioPanelElement';
-import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
@@ -43,9 +40,6 @@ import {
 import {
   assertValid,
 } from 'ts-assertions';
-import {
-  updateAudioPanelElement,
-} from './updateAudioPanelElement';
 
 export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
   get type(): NodeTypes.Manager {
@@ -99,45 +93,18 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     return this;
   };
 
-  /* Volume panel */
-  private __volumePanelElement: HTMLElement | null = null;
-
-  public readonly generateVolumePanelElement = (): HTMLElement => {
-    this.__volumePanelElement = generateAudioPanelElement(this);
-    return this.__volumePanelElement;
-  };
-
-  public readonly updateVolumePanelElement = () => {
-    const safeVolumePanelElement = assertValid<HTMLElement>(
-      this.__volumePanelElement,
-    );
-
-    const newElem = updateAudioPanelElement(this, safeVolumePanelElement);
-    this.__volumePanelElement = newElem;
-
-    return this;
-  };
-
   public readonly volumePanelRegister = (node: IPanelRegisterableNode) => {
     assertValid<IPanelRegisterableNode>(
       node,
     ).__panelRegistered = true;
 
-    if (this.__volumePanelElement) {
-      this.updateVolumePanelElement();
-    }
-
     return this;
   };
 
-  public readonly volumePanelDeregister = (node: IPanelRegisterableNode) => {
+  public readonly volumePanelUnregister = (node: IPanelRegisterableNode) => {
     assertValid<IPanelRegisterableNode>(
       node,
     ).__panelRegistered = false;
-
-    if (this.__volumePanelElement) {
-      this.updateVolumePanelElement();
-    }
 
     return this;
   };

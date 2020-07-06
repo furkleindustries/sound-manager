@@ -17,7 +17,7 @@ export class SoundManagerView extends React.PureComponent<ISoundManagerViewProps
       className,
       components = {},
       manager: {
-        collection: { getAllGroups },
+        collection: { groups },
       },
     } = this.props;
 
@@ -30,9 +30,10 @@ export class SoundManagerView extends React.PureComponent<ISoundManagerViewProps
         )}
       >
         <ul>
-          {getAllGroups().map((group) => (
+          {Object.keys(groups).map((name) => (
             <SoundGroupView
-              group={group}
+              group={groups[name]}
+              key={name}
             />
           ))}
         </ul>
