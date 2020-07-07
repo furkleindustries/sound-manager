@@ -17,12 +17,15 @@ export const getFadeValueAtTime = ({
   duration: number,
   initial: number,
   time: number,
-}) =>
-(
-  getEasingFunction(curve)(
-    time,
-    initial,
-    change,
-    duration,
-  )
+}) => Math.max(
+  0,
+  Math.min(
+    1,
+    getEasingFunction(curve)(
+      time,
+      initial,
+      change,
+      duration,
+    ),
+  ),
 );

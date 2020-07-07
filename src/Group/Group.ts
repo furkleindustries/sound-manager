@@ -139,17 +139,16 @@ export class Group
   public readonly addSounds = (sounds: ISoundsMap) => {
     const names = Object.keys(sounds);
     const isWebAudio = this.isWebAudio();
+    const volumeGetter = () => this.getVolume();
     names.forEach((soundName) => {
       assert(soundName)
       assert(!(soundName in this.sounds));
       assert(sounds[soundName]);
-      if (isWebAudio) {
-        const sound = sounds[soundName];
-        /* istanbul ignore next */
-        sound.getGroupVolume = () => this.getVolume();
-        if (sound.isWebAudio()) {
-          sound.getOutputNode().connect(this.getOutputNode());
-        }
+      const sound = sounds[soundName];
+      sound.getGroupVolume = volumeGetter;
+
+      if (isWebAudio && sound.isWebAudio()) {
+        sound.getOutputNode().connect(this.getOutputNode());
       }
     });
 
@@ -236,4 +235,8 @@ export class Group
 
     return this;
   };
+
+  public readonly callVolumeChangeCallbacks = () => {
+    super.callVolumeChangeCallbacks();
+  }
 }

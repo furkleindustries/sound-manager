@@ -2,24 +2,29 @@ import {
   getFadeValueAtTime,
 } from '../functions/getFadeValueAtTime';
 import {
-  IFade,
-} from './IFade';
+  IGetFadeVolumeArgs,
+} from './IGetFadeVolumeArgs';
 
-export function getFadeVolume(
-  fade: IFade,
-  trackPosition: number,
-  duration: number,
-)
-{
+export const getFadeVolume = ({
+  fade,
+  trackPosition,
+  duration,
+  iterationCount = 0,
+  fadeOnLoops = false,
+  targetVolume,
+}: IGetFadeVolumeArgs) => {
   if (!fade) {
+    return 1;
+  } else if (fadeOnLoops !== true && iterationCount) {
     return 1;
   }
 
   const inLen = Number(fade.length.in);
   const outLen = Number(fade.length.out);
+  // Fading in.
   if (fade.easingCurve.in && inLen >= trackPosition) {
     return getFadeValueAtTime({
-      change: 1,
+      change: targetVolume,
       curve: fade.easingCurve.in,
       duration: inLen,
       initial: 0,
@@ -27,10 +32,10 @@ export function getFadeVolume(
     });
   } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
     return getFadeValueAtTime({
-      change: -1,
+      change: -targetVolume,
       curve: fade.easingCurve.out,
       duration: outLen,
-      initial: 1,
+      initial: targetVolume,
       time: outLen - (duration - trackPosition),
     });
   }

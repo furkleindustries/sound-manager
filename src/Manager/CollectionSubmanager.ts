@@ -235,7 +235,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     group.callVolumeChangeCallbacks();
 
     return this;
-  }
+  };
 
   public readonly addSound = async (
     name: string,

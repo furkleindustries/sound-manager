@@ -81,9 +81,8 @@ export class Sound
   private __pausedTime: number = 0; 
   private __playing: boolean = false;
   /* istanbul ignore next */
-  private readonly getManagerVolume: () => number = () => {
-    throw new Error('getManagerVolume not initialized.');
-  };
+  /* @ts-ignore */
+  public getManagerVolume: () => number = () => 1;
 
   private __promise: Promise<Event> | null = null;
   private __sourceNode: AudioBufferSourceNode | null = null;
@@ -135,12 +134,13 @@ export class Sound
     }
 
     this.__initializeArgumentProperties(fade, loop, trackPosition);
-    if (!isWebAudio) {
-      this.updateAudioElementVolume();
+
+    if (isValidVolume(volume)) {
+      this.setVolume(volume);
     }
 
-    if (isValidVolume(volume)) {;
-      this.setVolume(volume);
+    if (!this.isWebAudio()) {
+      this.updateAudioElementVolume();
     }
   }
 
@@ -599,20 +599,54 @@ export class Sound
   public readonly updateAudioElementVolume = () => {
     /* Set the audio element volume to the product of manager, group, and
      * fade, and sound volumes. */
-    assertValid<HTMLAudioElement>(this.__audioElement).volume =
-      this.getManagerVolume() *
-      this.getGroupVolume() *
-      this.getFadeVolume() *
-      this.getVolume();
+    const sources = [
+      'Manager',
+      'Group',
+      'Fade',
+      '',
+    ];
+
+    const volumes = sources.map(() => 1);
+
+    for (let ii = 0; ii < sources.length; ii += 1) {
+      const key = sources[ii];
+      // @ts-ignore
+      const computedVol = this[`get${key}Volume`]();
+      if (isValidVolume(computedVol)) {
+        volumes[ii] = computedVol;
+      } else {
+        console.warn(`Expected a volume between the inclusive range of 0 and 1 in Sound.get${key}Volume. Instead, ${computedVol} was received.`)
+      }
+    }
+
+    const boundedVolume = volumes.reduce((aa, bb) => aa * bb, 1);
+
+    assertValid<HTMLAudioElement>(this.__audioElement).volume = boundedVolume;
 
     return this;
   };
 
-  public readonly getFadeVolume = () => {
+  public readonly getFadeVolume = (iterationCount = 0, fadeOnLoops = false) => {
     const fade = this.getFade();
     const trackPosition = this.getTrackPosition();
     const duration = this.getDuration();
-
-    return fade ? getFadeVolume(fade, trackPosition, duration) : 1;
+    const targetVolume = this.getVolume();
+  
+    if (fade) {
+      return getFadeVolume({
+        duration,
+        fade,
+        fadeOnLoops,
+        iterationCount,
+        targetVolume,
+        trackPosition,
+      });
+    }
+    
+    return 1;
   };
+
+  public readonly callVolumeChangeCallbacks = () => (
+    super.callVolumeChangeCallbacks()
+  );
 }
