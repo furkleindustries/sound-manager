@@ -9,7 +9,7 @@ import {
 } from './ISound';
 import {
   Sound,
-} from '../Sound/Sound';
+} from './Sound';
 import {
   assertValid,
 } from 'ts-assertions';
@@ -26,7 +26,7 @@ export const strings = {
     'The url argument property was not provided to createHtmlAudioSound.',
 };
 
-export async function createHtmlAudioSound(options: ICreateSoundOptions): Promise<ISound> {
+export const createHtmlAudioSound = (options: ICreateSoundOptions): Promise<ISound> => {
   const {
     getManagerVolume,
     url,
@@ -48,10 +48,32 @@ export async function createHtmlAudioSound(options: ICreateSoundOptions): Promis
     strings.GET_MANAGER_VOLUME_INVALID,
   );
 
-  return new Sound(getFrozenObject({
+  const sound = new Sound(getFrozenObject({
     ...options,
     audioElement,
     context: undefined,
     getManagerVolume: safeGetManagerVolume,
   }));
+
+  const playthroughListener = (resolver: (sound: ISound) => void) => {
+    resolver(sound);
+  };
+
+  const errorListener = (rejector: (err: Error) => void, { error }: ErrorEvent) => {
+    rejector(error);
+  };
+
+  return new Promise((resolve, reject) => {
+    const boundPlayListener = playthroughListener.bind(null, resolve);
+    const boundErrListener = errorListener.bind(null, reject);
+    audioElement.addEventListener(
+      'canplaythrough',
+      boundPlayListener,
+    );
+
+    audioElement.addEventListener(
+      'error',
+      boundErrListener,
+    );
+  });
 };

@@ -127,6 +127,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     const group = createGroup(options);
     this.addGroups({ [name]: group });
 
+    group.callVolumeChangeCallbacks();
+
     return group;
   };
 
@@ -147,10 +149,16 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
     this.__groups = getFrozenObject(this.groups, groups);
 
+    Object.values(this.__groups).forEach((group) => (
+      group.callVolumeChangeCallbacks()
+    ));
+
     return this;
   };
 
-  public readonly hasGroup = (name: string) => (name in this.groups);
+  public readonly hasGroup = (name: string) => (
+    name in this.groups
+  );
 
   public readonly hasGroups = (names: string[]) => (
     names.filter((groupName) => (
@@ -221,11 +229,17 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   public readonly setGroupVolume = (
     value: number,
     groupName = 'default',
-  ) => this.getGroup(groupName).setVolume(value) && this;
+  ) => {
+    const group = this.getGroup(groupName);
+    group.setVolume(value);
+    group.callVolumeChangeCallbacks();
+
+    return this;
+  }
 
   public readonly addSound = async (
     name: string,
-    options: string | ICreateSoundOptions,
+    options: ICreateSoundOptions,
     groupName = 'default',
   ): Promise<ISound> =>
   {
@@ -244,6 +258,8 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     const sound = await createSound(opts);
     this.addSounds({ [name]: sound }, groupName);
     this.__deregisterIntentToAddSound(name, groupName);
+
+    sound.callVolumeChangeCallbacks();
 
     return sound;
   };

@@ -11,12 +11,14 @@ import {
   INodeOptions,
 } from './INodeOptions';
 import {
+  ISoundLabel,
+} from './ISoundLabel';
+import {
   isValidVolume,
 } from '../functions/isValidVolume';
 import {
   assertValid,
 } from 'ts-assertions';
-import { ISoundLabel } from './ISoundLabel';
 
 export class BaseNode implements IBaseNode {
   get type(): NodeTypes {
@@ -47,6 +49,8 @@ export class BaseNode implements IBaseNode {
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
     }
+
+    this.callVolumeChangeCallbacks();
   }
 
   public readonly isWebAudio = () => Boolean(this.__isWebAudio);
@@ -90,6 +94,8 @@ export class BaseNode implements IBaseNode {
 
     this.__label = { ...newLabel };
 
+    this.callVolumeChangeCallbacks();
+
     return this;
   };
 
@@ -107,10 +113,7 @@ export class BaseNode implements IBaseNode {
       this.getGainNode().gain.setValueAtTime(value, currentTime);
     }
 
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      const callback = this.__volumeChangeCallbacks[key];
-      callback(key, this.getVolume());
-    });
+    this.callVolumeChangeCallbacks();
 
     return this;
   }
@@ -126,5 +129,12 @@ export class BaseNode implements IBaseNode {
   public removeVolumeChangeCallback(name: string) {
     delete this.__volumeChangeCallbacks[name];
     return this;
+  }
+
+  public callVolumeChangeCallbacks() {
+    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
+      const callback = this.__volumeChangeCallbacks[key];
+      callback(key, this.getVolume());
+    });
   }
 }

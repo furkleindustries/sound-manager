@@ -18,4 +18,5 @@ export interface IBaseNode {
   setVolume(value: number): IBaseNode;
   addVolumeChangeCallback(name: string, cb: (name: string, volume: number) => void): IBaseNode;
   removeVolumeChangeCallback(name: string): IBaseNode;
+  callVolumeChangeCallbacks(): void;
 }

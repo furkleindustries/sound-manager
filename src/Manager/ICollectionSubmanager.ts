@@ -25,11 +25,6 @@ export interface ICollectionSubmanager {
   hasIntentToAddSound(name: string, groupName?: string): boolean;
   addSound(
     name: string,
-    url: string,
-    groupName?: string,
-  ): Promise<ISound>;
-  addSound(
-    name: string,
     options: ICreateSoundOptions,
     groupName?: string,
   ): Promise<ISound>;

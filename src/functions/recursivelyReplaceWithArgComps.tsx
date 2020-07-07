@@ -1,12 +1,13 @@
-import voids from 'void-elements';
+/// import voids from 'void-elements';
 
 import * as React from 'react';
 
 export const recursivelyReplaceWithArgComps = (
-  map: Record<string, React.ComponentType> = {},
+  _: Record<string, React.ComponentType> = {},
   node: React.ReactNode,
 ): React.ReactNode => {
-  const mapKeys = Object.keys(map);
+  return node;
+  /*const mapKeys = Object.keys(map);
   if (!React.isValidElement(node)) {
     return node;
   }
@@ -35,5 +36,5 @@ export const recursivelyReplaceWithArgComps = (
 
       return child;
     }),
-  );
+  );*/
 };

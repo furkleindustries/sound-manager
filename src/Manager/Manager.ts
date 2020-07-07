@@ -98,6 +98,8 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       node,
     ).__panelRegistered = true;
 
+    this.callVolumeChangeCallbacks();
+
     return this;
   };
 

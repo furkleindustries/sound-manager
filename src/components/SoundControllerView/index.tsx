@@ -70,6 +70,7 @@ export class SoundControllerView extends React.PureComponent<
           className="sound-controller-view-volume"
           onChange={volumeSetter}
           key="sound-controller-view-volume"
+          type="range"
           value={volume}
         />
 
