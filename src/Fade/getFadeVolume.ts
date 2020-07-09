@@ -7,11 +7,11 @@ import {
 
 export const getFadeVolume = ({
   fade,
-  trackPosition,
   duration,
   iterationCount = 0,
   fadeOnLoops = false,
   targetVolume,
+  time,
 }: IGetFadeVolumeArgs) => {
   if (!fade) {
     return 1;
@@ -21,7 +21,6 @@ export const getFadeVolume = ({
 
   const inLen = Number(fade.length.in);
   const outLen = Number(fade.length.out);
-  const time = trackPosition * 1000;
   // Fading in.
   if (fade.easingCurve.in && inLen >= time) {
     return getFadeValueAtTime({

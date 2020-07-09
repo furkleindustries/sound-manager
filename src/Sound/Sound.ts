@@ -618,7 +618,7 @@ export class Sound
         fadeOnLoops,
         iterationCount,
         targetVolume,
-        trackPosition,
+        time: trackPosition * 1000,
       });
     }
     
