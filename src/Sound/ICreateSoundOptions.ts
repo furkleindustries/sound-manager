@@ -1,6 +1,9 @@
 import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
+import {
+  ISoundLabel,
+} from '../Node/ISoundLabel';
 
 export interface ICreateSoundOptions {
   context?: AudioContext;
@@ -9,6 +12,7 @@ export interface ICreateSoundOptions {
   buffer?: AudioBuffer;
   url?: string;
   fade?: IFadeOptions | boolean;
+  label?: ISoundLabel;
   loop?: boolean;
   trackPosition?: number;
   volume?: number;

@@ -294,18 +294,8 @@ export class Sound
 
   public readonly isPlaying = () => this.__playing;
 
-  public readonly getLoop = () => {
-    if (this.__loopOverride) {
-      return this.__loopOverride;
-    } else if (this.isWebAudio()) {
-      return this.getSourceNode().loop;
-    }
-
-    return assertValid<HTMLAudioElement>(
-      this.__audioElement,
-      strings.GET_LOOP_AUDIO_ELEMENT_INVALID,
-    ).loop;
-  };
+  private __loop = false;
+  public readonly getLoop = () => this.__loopOverride || this.__loop;
 
   public readonly setLoop = (loop: boolean) => {
     if (this.isWebAudio()) {
@@ -316,6 +306,8 @@ export class Sound
         strings.SET_LOOP_AUDIO_ELEMENT_INVALID,
       ).loop = loop;
     }
+
+    this.__loop = loop;
 
     this.callStateCallbacks();
 
