@@ -8,7 +8,7 @@ import {
 
 import * as React from 'react';
 
-export const SoundManagerViewL: React.FunctionComponent<ISoundManagerViewProps> = ({
+export const SoundManagerView: React.FunctionComponent<ISoundManagerViewProps> = ({
   className,
   manager: {
     collection: { groups },
