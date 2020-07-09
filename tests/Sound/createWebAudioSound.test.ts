@@ -80,7 +80,13 @@ describe('createWebAudioSound unit tests.', () => {
       url,
     } as any;
 
-    await createWebAudioSound(opts);
+    await createWebAudioSound(
+      opts,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
+
     expect(Sound).toBeCalledTimes(1);
     expect(Sound).toBeCalledWith({
       ...opts,
@@ -100,7 +106,12 @@ describe('createWebAudioSound unit tests.', () => {
     };
 
     try {
-      await createWebAudioSound(opts as any);
+      await createWebAudioSound(
+        opts as any,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+      );
     } catch (err) {
       expect(err).toBe(mockVal);
     }

@@ -11,6 +11,7 @@ import {
 export const fadeOutToStop = ({
   getFade,
   getVolume,
+  getTrackPosition,
   setVolume,
 }: ISound) => {
   const fade = getFade() || {
@@ -28,12 +29,12 @@ export const fadeOutToStop = ({
   const volume = getVolume();
   const fadeCurve = fade.easingCurve.out || EasingCurves.Quadratic;
   const fadeLength = fade.length.out || 3500;
+  const startPosition = getTrackPosition();
 
   return new Promise((resolve) => {
-    const startTime = new Date().getTime();
     const timerId = setInterval(() => {
-      const currentTime = new Date().getTime();
-      if (currentTime >= startTime + fadeLength) {
+      const trackPosition = getTrackPosition() * 1000;
+      if (trackPosition >= startPosition + fadeLength) {
         clearInterval(timerId);
         return resolve();
       } else {
@@ -42,7 +43,7 @@ export const fadeOutToStop = ({
           curve: fadeCurve,
           duration: fadeLength,
           initial: volume,
-          time: startTime,
+          time: trackPosition,
         }));
       }
     }, 1);

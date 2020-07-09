@@ -5,10 +5,16 @@ import {
   NodeTypes,
 } from '../../src/enums/NodeTypes';
 
-const testGroupFactory = (opts = {}) => new Group({
-  context: new AudioContext(),
-  ...opts,
-});
+const testGroupFactory = (opts = {}) => new Group(
+  {
+    context: new AudioContext(),
+    ...opts,
+  },
+
+  jest.fn(),
+  jest.fn(),
+  jest.fn(),
+);
 
 describe('Group Web Audio unit tests.', () => {
   it('Has a type property with the value NodeTypes.Group.', () => {

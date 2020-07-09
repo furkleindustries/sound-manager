@@ -24,7 +24,12 @@ describe('createHtmlHelper unit tests.', () => {
 
   it('Passes the options argument to getFrozenObject and then to createHtmlAudioSound.', () => {
     const opts: any = Symbol('opts');
-    createHtmlHelper(opts);
+    createHtmlHelper(
+      opts,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     expect(getFrozenObject).toBeCalledTimes(1);
     expect(getFrozenObject).toBeCalledWith(opts);
@@ -33,7 +38,12 @@ describe('createHtmlHelper unit tests.', () => {
   });
 
   it('Returns the return value of createHtmlAudioSound.', async () => {
-    expect(await createHtmlHelper({} as any)).toBe(retSym);
+    expect(await createHtmlHelper(
+      {} as any,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    )).toBe(retSym);
   });
 
   it('Throws if createHtmlAudioSound does.', async () => {
@@ -42,7 +52,12 @@ describe('createHtmlHelper unit tests.', () => {
     (createHtmlAudioSound as any).mockImplementation(() => { throw err; });
 
     try {
-      await createHtmlHelper({} as any);
+      await createHtmlHelper(
+        {} as any,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+      );
     } catch (__err) {
       expect(__err).toEqual(
         new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`)

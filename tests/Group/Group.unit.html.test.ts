@@ -5,9 +5,15 @@ import {
   NodeTypes,
 } from '../../src/enums/NodeTypes';
 
-const testGroupFactory = (opts = {}) => new Group({
-  ...opts,
-});
+const testGroupFactory = (opts = {}) => new Group(
+  {
+    ...opts,
+  },
+
+  jest.fn(),
+  jest.fn(),
+  jest.fn(),
+);
 
 describe('Group HTML5 Audio unit tests.', () => {
   it('Has a type property with the value NodeTypes.Group.', () => {

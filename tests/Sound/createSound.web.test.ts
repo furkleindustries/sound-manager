@@ -35,7 +35,12 @@ describe('createSound Web Audio unit tests.', () => {
 
   it('Freezes the options argument.', () => {
     const opts = getOpts();
-    createSound(opts);
+    createSound(
+      opts,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     expect(getFrozenObject).toBeCalledTimes(1);
     expect(getFrozenObject).toBeCalledWith(opts);
@@ -43,7 +48,12 @@ describe('createSound Web Audio unit tests.', () => {
 
   it('Calls createWebHelper.', () => {
     const opts = getOpts();
-    createSound(opts);
+    createSound(
+      opts,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     expect(createWebHelper).toBeCalledTimes(1);
     expect(createWebHelper).toBeCalledWith(opts);

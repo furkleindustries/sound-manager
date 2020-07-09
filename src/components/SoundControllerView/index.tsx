@@ -9,15 +9,10 @@ import {
 import * as React from 'react';
 
 export class SoundControllerView extends React.PureComponent<
-  ISoundControllerViewProps,
-  { readonly volume: number }
+  ISoundControllerViewProps
 > {
-  public readonly state: { readonly volume: number} = {
-    volume: 1,
-  };
-
   private readonly stateCallback: IManagerStateCallback = () => {
-    this.setState({ volume: this.props.sound.getVolume() });
+    this.forceUpdate();
   };
 
   public readonly render = () => {

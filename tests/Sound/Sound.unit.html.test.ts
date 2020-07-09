@@ -24,11 +24,17 @@ const testSoundFactory = (options?: Partial<ISoundOptions>) => {
     loop: false,
   };
 
-  return new Sound({
-    audioElement,
-    getManagerVolume: jest.fn(() => 1),
-    ...options,
-  });
+  return new Sound(
+    {
+      audioElement,
+      getManagerVolume: jest.fn(() => 1),
+      ...options,
+    },
+
+    jest.fn(),
+    jest.fn(),
+    jest.fn(),
+  );
 };
 
 describe('Sound HTML5 Audio unit tests.', () => {
@@ -50,11 +56,16 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Sets the audio element to the value passed in the constructor.', () => {
     const obj = {};
-    const sound = new Sound({
-      getManagerVolume: jest.fn(() => 1),
-      // @ts-ignore
-      audioElement: obj,
-    });
+    const sound = new Sound(
+      {
+        getManagerVolume: jest.fn(() => 1),
+        // @ts-ignore
+        audioElement: obj,
+      },
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     // @ts-ignore
     expect(sound.__audioElement).toBe(obj);
@@ -62,11 +73,16 @@ describe('Sound HTML5 Audio unit tests.', () => {
 
   it('Sets the getManagerVolume function to the value passed in the constructor.', () => {
     const mock = jest.fn(() => 1);
-    const sound = new Sound({
-      getManagerVolume: mock,
-      // @ts-ignore
-      audioElement: {},
-    });
+    const sound = new Sound(
+      {
+        getManagerVolume: mock,
+        // @ts-ignore
+        audioElement: {},
+      },
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     // @ts-ignore
     expect(sound.getManagerVolume).toBe(mock);

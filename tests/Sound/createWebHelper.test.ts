@@ -36,7 +36,12 @@ describe('createWebHelper unit tests.', () => {
 
   it('Passes the options to getFrozenObject, then to createWebAudioSound.', () => {
     const opts = Symbol('options') as any;
-    createWebHelper(opts);
+    createWebHelper(
+      opts,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
 
     expect(getFrozenObject).toBeCalledTimes(1);
     expect(getFrozenObject).toBeCalledWith(opts);
@@ -45,14 +50,24 @@ describe('createWebHelper unit tests.', () => {
   });
 
   it('Returns the result of createWebAudioSound if it resolves.', async () => {
-    expect(await createWebHelper({} as any)).toBe(webRetSym);
+    expect(await createWebHelper(
+      {} as any,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    )).toBe(webRetSym);
   });
 
   it('Warns if createWebAudioSound fails.', async () => {
     expect.assertions(2);
     const err = new Error('bux quux');
     (createWebAudioSound as any).mockImplementation(() => { throw err; });
-    await createWebHelper({} as any);
+    await createWebHelper(
+      {} as any,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    );
     
     expect(warn).toBeCalledTimes(1);
     expect(warn).toBeCalledWith(`${strings.WEB_AUDIO_FAILED}\n${err}`);
@@ -60,7 +75,12 @@ describe('createWebHelper unit tests.', () => {
 
   it('Returns the value of createHtmlHelper if createWebAudioSound rejects and createHtmlHelper resolves.', async () => {
     (createWebAudioSound as any).mockImplementation(() => { throw new Error(); });
-    expect(await createWebHelper({} as any)).toBe(htmlRetSym);
+    expect(await createWebHelper(
+      {} as any,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+    )).toBe(htmlRetSym);
   });
 
   it('Throws if both createWebAudioSound and createHtmlHelper reject.', async () => {
@@ -70,7 +90,12 @@ describe('createWebHelper unit tests.', () => {
     (createHtmlHelper as any).mockImplementation(() => { throw err; });
 
     try {
-      await createWebHelper({} as any);
+      await createWebHelper(
+        {} as any,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+      );
     } catch (__err) {
       expect(__err).toEqual(
         new Error(`${strings.BOTH_FAILED}\n${err}`)

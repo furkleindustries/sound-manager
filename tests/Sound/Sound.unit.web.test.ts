@@ -31,8 +31,10 @@ const testSoundFactory = (options?: Partial<ISoundOptions>) => {
       getManagerVolume: jest.fn(() => 1),
       ...options,
     },
+
     jest.fn(() => 1),
     jest.fn(() => 1),
+    jest.fn(),
   );
 };
 
@@ -58,6 +60,7 @@ describe('Sound Web Audio unit tests.', () => {
       } as any,
       jest.fn(() => 1),
       jest.fn(() => 1),
+      jest.fn(),
     );
 
     expect(func).toThrow(strings.CTOR_BUFFER_INVALID);
@@ -69,6 +72,7 @@ describe('Sound Web Audio unit tests.', () => {
         { context: getContext() } as any,
         jest.fn(() => 1),
         jest.fn(() => 1),
+        jest.fn(),
       )
     );
 
