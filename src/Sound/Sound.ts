@@ -151,11 +151,11 @@ export class Sound
       );
     }
 
-    this.__initializeArgumentProperties(fade, loop, trackPosition);
-
-    if (isValidVolume(volume)) {
-      this.setVolume(volume);
-    }
+    this.__initializeArgumentProperties(
+      fade,
+      loop,
+      trackPosition,
+    );
 
     if (!this.isWebAudio()) {
       this.updateAudioElementVolume();
@@ -537,7 +537,6 @@ export class Sound
     /* Must be executed after __pausedTime = ... and this.getPlaying(). */
     this.__playing = false;
     this.__clearScheduledFades();
-
     this.callStateCallbacks();
 
     return this;
@@ -563,7 +562,6 @@ export class Sound
 
   public readonly rewind = (milliseconds: number) => {
     this.setTrackPosition(this.getTrackPosition() - milliseconds);
-
     this.callStateCallbacks();
 
     return this;
@@ -571,7 +569,6 @@ export class Sound
 
   public readonly fastForward = (milliseconds: number) => {
     this.setTrackPosition(this.getTrackPosition() + milliseconds);
-
     this.callStateCallbacks();
 
     return this;
@@ -607,12 +604,15 @@ export class Sound
     return this;
   };
 
-  public readonly getFadeVolume = (iterationCount = 0, fadeOnLoops = false) => {
+  public readonly getFadeVolume = (
+    iterationCount = 0,
+    fadeOnLoops = false,
+  ) => {
     const fade = this.getFade();
     const time = this.getTrackPosition();
     const duration = this.getDuration();
     const targetVolume = this.getVolume();
-  
+
     if (fade) {
       return getFadeVolume({
         duration,
@@ -623,7 +623,7 @@ export class Sound
         time,
       });
     }
-    
+
     return 1;
   };
 }
