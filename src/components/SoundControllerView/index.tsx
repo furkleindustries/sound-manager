@@ -66,6 +66,7 @@ export class SoundControllerView extends React.PureComponent<
           key="sound-controller-view-volume"
           max={1}
           min={0}
+          step={0.01}
           onChange={volumeSetter}
           type="range"
           value={volume}
