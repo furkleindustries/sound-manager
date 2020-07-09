@@ -23,13 +23,6 @@ export const SoundViewLabel: React.FunctionComponent<ISoundViewLabelProps> = ({
 
     key="sound-view-label"
   >
-    <h6
-      className="sound-view-label-title"
-      key="sound-view-label-title"
-    >
-      {title || name}
-    </h6>
-
     {artistName ?
       <p
         className="sound-view-label-artist-name"
