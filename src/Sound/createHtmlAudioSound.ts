@@ -8,6 +8,9 @@ import {
   ISound,
 } from './ISound';
 import {
+  IManagerStateCallback,
+} from '../interfaces/IManagerStateCallback';
+import {
   Sound,
 } from './Sound';
 import {
@@ -26,7 +29,12 @@ export const strings = {
     'The url argument property was not provided to createHtmlAudioSound.',
 };
 
-export const createHtmlAudioSound = (options: ICreateSoundOptions): Promise<ISound> => {
+export const createHtmlAudioSound = (
+  options: ICreateSoundOptions,
+  registerStateCallback: (callback: IManagerStateCallback) => void,
+  unregisterStateCallback: (callback: IManagerStateCallback) => void,
+  callStateCallbacks: () => void,
+): Promise<ISound> => {
   const {
     buffer,
     context,
@@ -55,18 +63,24 @@ export const createHtmlAudioSound = (options: ICreateSoundOptions): Promise<ISou
     strings.GET_MANAGER_VOLUME_INVALID,
   );
 
-  const sound = new Sound(getFrozenObject({
-    ...options,
-    buffer,
-    audioElement,
-    fade,
-    getManagerVolume,
-    isWebAudio,
-    context,
-    loop,
-    trackPosition,
-    volume,
-  }));
+  const sound = new Sound(
+    getFrozenObject({
+      ...options,
+      buffer,
+      audioElement,
+      fade,
+      getManagerVolume,
+      isWebAudio,
+      context,
+      loop,
+      trackPosition,
+      volume,
+    }),
+
+    registerStateCallback,
+    unregisterStateCallback,
+    callStateCallbacks,
+  );
 
   const playthroughListener = (resolver: (sound: ISound) => void) => {
     resolver(sound);

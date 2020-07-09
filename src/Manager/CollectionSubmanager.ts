@@ -41,6 +41,7 @@ import {
   assert,
   assertValid,
 } from 'ts-assertions';
+import { IManagerStateCallback } from '../interfaces/IManagerStateCallback';
 
 export class CollectionSubmanager implements ICollectionSubmanager {
   /* Node collection */
@@ -62,20 +63,26 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   // @ts-ignore
   private readonly __getManagerVolume: () => number;
 
-  constructor({
-    getAudioContext,
-    getInputNode,
-    getManagerVolume,
-    groups,
-    isWebAudio,
-  }: {
-    getManagerVolume: () => number,
-    getAudioContext?: () => AudioContext,
-    getInputNode?: () => AudioNode;
-    getOutputNode?: () => AnalyserNode;
-    groups?: IGroupsMap,
-    isWebAudio?: () => boolean,
-  }) {
+  constructor(
+    {
+      getAudioContext,
+      getInputNode,
+      getManagerVolume,
+      groups,
+      isWebAudio,
+    }: {
+      getManagerVolume: () => number,
+      getAudioContext?: () => AudioContext,
+      getInputNode?: () => AudioNode;
+      getOutputNode?: () => AnalyserNode;
+      groups?: IGroupsMap,
+      isWebAudio?: () => boolean,
+    },
+
+    public readonly registerStateCallback: (cb: IManagerStateCallback) => void,
+    public readonly unregisterStateCallback: (cb: IManagerStateCallback) => void,
+    public readonly callStateCallbacks: () => void,
+  ) {
     this.__getManagerVolume = assertValid<() => number>(
       typeof getManagerVolume === 'function',
       'The getManagerVolume argument to the CollectionSubmanager constructor was invalid.',
@@ -125,11 +132,15 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     ));
   };
 
-  public readonly addGroup = (name: string, options?: IGroupOptions) => {
-    const group = createGroup(options);
-    this.addGroups({ [name]: group });
+  public readonly addGroup = (name: string, options: IGroupOptions = {}) => {
+    const group = createGroup(
+      options,
+      this.registerStateCallback,
+      this.unregisterStateCallback,
+      this.callStateCallbacks,
+    );
 
-    group.callVolumeChangeCallbacks();
+    this.addGroups({ [name]: group });
 
     return group;
   };
@@ -150,10 +161,6 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     });
 
     this.__groups = getFrozenObject(this.groups, groups);
-
-    Object.values(this.__groups).forEach((group) => (
-      group.callVolumeChangeCallbacks()
-    ));
 
     return this;
   };
@@ -234,8 +241,6 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   ) => {
     const group = this.getGroup(groupName);
     group.setVolume(value);
-    group.callVolumeChangeCallbacks();
-
     return this;
   };
 
@@ -248,11 +253,15 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     const opts: ICreateSoundOptions = getFrozenObject({ ...options });
 
     this.__registerIntentToAddSound(name, groupName);
-    const sound = await createSound(opts);
+    const sound = await createSound(
+      opts,
+      this.registerStateCallback,
+      this.unregisterStateCallback,
+      this.callStateCallbacks,
+    );
+
     this.addSounds({ [name]: sound }, groupName);
     this.__deregisterIntentToAddSound(name, groupName);
-
-    sound.callVolumeChangeCallbacks();
 
     return sound;
   };

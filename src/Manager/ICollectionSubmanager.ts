@@ -42,4 +42,6 @@ export interface ICollectionSubmanager {
   getSoundVolume(name: string, groupName?: string): number;
   setSoundVolume(name: string, value: number, groupName?: string): this;
   updateAllAudioElementsVolume(): this;
+  registerStateCallback(callback: () => void): void;
+  unregisterStateCallback(callback: () => void): void;
 }

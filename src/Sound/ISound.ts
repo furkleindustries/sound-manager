@@ -8,6 +8,9 @@ import {
   IFade,
 } from '../Fade/IFade';
 import {
+  IManagerStateCallback,
+} from '../interfaces/IManagerStateCallback';
+import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
 import {
@@ -44,4 +47,7 @@ export interface ISound
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): this;
+  registerStateCallback(callback: IManagerStateCallback): void;
+  unregisterStateCallback(callback: IManagerStateCallback): void;
+  callStateCallbacks(): void;
 }

@@ -23,4 +23,6 @@ export interface IManager extends IBaseNode, IAnalysableNode {
   readonly player: IPlayerSubmanager;
   volumePanelRegister(node: IPanelRegisterableNode): this;
   volumePanelUnregister(node: IPanelRegisterableNode): this;
+  registerStateCallback(callback: () => void): void;
+  unregisterStateCallback(callback: () => void): void;
 }

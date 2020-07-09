@@ -24,12 +24,16 @@ const getAudioBuffer = (context: AudioContext) => context.createBuffer(1, 100, 1
 const testSoundFactory = (options?: Partial<ISoundOptions>) => {
   const context = options ? options.context || getContext() : getContext();
   const buffer = options ? options.buffer || getAudioBuffer(context) : getAudioBuffer(context);
-  return new Sound({
-    buffer,
-    context,
-    getManagerVolume: jest.fn(() => 1),
-    ...options,
-  });
+  return new Sound(
+    {
+      buffer,
+      context,
+      getManagerVolume: jest.fn(() => 1),
+      ...options,
+    },
+    jest.fn(() => 1),
+    jest.fn(() => 1),
+  );
 };
 
 describe('Sound Web Audio unit tests.', () => {
@@ -45,19 +49,27 @@ describe('Sound Web Audio unit tests.', () => {
   });
 
   it('Throws an error if the buffer argument property is not provided.', () => {
-    const func = () => new Sound({
-      context: {
-        createAnalyser: jest.fn(() => ({})),
-        createGain: jest.fn(),
-      },
-    } as any);
+    const func = () => new Sound(
+      {
+        context: {
+          createAnalyser: jest.fn(() => ({})),
+          createGain: jest.fn(),
+        },
+      } as any,
+      jest.fn(() => 1),
+      jest.fn(() => 1),
+    );
 
     expect(func).toThrow(strings.CTOR_BUFFER_INVALID);
   });
 
   it('Throws an error if the buffer is missing.', () => {
     const func = () => (
-      new Sound({ context: getContext() } as any)
+      new Sound(
+        { context: getContext() } as any,
+        jest.fn(() => 1),
+        jest.fn(() => 1),
+      )
     );
 
     expect(func).toThrow();

@@ -16,13 +16,19 @@ import {
 import {
   assert,
 } from 'ts-assertions';
+import { IManagerStateCallback } from '../interfaces/IManagerStateCallback';
 
 export const strings = {
   OPTIONS_INVALID:
     'The options argument was not provided to createSound.',
 };
 
-export function createSound(options: ICreateSoundOptions): Promise<ISound> {
+export function createSound(
+  options: ICreateSoundOptions,
+  registerStateCallback: (cb: IManagerStateCallback) => void,
+  unregisterStateCallback: (cb: IManagerStateCallback) => void,
+  callStateCallbacks: () => void,
+): Promise<ISound> {
   assert(
     options,
     strings.OPTIONS_INVALID,
@@ -32,8 +38,18 @@ export function createSound(options: ICreateSoundOptions): Promise<ISound> {
 
   /* Default to web audio and require very explicit opt-out. */
   if (opts.isWebAudio === false) {
-    return createHtmlHelper(opts);
+    return createHtmlHelper(
+      opts,
+      registerStateCallback,
+      unregisterStateCallback,
+      callStateCallbacks,
+    );
   } else {
-    return createWebHelper(opts);
+    return createWebHelper(
+      opts,
+      registerStateCallback,
+      unregisterStateCallback,
+      callStateCallbacks,
+    );
   }
 }

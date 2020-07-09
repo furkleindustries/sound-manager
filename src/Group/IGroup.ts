@@ -19,6 +19,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { IManagerStateCallback } from '../interfaces/IManagerStateCallback';
 
 export interface IGroup
   extends
@@ -55,4 +56,7 @@ export interface IGroup
   stopSounds(names: string[]): this;
   stopAllSounds(): this;
   updateAllAudioElementsVolume(): this;
+  registerStateCallback(callback: IManagerStateCallback): void;
+  unregisterStateCallback(callback: IManagerStateCallback): void;
+  callStateCallbacks(): void;
 }

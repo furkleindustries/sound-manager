@@ -1,5 +1,8 @@
 import classNames from 'classnames';
 import {
+  IManagerStateCallback,
+} from '../../interfaces/IManagerStateCallback';
+import {
   ISoundControllerViewProps,
 } from './ISoundControllerViewProps';
 
@@ -9,17 +12,19 @@ export class SoundControllerView extends React.PureComponent<
   ISoundControllerViewProps,
   { readonly volume: number }
 > {
-  private changeId = '';
-
   public readonly state: { readonly volume: number} = {
     volume: 1,
+  };
+
+  private readonly stateCallback: IManagerStateCallback = () => {
+    this.setState({ volume: this.props.sound.getVolume() });
   };
 
   public readonly render = () => {
     const {
       className,
       sound: {
-        addVolumeChangeCallback,
+        registerStateCallback,
         getVolume,
         isPlaying,
         pause,
@@ -28,11 +33,7 @@ export class SoundControllerView extends React.PureComponent<
       },
     } = this.props;
 
-    this.changeId = String(Math.random() * 555555555);
-
-    addVolumeChangeCallback(this.changeId, (_, volume) => {
-      this.setState({ volume });
-    });
+    registerStateCallback(this.stateCallback);
 
     const volumeSetter = (e: React.FormEvent<HTMLInputElement>) => {
       setVolume(Math.max(Math.min(Number(e.currentTarget.value), 1), 0))
@@ -85,8 +86,6 @@ export class SoundControllerView extends React.PureComponent<
   };
 
   public readonly componentWillUnmount = () => {
-    if (this.changeId) {
-      this.props.sound.removeVolumeChangeCallback(this.changeId);
-    }
+    this.props.sound.unregisterStateCallback(this.stateCallback);
   };
 }

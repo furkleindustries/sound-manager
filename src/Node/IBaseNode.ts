@@ -16,7 +16,4 @@ export interface IBaseNode {
   setLabel(label: Partial<ISoundLabel>): IBaseNode;
   getVolume(): number;
   setVolume(value: number): IBaseNode;
-  addVolumeChangeCallback(name: string, cb: (name: string, volume: number) => void): IBaseNode;
-  removeVolumeChangeCallback(name: string): IBaseNode;
-  callVolumeChangeCallbacks(): void;
 }

@@ -15,6 +15,9 @@ import {
   IGroupOptions,
 } from './IGroupOptions';
 import {
+  IManagerStateCallback,
+} from '../interfaces/IManagerStateCallback';
+import {
   ISound,
 } from '../Sound/ISound';
 import {
@@ -54,12 +57,24 @@ export class Group
     return this.__sounds;
   }
 
-  constructor(options: IGroupOptions) {
+  constructor(
+    options: IGroupOptions,
+    public readonly registerStateCallback: (
+      callback: IManagerStateCallback,
+    ) => void,
+
+    public readonly unregisterStateCallback: (
+      callback: IManagerStateCallback,
+    ) => void,
+
+    public readonly callStateCallbacks: () => void,
+  ) {
     super({ ...options });
 
     const {
       context,
       sounds,
+      tags,
       volume,
     } = options;
 
@@ -71,6 +86,10 @@ export class Group
       this.addSounds(sounds);
     }
 
+    if (tags) {
+      tags.forEach(this.addTag);
+    }
+
     if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
@@ -79,6 +98,8 @@ export class Group
   public readonly setVolume = (value: number) => {
     super.setVolume(value);
     this.updateAllAudioElementsVolume();
+
+    this.callStateCallbacks();
 
     return this;
   };
@@ -154,6 +175,8 @@ export class Group
 
     this.__sounds = getFrozenObject(this.sounds, sounds);
 
+    this.callStateCallbacks();
+
     return this;
   };
 
@@ -175,6 +198,8 @@ export class Group
     });
 
     this.__sounds = getFrozenObject(sounds);
+
+    this.callStateCallbacks();
 
     return this;
   };
@@ -235,8 +260,4 @@ export class Group
 
     return this;
   };
-
-  public readonly callVolumeChangeCallbacks = () => {
-    super.callVolumeChangeCallbacks();
-  }
 }

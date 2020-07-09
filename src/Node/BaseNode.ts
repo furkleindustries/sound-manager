@@ -36,7 +36,6 @@ export class BaseNode implements IBaseNode {
   };
 
   protected __volume: number = 1;
-  protected __volumeChangeCallbacks: Record<string, (name: string, volume: number) => void> = {};
 
   constructor(options?: INodeOptions) {
     const opts = options || {};
@@ -49,8 +48,6 @@ export class BaseNode implements IBaseNode {
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
     }
-
-    this.callVolumeChangeCallbacks();
   }
 
   public readonly isWebAudio = () => Boolean(this.__isWebAudio);
@@ -94,8 +91,6 @@ export class BaseNode implements IBaseNode {
 
     this.__label = { ...newLabel };
 
-    this.callVolumeChangeCallbacks();
-
     return this;
   };
 
@@ -113,28 +108,6 @@ export class BaseNode implements IBaseNode {
       this.getGainNode().gain.setValueAtTime(value, currentTime);
     }
 
-    this.callVolumeChangeCallbacks();
-
     return this;
-  }
-
-  public addVolumeChangeCallback(
-    name: string,
-    cb: (name: string, volume: number) => void,
-  ) {
-    this.__volumeChangeCallbacks[name] = cb;
-    return this;
-  }
-
-  public removeVolumeChangeCallback(name: string) {
-    delete this.__volumeChangeCallbacks[name];
-    return this;
-  }
-
-  public callVolumeChangeCallbacks() {
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      const callback = this.__volumeChangeCallbacks[key];
-      callback(key, this.getVolume());
-    });
   }
 }

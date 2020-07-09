@@ -8,6 +8,9 @@ import {
   loadAudioBuffer,
 } from '../functions/loadAudioBuffer';
 import {
+  IManagerStateCallback,
+} from '../interfaces/IManagerStateCallback';
+import {
   ISound,
 } from './ISound';
 import {
@@ -36,7 +39,12 @@ export const strings = {
     'createWebAudioSound.',
 };
 
-export async function createWebAudioSound(options: ICreateSoundOptions): Promise<ISound> {
+export async function createWebAudioSound(
+  options: ICreateSoundOptions,
+  registerStateCallback: (callback: IManagerStateCallback) => void,
+  unregisterStateCallback: (callback: IManagerStateCallback) => void,
+  callStateCallbacks: () => void,
+): Promise<ISound> {
   const {
     buffer,
     context,
@@ -70,8 +78,14 @@ export async function createWebAudioSound(options: ICreateSoundOptions): Promise
     throw new Error(strings.NO_VALID_ARG);
   }
 
-  return new Sound(getFrozenObject({
-    ...options,
-    buffer: safeBuffer,
-  }));
+  return new Sound(
+    getFrozenObject({
+      ...options,
+      buffer: safeBuffer,
+    }),
+
+    registerStateCallback,
+    unregisterStateCallback,
+    callStateCallbacks,
+  );
 };

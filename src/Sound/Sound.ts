@@ -26,6 +26,9 @@ import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
 import {
+  IManagerStateCallback,
+} from '../interfaces/IManagerStateCallback';
+import {
   ISound,
 } from './ISound';
 import {
@@ -100,7 +103,18 @@ export class Sound
   /* istanbul ignore next */
   public getGroupVolume: () => number = () => 1;
 
-  constructor(options: ISoundOptions) {
+  constructor(
+    options: ISoundOptions,
+    public readonly registerStateCallback: (
+      callback: IManagerStateCallback,
+    ) => void,
+
+    public readonly unregisterStateCallback: (
+      callback: IManagerStateCallback,
+    ) => void,
+
+    public readonly callStateCallbacks: () => void,
+  ) {
     super({ ...options });
 
     assert(options, strings.CTOR_OPTIONS_INVALID);
@@ -146,6 +160,8 @@ export class Sound
     if (!this.isWebAudio()) {
       this.updateAudioElementVolume();
     }
+
+    this.callStateCallbacks();
   }
 
   private readonly __initializeSoundForWebAudio = (buffer: AudioBuffer) => {  
@@ -214,17 +230,10 @@ export class Sound
       this.updateAudioElementVolume();
     }
 
+    this.callStateCallbacks();
+
     return this;
   };
-
-  public readonly addVolumeChangeCallback = (
-    name: string,
-    cb: (name: string, volume: number) => void,
-  ): this => super.addVolumeChangeCallback(name, cb) as this;
-
-  public readonly removeVolumeChangeCallback = (name: string): this => (
-    super.removeVolumeChangeCallback(name) as this
-  );
 
   public readonly getTrackPosition = () => {
     if (this.isPlaying()) {
@@ -259,10 +268,7 @@ export class Sound
       this.__pausedTime = seconds;
     }
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     return this;
   };
@@ -310,10 +316,7 @@ export class Sound
       ).loop = loop;
     }
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     return this;
   };
@@ -323,10 +326,7 @@ export class Sound
   public readonly setFade = (fade: IFade | null) => {
     this.__fade = fade;
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     return this;
   };
@@ -356,10 +356,7 @@ export class Sound
     /* Ensure the sound knows it's playing. */
     this.__playing = true;
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     /* Emit the promise that was either just generated or emitted on previous
      * unfinished plays. */
@@ -539,10 +536,7 @@ export class Sound
     this.__playing = false;
     this.__clearScheduledFades();
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     return this;
   };
@@ -559,6 +553,7 @@ export class Sound
   public readonly stop = () => {
     fadeOutToStop(this).then(() => {
       this.__resolveOnEnd();
+      this.callStateCallbacks();
     });
 
     return this.__promise as Promise<void>;
@@ -567,21 +562,15 @@ export class Sound
   public readonly rewind = (seconds: number) => {
     this.setTrackPosition(this.getTrackPosition() - seconds);
 
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
+    this.callStateCallbacks();
 
     return this;
   };
 
   public readonly fastForward = (seconds: number) => {
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
-    });
-
     this.setTrackPosition(this.getTrackPosition() + seconds);
+
+    this.callStateCallbacks();
 
     return this;
   };
@@ -635,8 +624,4 @@ export class Sound
     
     return 1;
   };
-
-  public readonly callVolumeChangeCallbacks = () => (
-    super.callVolumeChangeCallbacks()
-  );
 }

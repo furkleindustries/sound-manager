@@ -63,17 +63,26 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       this.__connectNodes();
     }
 
-    this.collection = new CollectionSubmanager({
-      getManagerVolume: () => this.getVolume(),
-      isWebAudio: () => isWebAudio,
-      getAudioContext: () => this.getAudioContext(),
-      getInputNode: () => this.getInputNode(),
-      groups: groups || {},
-    });
+    this.collection = new CollectionSubmanager(
+      {
+        getManagerVolume: () => this.getVolume(),
+        isWebAudio: () => isWebAudio,
+        getAudioContext: () => this.getAudioContext(),
+        getInputNode: () => this.getInputNode(),
+        groups: groups || {},
+      },
 
-    this.player = new PlayerSubmanager({
-      getCollection: () => this.collection,
-    });
+      this.registerStateCallback,
+      this.unregisterStateCallback,
+      this.callStateCallbacks,
+    );
+
+    this.player = new PlayerSubmanager(
+      { getCollection: () => this.collection },
+      this.registerStateCallback,
+      this.unregisterStateCallback,
+      this.callStateCallbacks,
+    );
 
     if (isValidVolume(volume)) {
       this.setVolume(volume);
@@ -90,6 +99,8 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
     super.setVolume(value);
     this.collection.updateAllAudioElementsVolume();
 
+    this.callStateCallbacks();
+
     return this;
   };
 
@@ -98,7 +109,7 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       node,
     ).__panelRegistered = true;
 
-    this.callVolumeChangeCallbacks();
+    this.callStateCallbacks();
 
     return this;
   };
@@ -108,6 +119,24 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
       node,
     ).__panelRegistered = false;
 
+    this.callStateCallbacks();
+
     return this;
+  };
+
+  private readonly __stateCallbacks: Array<() => void> = [];
+  public readonly registerStateCallback = (cb: () => void) => {
+    this.__stateCallbacks.push(cb);
+  };
+
+  public readonly unregisterStateCallback = (cb: () => void) => {
+    const idx = this.__stateCallbacks.indexOf(cb);
+    if (idx !== -1) {
+      this.__stateCallbacks.splice(idx, 1);
+    }
+  };
+
+  public readonly callStateCallbacks = () => {
+    this.__stateCallbacks.forEach((cb) => cb());
   };
 }
