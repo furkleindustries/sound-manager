@@ -3,9 +3,6 @@ import {
   ISoundViewProps,
 } from './ISoundViewProps';
 import {
-  recursivelyReplaceWithArgComps,
-} from '../../functions/recursivelyReplaceWithArgComps';
-import {
   SoundControllerView,
 } from '../SoundControllerView';
 import {
@@ -14,39 +11,24 @@ import {
 
 import * as React from 'react';
 
-export class SoundView extends React.PureComponent<ISoundViewProps> {
-  public readonly render = () => {
-    const {
+export const SoundView: React.FunctionComponent<ISoundViewProps> = ({
+  className,
+  name,
+  sound,
+}) => (
+  <div
+    className={classNames(
+      'sound-view',
       className,
-      components = {},
-      name,
-      sound,
-      sound: { getLabel },
-    } = this.props;
+    )}
 
-    const label = getLabel();
+    key="sound-view"
+  >
+    <SoundViewLabel
+      label={sound.getLabel()}
+      name={name}
+    />
 
-    return recursivelyReplaceWithArgComps(
-      components,
-      <div
-        className={classNames(
-          'sound-view',
-          className,
-        )}
-
-        key="sound-view"
-      >
-        <SoundViewLabel
-          components={components}
-          label={label}
-          name={name}
-        />
-
-        <SoundControllerView
-          components={components}
-          sound={sound}
-        />
-      </div>
-    );
-  };
-}
+    <SoundControllerView sound={sound} />
+  </div>
+);

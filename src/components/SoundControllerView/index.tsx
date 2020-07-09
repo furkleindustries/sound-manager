@@ -2,9 +2,6 @@ import classNames from 'classnames';
 import {
   ISoundControllerViewProps,
 } from './ISoundControllerViewProps';
-import {
-  recursivelyReplaceWithArgComps,
-} from '../../functions/recursivelyReplaceWithArgComps';
 
 import * as React from 'react';
 
@@ -21,7 +18,6 @@ export class SoundControllerView extends React.PureComponent<
   public readonly render = () => {
     const {
       className,
-      components = {},
       sound: {
         addVolumeChangeCallback,
         getVolume,
@@ -56,8 +52,7 @@ export class SoundControllerView extends React.PureComponent<
     const isPlayingNow = isPlaying();
     const volume = getVolume();
 
-    return recursivelyReplaceWithArgComps(
-      components,
+    return (
       <div
         className={classNames(
           'sound-controller-view',

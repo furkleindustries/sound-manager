@@ -8,5 +8,4 @@ import {
 export interface ISoundControllerViewProps {
   readonly sound: ISound;
   readonly className?: string;
-  readonly components?: Record<string, ComponentType>;
 }

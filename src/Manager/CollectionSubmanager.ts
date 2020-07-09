@@ -59,6 +59,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     throw new Error();
   };
 
+  // @ts-ignore
   private readonly __getManagerVolume: () => number;
 
   constructor({
@@ -77,6 +78,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   }) {
     this.__getManagerVolume = assertValid<() => number>(
       typeof getManagerVolume === 'function',
+      'The getManagerVolume argument to the CollectionSubmanager constructor was invalid.',
     );
 
     if (typeof isWebAudio === 'function') {
@@ -243,16 +245,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     groupName = 'default',
   ): Promise<ISound> =>
   {
-    /* Allow a bare string to be used as an URL argument. */
-    const tempOpts: Partial<ICreateSoundOptions> & { url: string } =
-      typeof options === 'string' ? { url: options } : { ...options } as any;
-
-    const opts: ICreateSoundOptions = getFrozenObject({
-      isWebAudio: this.__isWebAudio(),
-      context: this.__isWebAudio() ? this.__getAudioContext() : undefined,
-      getManagerVolume: this.__isWebAudio() ? undefined : () => this.__getManagerVolume(),
-      ...tempOpts,
-    });
+    const opts: ICreateSoundOptions = getFrozenObject({ ...options });
 
     this.__registerIntentToAddSound(name, groupName);
     const sound = await createSound(opts);

@@ -3,44 +3,35 @@ import {
   ISoundGroupViewProps,
 } from './ISoundGroupViewProps';
 import {
-  recursivelyReplaceWithArgComps,
-} from '../../functions/recursivelyReplaceWithArgComps';
+  SoundView,
+} from '../SoundView';
 
 import * as React from 'react';
-import { SoundView } from '../SoundView';
 
-export class SoundGroupView extends React.PureComponent<ISoundGroupViewProps> {
-  public readonly render = () => {
-    const {
+export const SoundGroupView: React.FunctionComponent<ISoundGroupViewProps> = ({
+  className,
+  group: { sounds },
+}) => (
+  <div
+    className={classNames(
+      'sound-group-view',
       className,
-      components = {},
-      group: {
-        sounds,
-      },
-    } = this.props;
+    )}
 
-    return recursivelyReplaceWithArgComps(
-      components,
-      <div
-        className={classNames(
-          'sound-group-view',
-          className,
-        )}
-
-        key="sound-group-view"
-      >
-        <ul>
-          {Object.keys(sounds).map((key) => (
-            <li key={key}>
-              <SoundView
-                name={key}
-                key={key}
-                sound={sounds[key]}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  };
-}
+    key="sound-group-view"
+  >
+    <ul>
+      {Object.keys(sounds)
+        .filter((key) => sounds[key].isPanelRegistered())
+        .map((key) => (
+          <li key={key}>
+            <SoundView
+              name={key}
+              key={key}
+              sound={sounds[key]}
+            />
+          </li>
+        ))}
+    </ul>
+  </div>
+);
