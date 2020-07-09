@@ -21,7 +21,10 @@ export const strings = {
     'The node argument did not have a type property.',
 };
 
-export function generateUniqueAudioPanelIdentifier(node: IBaseNode, name?: string) {
+export const generateUniqueAudioPanelIdentifier = (
+  node: IBaseNode,
+  name?: string,
+) => {
   assert(
     node,
     strings.NODE_INVALID,
@@ -43,4 +46,4 @@ export function generateUniqueAudioPanelIdentifier(node: IBaseNode, name?: strin
   }
 
   return `sm-volumeInput-${nodeType}-${uniqueName}`;
-}
+};

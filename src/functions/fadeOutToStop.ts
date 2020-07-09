@@ -20,14 +20,14 @@ export const fadeOutToStop = ({
     },
 
     length: {
-      in: 5,
-      out: 5,
+      in: 5000,
+      out: 3500,
     },
   };
 
   const volume = getVolume();
   const fadeCurve = fade.easingCurve.out || EasingCurves.Quadratic;
-  const fadeLength = fade.length.out || 5000;
+  const fadeLength = fade.length.out || 3500;
 
   return new Promise((resolve) => {
     const startTime = new Date().getTime();

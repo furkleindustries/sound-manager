@@ -21,24 +21,25 @@ export const getFadeVolume = ({
 
   const inLen = Number(fade.length.in);
   const outLen = Number(fade.length.out);
+  const time = trackPosition * 1000;
   // Fading in.
-  if (fade.easingCurve.in && inLen >= trackPosition) {
+  if (fade.easingCurve.in && inLen >= time) {
     return getFadeValueAtTime({
       change: targetVolume,
       curve: fade.easingCurve.in,
       duration: inLen,
       initial: 0,
-      time: trackPosition,
+      time,
     });
-  } else if (fade.easingCurve.out && outLen >= duration - trackPosition) {
+  } else if (fade.easingCurve.out && outLen >= duration - time) {
     return getFadeValueAtTime({
       change: -targetVolume,
       curve: fade.easingCurve.out,
       duration: outLen,
       initial: targetVolume,
-      time: outLen - (duration - trackPosition),
+      time,
     });
   }
 
   return 1;
-}
+};

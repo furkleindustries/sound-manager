@@ -48,7 +48,6 @@ export * from './functions/getFadeValueAtTime';
 export * from './functions/isValidVolume';
 export * from './functions/loadAudioBuffer';
 export * from './functions/makeSoundGroupIdentifier';
-export * from './functions/recursivelyReplaceWithArgComps';
 
 export * from './interfaces/ICollection';
 export * from './interfaces/ISoundGroupIdentifier';

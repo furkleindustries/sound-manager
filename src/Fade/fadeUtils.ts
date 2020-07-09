@@ -8,7 +8,11 @@ import {
   assert,
 } from 'ts-assertions';
 
-export function fadeArgumentToFadeProperty<T>(arg: TFadeArg<T>, defaultValue: T | null, validator: (arg: T) => boolean): IFadeProperty<T> {
+export const fadeArgumentToFadeProperty = <T>(
+  arg: TFadeArg<T>,
+  defaultValue: T | null,
+  validator: (arg: T) => boolean,
+): IFadeProperty<T> => {
   const {
     valids,
     value,
@@ -17,16 +21,15 @@ export function fadeArgumentToFadeProperty<T>(arg: TFadeArg<T>, defaultValue: T 
   assert(valids[0] || valids[1]);
 
   return normalizeFadeProp(value, valids, defaultValue);
-}
+};
 
-export function argToPropHelper<T>(
+export const argToPropHelper = <T>(
   arg: TFadeArg<T>,
   validator: (arg: T) => boolean
 ): {
   valids: [ boolean, boolean ],
   value: IFadeProperty<T>,
-}
-{
+} => {
   if (validatorWrapper<T>(arg, validator)) {
     return {
       valids: [ true, true ],
@@ -55,45 +58,33 @@ export function argToPropHelper<T>(
   }
 
   throw new Error();
-}
+};
 
-export function validatorWrapper<T>(
+export const validatorWrapper = <T>(
   arg: any,
   validator: (arg: any) => boolean,
-): arg is T
-{
-  return arg === null || validator(arg);
-}
+): arg is T => arg === null || validator(arg);
 
-export function structureFadePropFromValue<T>(arg: T) {
-  return {
-    in: arg,
-    out: arg,
-  };
-}
+export const structureFadePropFromValue = <T>(arg: T) => ({
+  in: arg,
+  out: arg,
+});
 
-export function structureFadePropFromArray<T>(arg: [ T, T ]) {
-  return {
-    in: arg[0],
-    out: arg[1],
-  };
-}
+export const structureFadePropFromArray = <T>(arg: [ T, T ]) => ({
+  in: arg[0],
+  out: arg[1],
+});
 
-export function structureFadePropFromObject<T>(arg: IFadeProperty<T>) {
-  return {
-    in: arg.in,
-    out: arg.out,
-  };
-}
+export const structureFadePropFromObject = <T>(arg: IFadeProperty<T>) => ({
+  in: arg.in,
+  out: arg.out,
+});
 
-export function normalizeFadeProp<T>(
+export const normalizeFadeProp = <T>(
   arg: IFadeProperty<any>,
   valids: [ boolean, boolean ],
   defaultValue: T | null,
-): IFadeProperty<T>
-{
-  return {
-    in: valids[0] ? arg.in : defaultValue,
-    out: valids[1] ? arg.out : defaultValue,
-  };
-}
+): IFadeProperty<T> => ({
+  in: valids[0] ? arg.in : defaultValue,
+  out: valids[1] ? arg.out : defaultValue,
+});
