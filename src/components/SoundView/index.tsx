@@ -8,6 +8,9 @@ import {
 import {
   SoundViewLabel,
 } from '../SoundViewLabel';
+import {
+  SoundViewTitle,
+} from '../SoundViewTitle';
 
 import * as React from 'react';
 
@@ -24,11 +27,13 @@ export const SoundView: React.FunctionComponent<ISoundViewProps> = ({
 
     key="sound-view"
   >
+    <SoundViewTitle name={name} />
+
+    <SoundControllerView sound={sound} />
+
     <SoundViewLabel
       label={sound.getLabel()}
       name={name}
     />
-
-    <SoundControllerView sound={sound} />
   </div>
 );

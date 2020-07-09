@@ -32,6 +32,9 @@ import {
   ISound,
 } from './ISound';
 import {
+  ISoundLabel,
+} from '../Node/ISoundLabel';
+import {
   ISoundOptions,
 } from './ISoundOptions';
 import {
@@ -124,6 +127,7 @@ export class Sound
       buffer,
       fade,
       getManagerVolume,
+      label,
       loop,
       trackPosition,
     } = options;
@@ -150,11 +154,12 @@ export class Sound
       );
     }
 
-    this.__initializeArgumentProperties(
+    this.__initializeArgumentProperties({
       fade,
+      label,
       loop,
       trackPosition,
-    );
+    });
 
     if (!this.isWebAudio()) {
       this.updateAudioElementVolume();
@@ -182,17 +187,27 @@ export class Sound
     this.__fadeGainNode.connect(this.getGainNode());
   };
 
-  private readonly __initializeArgumentProperties = (
+  private readonly __initializeArgumentProperties = ({
+    fade,
+    label,
+    loop,
+    trackPosition,
+  }: {
     fade: boolean | IFadeOptions | undefined,
+    label: ISoundLabel | undefined,
     loop: boolean | number | undefined,
     trackPosition: number | undefined,
-  ) => {
+  }) => {
     if (fade) {
       const fadeObj = typeof fade === 'boolean' ?
         createFade() :
         createFade(fade);
 
       this.setFade(fadeObj);
+    }
+
+    if (label) {
+      this.setLabel(label);
     }
 
     if (loopIsValid(loop)) {

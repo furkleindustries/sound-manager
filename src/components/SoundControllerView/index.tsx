@@ -7,6 +7,7 @@ import {
 } from './ISoundControllerViewProps';
 
 import * as React from 'react';
+import { makeSoundGroupIdentifier } from '../../functions/makeSoundGroupIdentifier';
 
 export class SoundControllerView extends React.PureComponent<
   ISoundControllerViewProps
@@ -19,7 +20,6 @@ export class SoundControllerView extends React.PureComponent<
     const {
       className,
       sound: {
-        getLabel,
         getLoop,
         getVolume,
         isPlaying,
@@ -52,12 +52,8 @@ export class SoundControllerView extends React.PureComponent<
 
     const isPlayingNow = isPlaying();
 
-    const {
-      artistName,
-      contributors,
-      license,
-      title,
-    } = getLabel();
+    const loopId = Math.random().toString();
+    const volumeId = Math.random().toString();
 
     return (
       <div
@@ -68,6 +64,10 @@ export class SoundControllerView extends React.PureComponent<
 
         key="sound-controller-view"
       >
+        <label htmlFor={volumeId}>
+          ⏶/⏷
+        </label>
+
         <input
           className="sound-controller-view-volume"
           key="sound-controller-view-volume"
@@ -78,6 +78,10 @@ export class SoundControllerView extends React.PureComponent<
           type="range"
           value={getVolume()}
         />
+
+        <label htmlFor={loopId}>
+          ↻
+        </label>
 
         <input
           className="sound-controller-view-loop"
@@ -92,28 +96,8 @@ export class SoundControllerView extends React.PureComponent<
           key="sound-controller-view-play"
           onClick={playSetter}
         >
-          {isPlayingNow ? 'Pause' : 'Play'}
+          {isPlayingNow ? '⏸' : '⏵︎'}
         </button>
-
-        <div>
-          <p>
-            <strong>{title}</strong>
-          </p>
-
-          <p>
-            <em>{artistName}</em>
-          </p>
-
-          <ul>
-            {contributors.map((contributor) => (
-              <li key={contributor}>
-                {contributor}
-              </li>
-            ))}
-          </ul>
-
-          <p>{license}</p>
-        </div>
       </div>
     );
   };
