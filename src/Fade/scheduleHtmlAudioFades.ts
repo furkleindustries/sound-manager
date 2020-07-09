@@ -1,7 +1,4 @@
-export function scheduleHtmlAudioFades(
+export const scheduleHtmlAudioFades = (
   audioElement: HTMLAudioElement,
   updateFunc: () => void,
-)
-{
-  audioElement.addEventListener('timeupdate', updateFunc);
-}
+) => audioElement.addEventListener('timeupdate', updateFunc);

@@ -244,12 +244,13 @@ export class Sound
       return assertValid<HTMLAudioElement>(
         this.__audioElement,
         strings.GET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
-      ).currentTime;
+      ).currentTime * 1000;
     }
 
     return this.__pausedTime;
   };
 
+  // Must be milliseconds.
   public readonly setTrackPosition = (seconds: number) => {
     if (this.isPlaying()) {
       if (this.isWebAudio()) {
@@ -273,6 +274,7 @@ export class Sound
     return this;
   };
 
+  // Returned in milliseconds.
   public readonly getDuration = () => {
     if (this.isWebAudio()) {
       const {
@@ -282,13 +284,13 @@ export class Sound
       return assertValid<AudioBuffer>(
         buffer,
         strings.GET_DURATION_BUFFER_INVALID,
-      ).duration;
+      ).duration * 1000;
     }
 
     return assertValid<HTMLAudioElement>(
       this.__audioElement,
       strings.GET_DURATION_AUDIO_ELEMENT_INVALID,
-    ).duration;
+    ).duration * 1000;
   };
 
   public readonly isPlaying = () => this.__playing;
@@ -431,7 +433,7 @@ export class Sound
       /* Set the current time to the track position. */
       assertValid<HTMLAudioElement>(
         this.__audioElement,
-      ).currentTime = trackPosition;
+      ).currentTime = trackPosition / 1000;
     }
   };
 
@@ -559,16 +561,16 @@ export class Sound
     return this.__promise as Promise<void>;
   };
 
-  public readonly rewind = (seconds: number) => {
-    this.setTrackPosition(this.getTrackPosition() - seconds);
+  public readonly rewind = (milliseconds: number) => {
+    this.setTrackPosition(this.getTrackPosition() - milliseconds);
 
     this.callStateCallbacks();
 
     return this;
   };
 
-  public readonly fastForward = (seconds: number) => {
-    this.setTrackPosition(this.getTrackPosition() + seconds);
+  public readonly fastForward = (milliseconds: number) => {
+    this.setTrackPosition(this.getTrackPosition() + milliseconds);
 
     this.callStateCallbacks();
 
@@ -607,7 +609,7 @@ export class Sound
 
   public readonly getFadeVolume = (iterationCount = 0, fadeOnLoops = false) => {
     const fade = this.getFade();
-    const trackPosition = this.getTrackPosition();
+    const time = this.getTrackPosition();
     const duration = this.getDuration();
     const targetVolume = this.getVolume();
   
@@ -618,7 +620,7 @@ export class Sound
         fadeOnLoops,
         iterationCount,
         targetVolume,
-        time: trackPosition * 1000,
+        time,
       });
     }
     

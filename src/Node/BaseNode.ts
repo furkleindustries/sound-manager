@@ -58,7 +58,7 @@ export class BaseNode implements IBaseNode {
   };
 
   public readonly getContextCurrentTime = () => (
-    this.getAudioContext().currentTime
+    this.getAudioContext().currentTime * 1000
   );
 
   public getGainNode = () => {
