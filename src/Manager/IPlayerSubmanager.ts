@@ -10,11 +10,11 @@ import {
 
 export interface IPlayerSubmanager {
   readonly playlists: IPlaylistsMap;
-  playGroup(name: string): Promise<Event[]>;
-  playGroups(names: string[]): Promise<Event[]>;
-  playSound(name: string, groupName?: string): Promise<Event>;
-  playSounds(names: string[], groupName?: string): Promise<Event[]>;
-  playAllSounds(groupName?: string): Promise<Event[]>;
+  playGroup(name: string): Promise<void[]>;
+  playGroups(names: string[]): Promise<void[]>;
+  playSound(name: string, groupName?: string): Promise<void>;
+  playSounds(names: string[], groupName?: string): Promise<void[]>;
+  playAllSounds(groupName?: string): Promise<void[]>;
   pauseSound(name: string, groupName?: string): this;
   pauseSounds(names: string[], groupName?: string): this;
   pauseAllSounds(groupName?: string): this;

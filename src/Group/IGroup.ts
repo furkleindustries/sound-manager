@@ -44,9 +44,9 @@ export interface IGroup
   removeSound(names: string): this;
   removeSounds(names: string[]): this;
   removeAllSounds(): this;
-  playSound(name: string): Promise<Event>;
-  playSounds(names: string[]): Promise<Event[]>;
-  playAllSounds(): Promise<Event[]>;
+  playSound(name: string): Promise<void>;
+  playSounds(names: string[]): Promise<void[]>;
+  playAllSounds(): Promise<void[]>;
   pauseSound(name: string): this;
   pauseSounds(names: string[]): this;
   pauseAllSounds(): this;

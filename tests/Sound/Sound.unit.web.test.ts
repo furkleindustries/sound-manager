@@ -332,14 +332,6 @@ describe('Sound Web Audio unit tests.', () => {
     expect(ret).toBe(sound);
   });
 
-  it('Has a stop function which returns the Sound.', () => {
-    const sound = testSoundFactory();
-    sound.play().catch(() => {});
-    const ret = sound.stop();
-
-    expect(ret).toBe(sound);
-  });
-
   it('Has a rewind function which returns the Sound.', () => {
     const sound = testSoundFactory();
     const ret = sound.rewind(2);

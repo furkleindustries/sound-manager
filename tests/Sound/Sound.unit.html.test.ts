@@ -362,11 +362,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
     expect(sound.setFade(sym)).toBe(sound);
   });  
 
-  it('Has a stop function which returns the Sound.', () => {
-    const sound = testSoundFactory();
-    expect(sound.stop()).toBe(sound);
-  });
-
   it('Has a rewind function which decreases the trackPosition property.', () => {
     const sound = testSoundFactory();
     const origPosition = 16;

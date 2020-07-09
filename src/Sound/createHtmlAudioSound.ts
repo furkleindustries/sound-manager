@@ -28,8 +28,15 @@ export const strings = {
 
 export const createHtmlAudioSound = (options: ICreateSoundOptions): Promise<ISound> => {
   const {
-    getManagerVolume,
+    buffer,
+    context,
+    fade,
+    getManagerVolume: getManagerVol,
+    isWebAudio,
+    loop,
+    trackPosition,
     url,
+    volume,
   } = assertValid<ICreateSoundOptions>(
     options,
     strings.OPTIONS_INVALID,
@@ -43,16 +50,22 @@ export const createHtmlAudioSound = (options: ICreateSoundOptions): Promise<ISou
   const audioElement = new Audio(safeUrl);
   audioElement.preload = 'auto';
 
-  const safeGetManagerVolume = assertValid<() => number>(
-    getManagerVolume,
+  const getManagerVolume = assertValid<() => number>(
+    getManagerVol,
     strings.GET_MANAGER_VOLUME_INVALID,
   );
 
   const sound = new Sound(getFrozenObject({
     ...options,
+    buffer,
     audioElement,
-    context: undefined,
-    getManagerVolume: safeGetManagerVolume,
+    fade,
+    getManagerVolume,
+    isWebAudio,
+    context,
+    loop,
+    trackPosition,
+    volume,
   }));
 
   const playthroughListener = (resolver: (sound: ISound) => void) => {

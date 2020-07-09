@@ -63,11 +63,11 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     this.__getCollection = assertValid<() => ICollectionSubmanager>(getCollection);
   }
 
-  public readonly playGroup = async (name: string): Promise<Event[]> => (
+  public readonly playGroup = async (name: string): Promise<void[]> => (
     this.__getCollection().getGroup(name).playAllSounds()
   );
 
-  public readonly playGroups = async (names: string[]): Promise<Event[]> => {
+  public readonly playGroups = async (names: string[]): Promise<void[]> => {
     assert(Array.isArray(names));
     const val = await Promise.all(names.map((name) => this.playGroup(name)));
     return shallowFlattenArray(val);
@@ -76,21 +76,21 @@ export class PlayerSubmanager implements IPlayerSubmanager {
   public readonly playSound = (
     name: string,
     groupName: string = 'default',
-  ): Promise<Event> => (
+  ): Promise<void> => (
     this.__getCollection().getGroup(groupName).playSound(name)
   );
 
   public readonly playSounds = (
     names: string[],
     groupName: string = 'default',
-  ): Promise<Event[]> => {
+  ): Promise<void[]> => {
     assert(Array.isArray(names));
     return this.__getCollection().getGroup(groupName).playSounds(names);
   };
 
   public readonly playAllSounds = async (
     groupName?: string,
-  ): Promise<Event[]> => {
+  ): Promise<void[]> => {
     if (groupName) {
       return this.playGroup(groupName);
     } else {
@@ -214,7 +214,6 @@ export class PlayerSubmanager implements IPlayerSubmanager {
   public readonly playPlaylist = async (name: string) => {
     const playlist = this.getPlaylist(name);
     log(`Playing playlist ${name}.`);
-    const events: Event[] = [];
     let playIndex = 0;
     let loopedTimes = 0;
     let sentinel = true;
@@ -226,7 +225,6 @@ export class PlayerSubmanager implements IPlayerSubmanager {
         looped,
       } = await this.__playlistPlaySound(
         playlist,
-        events,
         playIndex,
         loopedTimes,
         name,
@@ -247,7 +245,6 @@ export class PlayerSubmanager implements IPlayerSubmanager {
 
   private readonly  __playlistPlaySound = async (
     playlist: IPlaylist,
-    events: Event[],
     playIndex: number,
     loopedTimes: number,
     name?: string,
@@ -255,19 +252,14 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     const id = playlist.ids[playIndex];
     const sound = this.__getCollection().getSound(id.soundName, id.groupName);
 
-    const event = await sound.play(
+    await sound.play(
       /* Overrides the sound's fade with the playlist fade. This argument is
         * ignored if it's falsy. */
       playlist.fade,
     );
 
-    events.push(event);
-
     if (playIndex === playlist.ids.length - 1) {
-      /* Pass the events to the playlist's callback, if it exists. */
-      playlist.tryCallback(events, name);
-      /* Empty the list. */
-      events.splice(0, events.length);
+      playlist.tryCallback(name);
 
       if (shouldLoopPlaylist(playlist, loopedTimes)) {
         /* This value is incremented when the loop begins a new iteration so

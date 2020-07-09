@@ -27,7 +27,7 @@ export class Playlist implements IPlaylist {
   public readonly loop: boolean | number = false;
   public readonly ids: ReadonlyArray<ISoundGroupIdentifier>;
   public readonly fade: IFade | null = null;
-  public readonly callback?: (events: Event[]) => any;
+  public readonly callback?: () => any;
 
   constructor(options: IPlaylistOptions) {
     assert(options);
@@ -59,13 +59,13 @@ export class Playlist implements IPlaylist {
 
   public readonly loopIsValid = () => loopIsValid(this.loop);
 
-  public readonly tryCallback = (events: Event[], name?: string) => {
+  public readonly tryCallback = (name?: string) => {
     if (typeof this.callback === 'function') {
       console.log(
         `Firing playlist ${name ? name : '(no name provided)'} callback.`
       );
 
-      this.callback(events);
+      this.callback();
     }
   };
 }

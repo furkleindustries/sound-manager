@@ -10,7 +10,7 @@ import {
 
 export interface IPlaylistOptions {
   ids: Array<ISoundGroupIdentifier | string>;
-  callback?(events: Event[]): any;
+  callback?(): any;
   fade?: IFade | IFadeOptions | boolean;
   loop?: boolean | number;
 }

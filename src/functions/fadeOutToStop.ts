@@ -2,24 +2,29 @@ import {
   EasingCurves,
 } from '../enums/EasingCurves';
 import {
-  IFade,
-} from '../Fade/IFade';
-import {
   ISound,
 } from '../Sound/ISound';
 import {
   getFadeValueAtTime,
 } from './getFadeValueAtTime';
-import {
-  assertValid,
-} from 'ts-assertions';
 
 export const fadeOutToStop = ({
   getFade,
   getVolume,
   setVolume,
 }: ISound) => {
-  const fade = assertValid<IFade>(getFade());
+  const fade = getFade() || {
+    easingCurve: {
+      in: EasingCurves.Quadratic,
+      out: EasingCurves.Quadratic,
+    },
+
+    length: {
+      in: 5,
+      out: 5,
+    },
+  };
+
   const volume = getVolume();
   const fadeCurve = fade.easingCurve.out || EasingCurves.Quadratic;
   const fadeLength = fade.length.out || 5000;
