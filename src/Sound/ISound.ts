@@ -36,9 +36,9 @@ export interface ISound
   setLoop(loop: boolean): this;
   getFade(): IFade | null;
   setFade(fade: IFade | null): this;
-  play(fadeOverride?: IFade | null, loopOverride?: boolean | number): Promise<Event>;
+  play(fadeOverride?: IFade | null, loopOverride?: boolean | number): Promise<void>;
   pause(): this;
-  stop(): this;
+  stop(): Promise<void>;
   rewind(seconds: number): this;
   fastForward(seconds: number): this;
   getGroupVolume(): number;

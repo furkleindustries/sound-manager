@@ -35,6 +35,9 @@ import {
   isValidVolume,
 } from '../functions/isValidVolume';
 import {
+  fadeOutToStop,
+} from '../functions/fadeOutToStop';
+import {
   loopIsValid,
 } from '../Playlist/loopIsValid';
 import {
@@ -84,11 +87,12 @@ export class Sound
   /* @ts-ignore */
   public getManagerVolume: () => number = () => 1;
 
-  private __promise: Promise<Event> | null = null;
+  private __promise: Promise<void> | null = null;
   private __sourceNode: AudioBufferSourceNode | null = null;
   private __startedTime: number = 0;
-  private __resolveOnEnd: (e: Event) => void = () => {};
-  private __rejectOnStop: (message?: string) => void = () => {};
+  private __resolveOnEnd: () => void = () => {};
+  /* @ts-ignore */
+  private __rejectOnError = () => {};
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
@@ -329,7 +333,7 @@ export class Sound
 
   public readonly play = (fadeOverride?: IFade, loopOverride?: boolean) => {
     if (this.isPlaying()) {
-      return assertValid<Promise<Event>>(this.__promise);
+      return assertValid<Promise<void>>(this.__promise);
     }
 
     this.__updateSoundTimes();
@@ -359,7 +363,7 @@ export class Sound
 
     /* Emit the promise that was either just generated or emitted on previous
      * unfinished plays. */
-    return assertValid<Promise<Event>>(this.__promise);
+    return assertValid<Promise<void>>(this.__promise);
   };
 
   /* Regenerates the source node, generates the promise if it does not already
@@ -448,12 +452,12 @@ export class Sound
     }
   };
 
-  private readonly __initializeStartResolver = (resolve: Function) => (
+  private readonly __initializeStartStopResolver = (resolve: Function) => (
     this.__resolveOnEnd = (...args: any[]) => resolve(...args)
   );
 
-  private readonly __initializeStopRejector = (reject: Function) => (
-    this.__rejectOnStop = (message?: string) => reject(
+  private readonly __initializeRejector = (reject: Function) => (
+    this.__rejectOnError = (message?: string) => reject(
       message ||
       'The sound was stopped, probably by a user-created script.'
     )
@@ -462,10 +466,10 @@ export class Sound
   private readonly __initializePromiseForPlay = () => (
     this.__promise = new Promise((resolve, reject) => {
       /* Allows the same promise to be used across pauses. */
-      this.__initializeStartResolver(resolve);
+      this.__initializeStartStopResolver(resolve);
 
-      /* Allow the promise to be rejected if the sound is stopped. */
-      this.__initializeStopRejector(reject);
+      /* Allow the promise to be rejected if the sound fails. */
+      this.__initializeRejector(reject);
     })
   );
 
@@ -490,10 +494,10 @@ export class Sound
     source: AudioBufferSourceNode | HTMLAudioElement,
     timeUpdate?: () => void,
   ) => {
-    const ended = (e: Event) => {
+    const ended = () => {
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
-  
+
       /* istanbul ignore next */
       if (typeof timeUpdate === 'function' && !this.isWebAudio()) {
         /* Remove the 'timeupdate' event listener. */
@@ -505,15 +509,15 @@ export class Sound
         return;
       }
 
-      /* Don't reject the emitted promise. */
-      this.__rejectOnStop = () => {};
+      /* Resolve the emitted promise. */
+      this.__rejectOnError = () => this.__promise;
 
       /* Reset the track position of the sound after it ends. Also rejects
        * the old promise. */
       this.stop();
 
       /* Resolve the promise with the ended event. */
-      this.__resolveOnEnd(e);
+      this.__resolveOnEnd();
     };
 
     return ended;
@@ -553,25 +557,11 @@ export class Sound
   };
 
   public readonly stop = () => {
-    this.pause();
-
-    this.__rejectOnStop('The sound was stopped through the stop() method.');
-    /* istanbul ignore next */
-    this.__rejectOnStop = () => {};
-    delete this.__promise;
-    delete this.__loopOverride;
-
-    this.__pausedTime = 0;
-    if (!this.isWebAudio()) {
-      assertValid<HTMLAudioElement>(this.__audioElement).currentTime = 0;
-    }
-
-    const currentVolume = this.getVolume();
-    Object.keys(this.__volumeChangeCallbacks).forEach((key) => {
-      this.__volumeChangeCallbacks[key](key, currentVolume);
+    fadeOutToStop(this).then(() => {
+      this.__resolveOnEnd();
     });
 
-    return this;
+    return this.__promise as Promise<void>;
   };
 
   public readonly rewind = (seconds: number) => {
