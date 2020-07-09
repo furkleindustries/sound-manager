@@ -19,11 +19,14 @@ export class SoundControllerView extends React.PureComponent<
     const {
       className,
       sound: {
-        registerStateCallback,
+        getLabel,
+        getLoop,
         getVolume,
         isPlaying,
         pause,
         play,
+        registerStateCallback,
+        setLoop,
         setVolume,
       },
     } = this.props;
@@ -44,9 +47,17 @@ export class SoundControllerView extends React.PureComponent<
         );
       }
     };
+  
+    const loopSetter = () => setLoop(!getLoop());
 
     const isPlayingNow = isPlaying();
-    const volume = getVolume();
+
+    const {
+      artistName,
+      contributors,
+      license,
+      title,
+    } = getLabel();
 
     return (
       <div
@@ -65,17 +76,44 @@ export class SoundControllerView extends React.PureComponent<
           step={0.01}
           onChange={volumeSetter}
           type="range"
-          value={volume}
+          value={getVolume()}
+        />
+
+        <input
+          className="sound-controller-view-loop"
+          checked={getLoop()}
+          key="sound-controller-view-loop"
+          onChange={loopSetter}
+          type="checkbox"
         />
 
         <button 
           className="sound-controller-view-play"
           key="sound-controller-view-play"
           onClick={playSetter}
-          value={volume}
         >
           {isPlayingNow ? 'Pause' : 'Play'}
         </button>
+
+        <div>
+          <p>
+            <strong>{title}</strong>
+          </p>
+
+          <p>
+            <em>{artistName}</em>
+          </p>
+
+          <ul>
+            {contributors.map((contributor) => (
+              <li key={contributor}>
+                {contributor}
+              </li>
+            ))}
+          </ul>
+
+          <p>{license}</p>
+        </div>
       </div>
     );
   };

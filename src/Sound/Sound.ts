@@ -126,7 +126,6 @@ export class Sound
       getManagerVolume,
       loop,
       trackPosition,
-      volume,
     } = options;
 
     const isWebAudio = this.isWebAudio();
