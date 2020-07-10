@@ -9,5 +9,6 @@ import {
 } from '../Node/ITaggableNodeOptions';
 
 export interface IGroupOptions extends INodeOptions, ITaggableNodeOptions {
+  isWebAudio?: boolean;
   sounds?: ISoundsMap;
 }

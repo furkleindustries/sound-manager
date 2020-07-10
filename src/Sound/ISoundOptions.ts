@@ -12,6 +12,7 @@ export interface ISoundOptions extends INodeOptions, ITaggableNodeOptions {
   audioElement?: HTMLAudioElement;
   buffer?: AudioBuffer;
   fade?: boolean | IFadeOptions;
+  isWebAudio?: boolean;
   loop?: boolean;
   trackPosition?: number;
   getManagerVolume?(): number;

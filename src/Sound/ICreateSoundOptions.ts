@@ -7,7 +7,7 @@ import {
 
 export interface ICreateSoundOptions {
   context?: AudioContext;
-  isWebAudio: boolean;
+  isWebAudio?: boolean;
   // Must have buffer or url.
   buffer?: AudioBuffer;
   url?: string;
