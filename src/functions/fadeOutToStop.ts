@@ -33,7 +33,7 @@ export const fadeOutToStop = ({
 
   return new Promise((resolve) => {
     const timerId = setInterval(() => {
-      const trackPosition = getTrackPosition() * 1000;
+      const trackPosition = getTrackPosition();
       if (trackPosition >= startPosition + fadeLength) {
         clearInterval(timerId);
         return resolve();
