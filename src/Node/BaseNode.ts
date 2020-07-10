@@ -41,12 +41,13 @@ export class BaseNode implements IBaseNode {
     const opts = options || {};
     const {
       context,
+      isWebAudio,
       label,
       volume,
     } = opts;
 
     this.__audioContext = context || null;
-    this.__isWebAudio = Boolean(this.__audioContext);
+    this.__isWebAudio = Boolean(isWebAudio || this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
     }
