@@ -60,8 +60,11 @@ export * from './AnalysisSuite/IAnalysisOptions';
 export * from './AnalysisSuite/IAnalysisRenderCallback';
 export * from './AnalysisSuite/IGetAnalysisOptions';
 
-export * from './components/SoundControllerView';
-export * from './components/SoundGroupView';
 export * from './components/SoundManagerView';
+export * from './components/SoundGroupView';
+export * from './components/SoundGroupViewTitle';
+export * from './components/SoundGroupController';
 export * from './components/SoundView';
+export * from './components/SoundViewTitle';
 export * from './components/SoundViewLabel';
+export * from './components/SoundController';

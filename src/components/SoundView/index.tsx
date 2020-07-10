@@ -3,8 +3,8 @@ import {
   ISoundViewProps,
 } from './ISoundViewProps';
 import {
-  SoundControllerView,
-} from '../SoundControllerView';
+  SoundController,
+} from '../SoundController';
 import {
   SoundViewLabel,
 } from '../SoundViewLabel';
@@ -29,7 +29,7 @@ export const SoundView: React.FunctionComponent<ISoundViewProps> = ({
   >
     <SoundViewTitle title={sound.getLabel().title || name} />
 
-    <SoundControllerView sound={sound} />
+    <SoundController sound={sound} />
 
     <SoundViewLabel
       label={sound.getLabel()}

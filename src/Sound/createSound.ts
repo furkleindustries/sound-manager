@@ -16,7 +16,6 @@ import {
 import {
   assert,
 } from 'ts-assertions';
-import { IManagerStateCallback } from '../interfaces/IManagerStateCallback';
 
 export const strings = {
   OPTIONS_INVALID:

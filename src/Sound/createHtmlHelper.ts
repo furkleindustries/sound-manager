@@ -8,9 +8,6 @@ import {
   ICreateSoundOptions,
 } from './ICreateSoundOptions';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   ISound,
 } from './ISound';
 
