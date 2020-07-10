@@ -115,7 +115,7 @@ export class BaseNode implements IBaseNode {
     assertValid(value, '', isValidVolume);
     this.__volume = value;
     if (this.isWebAudio()) {
-      const currentTime = this.getContextCurrentTime();
+      const currentTime = this.getContextCurrentTime() / 1000;
       this.getGainNode().gain.setValueAtTime(value, currentTime);
     }
 

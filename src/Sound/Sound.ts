@@ -62,6 +62,8 @@ import {
   assert,
   assertValid,
 } from 'ts-assertions';
+import { IPlaySoundOptions } from './IPlaySoundOptions';
+import { throws } from 'assert';
 
 export class Sound
   extends
@@ -78,21 +80,29 @@ export class Sound
 
   private __audioElement: HTMLAudioElement | null = null;
   private __fade: IFade | null = null;
-  private __pausedTime: number = 0; 
-  private __playing: boolean = false;
-  /* istanbul ignore next */
-  /* @ts-ignore */
-  public getManagerVolume: () => number = () => 1;
+  private __fadeGainNode: GainNode | null = null;
+  private __fadeOnLoops = false;
+  private __fadeOverride?: IFade;
 
+  // Tracks how many times the song has looped this play session.
+  private __loopIterationCount = 0;
+
+  // Do not initialize. `false` is still a valid override value.
+  private __loopOverride?: boolean;
+  //
+
+  private __pausedTime = 0; 
+  private __playing = false;
   private __promise: Promise<void> | null = null;
   private __sourceNode: AudioBufferSourceNode | null = null;
-  private __startedTime: number = 0;
+  private __startedTime = 0;
+
   private __resolveOnEnd = () => Promise.resolve();
   private __rejectOnError?: (err: string | Error) => Error;
 
-  private __fadeGainNode: GainNode | null = null;
-  private __fadeOverride?: IFade;
-  private __loopOverride?: boolean;
+  /* istanbul ignore next */
+  /* @ts-ignore */
+  public getManagerVolume: () => number = () => 1;
 
   /* istanbul ignore next */
   public getGroupVolume: () => number = () => 1;
@@ -301,7 +311,11 @@ export class Sound
     return this;
   };
 
-  public readonly play = (fadeOverride?: IFade, loopOverride?: boolean) => {
+  public readonly play = ({
+    fadeOnLoops,
+    fadeOverride,
+    loopOverride,
+  }: Partial<IPlaySoundOptions> = {}) => {
     try {
       if (this.isPlaying()) {
         return assertValid<Promise<void>>(this.__promise);
@@ -317,7 +331,11 @@ export class Sound
         contextTime = this.getContextCurrentTime();
       }
 
-      this.__initializeForPlay(fadeOverride, loopOverride);
+      this.__initializeForPlay({
+        fadeOnLoops,
+        fadeOverride,
+        loopOverride,
+      });
 
       playAudioSource(this, this.__audioElement, contextTime);
 
@@ -341,16 +359,21 @@ export class Sound
 
   /* Regenerates the source node, generates the promise if it does not already
    * exist, registers events, etc. */
-  private readonly __initializeForPlay = (
-    fadeOverride?: IFade,
-    loopOverride?: boolean,
-  ) => {
+  private readonly __initializeForPlay = ({
+    fadeOnLoops,
+    fadeOverride,
+    loopOverride,
+  }: Partial<IPlaySoundOptions>) => {
     if (this.isWebAudio()) {
       this.__regenerateSourceNode();
     }
 
     /* Sets the override properties e.g. if this sound is part of a
-     * playlist. */
+     * playlist, or the changes occurred through play options. */
+    if (typeof fadeOnLoops === 'boolean') {
+      this.__fadeOnLoops = fadeOnLoops;
+    }
+
     if (fadeOverride) {
       this.__fadeOverride = getFrozenObject(fadeOverride);
     }
@@ -469,6 +492,13 @@ export class Sound
     timeUpdate?: () => void,
   ) => {
     const ended = () => {
+      if (this.getLoop()) {
+        this.__loopIterationCount += 1;
+        this.pause();
+        this.setTrackPosition(0);
+        this.play();
+      }
+
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
 
@@ -525,8 +555,9 @@ export class Sound
     delete this.__fadeOverride;
     if (this.isWebAudio()) {
       const fadeGain = this.getFadeGainNode();
-      fadeGain.gain.cancelScheduledValues(this.getContextCurrentTime());
-      fadeGain.gain.setValueAtTime(1, this.getContextCurrentTime());
+      const time = this.getContextCurrentTime() / 1000;
+      fadeGain.gain.cancelScheduledValues(time);
+      fadeGain.gain.setValueAtTime(1, time);
     }
   };
 
@@ -590,21 +621,33 @@ export class Sound
     return this;
   };
 
-  public readonly getFadeVolume = (
-    iterationCount = 0,
-    fadeOnLoops = false,
-  ) => {
-    const fade = this.getFade();
-    const time = this.getTrackPosition();
+  public readonly getFadeVolume = ({
+    fadeOnLoops: argLoopFade,
+    fadeOverride,
+    loopIterationCount: argIterCount,
+    loopOverride,
+  }: Partial<IPlaySoundOptions & { readonly loopIterationCount: number }>) => {
     const duration = this.getDuration();
+    const fade = fadeOverride || this.getFade();
+    const fadeOnLoops = this.__fadeOnLoops;
+    const loop = typeof loopOverride === 'boolean' ?
+      loopOverride :
+      this.getLoop();
+
+    const loopIterationCount =  argIterCount! >= 0 ?
+      argLoopFade :
+      this.__loopIterationCount;
+
     const targetVolume = this.getVolume();
+    const time = this.getTrackPosition();
 
     if (fade) {
       return getFadeVolume({
         duration,
         fade,
         fadeOnLoops,
-        iterationCount,
+        loop,
+        loopIterationCount,
         targetVolume,
         time,
       });

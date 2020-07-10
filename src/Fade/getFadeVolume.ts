@@ -8,25 +8,29 @@ import {
 export const getFadeVolume = ({
   fade,
   duration,
-  iterationCount = 0,
-  fadeOnLoops = false,
+  loop,
+  loopIterationCount,
+  fadeOnLoops,
   targetVolume,
   time,
 }: IGetFadeVolumeArgs) => {
-  if (!fade) {
-    return 1;
-  } else if (fadeOnLoops !== true && iterationCount) {
+  const shouldSkipFadeForLoop = loop &&
+    fadeOnLoops !== true &&
+    loopIterationCount;
+
+  if (!fade || shouldSkipFadeForLoop) {
     return 1;
   }
 
-  const inLen = Number(fade.length.in);
+  const inLen = ;
   const outLen = Number(fade.length.out);
+
   // Fading in.
   if (fade.easingCurve.in && inLen >= time) {
     return getFadeValueAtTime({
       change: targetVolume,
       curve: fade.easingCurve.in,
-      duration: inLen,
+      duration: fade.length.in || 0,
       initial: 0,
       time,
     });
@@ -34,7 +38,7 @@ export const getFadeVolume = ({
     return getFadeValueAtTime({
       change: -targetVolume,
       curve: fade.easingCurve.out,
-      duration: outLen,
+      duration: fade.length.out || 0,
       initial: targetVolume,
       time,
     });

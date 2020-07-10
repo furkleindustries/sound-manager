@@ -8,11 +8,11 @@ import {
   IFade,
 } from '../Fade/IFade';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
+import {
+  IPlaySoundOptions,
+} from './IPlaySoundOptions';
 import {
   ITaggableNode,
 } from '../Node/ITaggableNode';
@@ -39,7 +39,7 @@ export interface ISound
   setLoop(loop: boolean): this;
   getFade(): IFade | null;
   setFade(fade: IFade | null): this;
-  play(fadeOverride?: IFade | null, loopOverride?: boolean | number): Promise<void>;
+  play(options: Partial<IPlaySoundOptions>): Promise<void>;
   pause(): this;
   stop(): Promise<void>;
   rewind(seconds: number): this;
