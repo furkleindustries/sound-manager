@@ -35,9 +35,6 @@ import {
   isValidVolume,
 } from '../functions/isValidVolume';
 import {
-  fadeOutToStop,
-} from '../functions/fadeOutToStop';
-import {
   loopIsValid,
 } from '../Playlist/loopIsValid';
 import {
@@ -90,9 +87,9 @@ export class Sound
   private __promise: Promise<void> | null = null;
   private __sourceNode: AudioBufferSourceNode | null = null;
   private __startedTime: number = 0;
-  private __resolveOnEnd: () => void = () => {};
-  /* @ts-ignore */
-  private __rejectOnError = () => {};
+  private __resolveOnEnd = () => Promise.resolve();
+  private __rejectOnError?: (err: string | Error) => Error;
+
   private __fadeGainNode: GainNode | null = null;
   private __fadeOverride?: IFade;
   private __loopOverride?: boolean;
@@ -236,22 +233,22 @@ export class Sound
   };
 
   // Must be milliseconds.
-  public readonly setTrackPosition = (seconds: number) => {
+  public readonly setTrackPosition = (milliseconds: number) => {
     if (this.isPlaying()) {
       if (this.isWebAudio()) {
-        this.__startedTime = this.getContextCurrentTime() - seconds;
+        this.__startedTime = this.getContextCurrentTime() - milliseconds;
         this.pause();
         this.play();
       } else {
         assertValid<HTMLAudioElement>(
           this.__audioElement,
           strings.SET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
-        ).currentTime = seconds;
+        ).currentTime = milliseconds / 1000;
 
         this.__clearScheduledFades();
       }
     } else {
-      this.__pausedTime = seconds;
+      this.__pausedTime = milliseconds;
     }
 
     return this;
@@ -305,33 +302,41 @@ export class Sound
   };
 
   public readonly play = (fadeOverride?: IFade, loopOverride?: boolean) => {
-    if (this.isPlaying()) {
+    try {
+      if (this.isPlaying()) {
+        return assertValid<Promise<void>>(this.__promise);
+      }
+
+      this.__updateSoundTimes();
+
+      let contextTime = 0;
+
+      /* Regenerate the source node. This *must* be called otherwise paused
+      * Sounds in Web Audio mode will throw. */
+      if (this.isWebAudio()) {
+        contextTime = this.getContextCurrentTime();
+      }
+
+      this.__initializeForPlay(fadeOverride, loopOverride);
+
+      playAudioSource(this, this.__audioElement, contextTime);
+
+      /* Reset the paused time. */
+      this.__pausedTime = 0;
+
+      /* Ensure the sound knows it's playing. */
+      this.__playing = true;
+
+      /* Emit the promise that was either just generated or emitted on previous
+      * unfinished plays. */
       return assertValid<Promise<void>>(this.__promise);
+    } catch (err) {
+      if (typeof this.__rejectOnError === 'function') {
+        this.__rejectOnError(err);
+      }
     }
 
-    this.__updateSoundTimes();
-
-    let contextTime = 0;
-
-    /* Regenerate the source node. This *must* be called otherwise paused
-     * Sounds in Web Audio mode will throw. */
-    if (this.isWebAudio()) {
-      contextTime = this.getContextCurrentTime();
-    }
-
-    this.__initializeForPlay(fadeOverride, loopOverride);
-
-    playAudioSource(this, this.__audioElement, contextTime);
-
-    /* Reset the paused time. */
-    this.__pausedTime = 0;
-
-    /* Ensure the sound knows it's playing. */
-    this.__playing = true;
-
-    /* Emit the promise that was either just generated or emitted on previous
-     * unfinished plays. */
-    return assertValid<Promise<void>>(this.__promise);
+    return this.__promise as any;
   };
 
   /* Regenerates the source node, generates the promise if it does not already
@@ -395,6 +400,7 @@ export class Sound
 
   private readonly __updateSoundTimes = () => {
     const trackPosition = this.getTrackPosition();
+
     if (this.isWebAudio()) {
       /* Reset the started time. */
       this.__startedTime = this.getContextCurrentTime() - trackPosition;
@@ -425,7 +431,7 @@ export class Sound
   );
 
   private readonly __initializeRejector = (reject: Function) => (
-    this.__rejectOnError = (message?: string) => reject(
+    this.__rejectOnError = (message?: string | Error) => reject(
       message ||
       'The sound was stopped, probably by a user-created script.'
     )
@@ -477,8 +483,8 @@ export class Sound
         return;
       }
 
-      /* Resolve the emitted promise. */
-      this.__rejectOnError = () => this.__promise;
+      /* Delete the rejector. */
+      delete this.__rejectOnError;
 
       /* Reset the track position of the sound after it ends. Also rejects
        * the old promise. */
@@ -496,16 +502,24 @@ export class Sound
     this.__pausedTime = this.getTrackPosition();
     this.__startedTime = 0;
 
-    if (!this.isWebAudio()) {
-      /* Must be executed after __pausedTime = ... */
-      assertValid<HTMLAudioElement>(this.__audioElement).pause();
-    } else if (this.isPlaying()) {
-      this.getSourceNode().stop();
-    }
+    try {
+      if (!this.isWebAudio()) {
+        /* Must be executed after __pausedTime = ... */
+        assertValid<HTMLAudioElement>(this.__audioElement).pause();
+      } else if (this.isPlaying()) {
+        this.getSourceNode().stop();
+      }
 
-    /* Must be executed after __pausedTime = ... and this.getPlaying(). */
-    this.__playing = false;
-    this.__clearScheduledFades();
+      /* Must be executed after __pausedTime = ... and this.getPlaying(). */
+      this.__playing = false;
+      this.__clearScheduledFades();
+    } catch (err) {
+      if (typeof this.__rejectOnError === 'function') {
+        this.__rejectOnError(err);
+      } else {
+        throw err;
+      }
+    }
 
     return this;
   };
@@ -520,9 +534,19 @@ export class Sound
   };
 
   public readonly stop = () => {
-    fadeOutToStop(this).then(() => {
-      this.__resolveOnEnd();
-    });
+    setTimeout(() => {
+      try {
+        this.pause();
+        this.setTrackPosition(0);
+        this.__resolveOnEnd();
+      } catch (err) {
+        if (typeof this.__rejectOnError === 'function') {
+          this.__rejectOnError(err);
+        } else {
+          throw err;
+        }
+      }
+    }, this.getFade()?.length.out || 0);
 
     return this.__promise as Promise<void>;
   };
