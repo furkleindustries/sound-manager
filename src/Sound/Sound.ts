@@ -87,6 +87,7 @@ export class Sound
 
   // Tracks how many times the song has looped this play session.
   private __loopIterationCount = 0;
+  //
 
   // Do not initialize. `false` is still a valid override value.
   private __loopOverride?: boolean;
@@ -117,6 +118,7 @@ export class Sound
       audioElement,
       buffer,
       fade,
+      fadeOnLoops,
       getManagerVolume,
       loop,
       trackPosition,
@@ -146,6 +148,7 @@ export class Sound
 
     this.__initializeArgumentProperties({
       fade,
+      fadeOnLoops,
       loop,
       trackPosition,
     });
@@ -176,10 +179,12 @@ export class Sound
 
   private readonly __initializeArgumentProperties = ({
     fade,
+    fadeOnLoops,
     loop,
     trackPosition,
   }: {
-    fade: boolean | IFadeOptions | undefined,
+    fade: IFadeOptions | undefined,
+    fadeOnLoops: boolean | undefined,
     loop: boolean | undefined,
     trackPosition: number | undefined,
   }) => {
@@ -189,6 +194,10 @@ export class Sound
         createFade(fade);
 
       this.setFade(fadeObj);
+    }
+
+    if (typeof fadeOnLoops === 'boolean') {
+      this.__fadeOnLoops = fadeOnLoops;
     }
 
     if (typeof loop === 'boolean') {

@@ -19,7 +19,8 @@ export interface ISoundOptions
 {
   audioElement?: HTMLAudioElement;
   buffer?: AudioBuffer;
-  fade?: boolean | IFadeOptions;
+  fade?: IFadeOptions;
+  fadeOnLoops?: boolean;
   loop?: boolean;
   trackPosition?: number;
   getManagerVolume?(): number;
