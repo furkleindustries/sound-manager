@@ -79,8 +79,6 @@ export class Group
     if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
-
-    this.panelRegister();
   }
 
   public readonly setVolume = (value: number) => {

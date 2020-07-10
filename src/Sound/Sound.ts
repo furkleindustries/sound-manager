@@ -29,9 +29,6 @@ import {
   ISound,
 } from './ISound';
 import {
-  ISoundLabel,
-} from '../Node/ISoundLabel';
-import {
   ISoundOptions,
 } from './ISoundOptions';
 import {
@@ -113,7 +110,6 @@ export class Sound
       buffer,
       fade,
       getManagerVolume,
-      label,
       loop,
       trackPosition,
     } = options;
@@ -142,7 +138,6 @@ export class Sound
 
     this.__initializeArgumentProperties({
       fade,
-      label,
       loop,
       trackPosition,
     });
@@ -173,12 +168,10 @@ export class Sound
 
   private readonly __initializeArgumentProperties = ({
     fade,
-    label,
     loop,
     trackPosition,
   }: {
     fade: boolean | IFadeOptions | undefined,
-    label: ISoundLabel | undefined,
     loop: boolean | number | undefined,
     trackPosition: number | undefined,
   }) => {
@@ -188,10 +181,6 @@ export class Sound
         createFade(fade);
 
       this.setFade(fadeObj);
-    }
-
-    if (label) {
-      this.setLabel(label);
     }
 
     if (loopIsValid(loop)) {

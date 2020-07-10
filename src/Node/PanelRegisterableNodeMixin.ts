@@ -10,17 +10,26 @@ import {
 
 export function PanelRegisterableNodeMixin<T extends IConstructor<IBaseNode>>(Base: T) {
   return class PanelRegisterableNode extends Base implements IPanelRegisterableNode {
-    public __panelRegistered: boolean = false;
+    public panelRegistered = false;
 
-    public readonly isPanelRegistered = () =>this.__panelRegistered;
+    constructor(...args: any[]) {
+      super(args);
+
+      const options = args[0] as { panelRegistered?: boolean };
+      if (options && typeof options.panelRegistered === 'boolean') {
+        this.panelRegistered = options.panelRegistered;
+      }
+    }
+
+    public readonly isPanelRegistered = () => this.panelRegistered;
 
     public readonly panelRegister = () => {
-      this.__panelRegistered = true;
+      this.panelRegistered = true;
       return this;
     };
 
     public readonly panelUnregister = () => {
-      this.__panelRegistered = false;
+      this.panelRegistered = false;
       return this;
     };
   }

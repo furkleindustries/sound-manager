@@ -41,6 +41,7 @@ export class BaseNode implements IBaseNode {
     const opts = options || {};
     const {
       context,
+      label,
       volume,
     } = opts;
 
@@ -48,6 +49,10 @@ export class BaseNode implements IBaseNode {
     this.__isWebAudio = Boolean(this.__audioContext);
     if (this.isWebAudio()) {
       this.__gainNode = this.getAudioContext().createGain();
+    }
+
+    if (label) {
+      this.setLabel(label);
     }
 
     if (isValidVolume(volume)) {
