@@ -486,12 +486,9 @@ export class Sound
       /* Delete the rejector. */
       delete this.__rejectOnError;
 
-      /* Reset the track position of the sound after it ends. Also rejects
+      /* Reset the track position of the sound after it ends. Also resolves
        * the old promise. */
       this.stop();
-
-      /* Resolve the promise with the ended event. */
-      this.__resolveOnEnd();
     };
 
     return ended;
