@@ -8,15 +8,31 @@ import {
   assertValid,
 } from 'ts-assertions';
 
-export function scheduleWebAudioFadeOut(sound: ISound) {
-  const fade = assertValid<IFade>(sound.getFade());
-  const outLength = Number(fade.length.out);
+export const scheduleWebAudioFadeOut = ({
+  getContextCurrentTime,
+  getDuration,
+  getFade,
+  getFadeGainNode,
+  getFadeVolume,
+  getLoop,
+}: ISound) => {
+  const currentTime = getContextCurrentTime() / 1000;
+  const duration = getDuration();
+  const fade = assertValid<IFade>(getFade());
+  const fadeGainNode = getFadeGainNode();
+  const outLength = fade.length.out || 0;
+  const loop = getLoop();
+
   for (let time = 0; time < outLength; time += 1) {
-    const currentTime = sound.getContextCurrentTime() / 1000;
-    const duration = sound.getDuration() / 1000;
-    sound.getFadeGainNode().gain.setValueAtTime(
-      sound.getFadeVolume(),
+    fadeGainNode.gain.setValueAtTime(
+      getFadeVolume({
+        duration,
+        fade,
+        loop,
+        time,
+      }),
+
       currentTime + duration - time,
     );
   }
-}
+};
