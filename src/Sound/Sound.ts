@@ -38,9 +38,6 @@ import {
   isValidVolume,
 } from '../functions/isValidVolume';
 import {
-  loopIsValid,
-} from '../Playlist/loopIsValid';
-import {
   NodeTypes,
 } from '../enums/NodeTypes';
 import {
@@ -180,7 +177,7 @@ export class Sound
     trackPosition,
   }: {
     fade: boolean | IFadeOptions | undefined,
-    loop: boolean | number | undefined,
+    loop: boolean | undefined,
     trackPosition: number | undefined,
   }) => {
     if (fade) {
@@ -191,8 +188,8 @@ export class Sound
       this.setFade(fadeObj);
     }
 
-    if (loopIsValid(loop)) {
-      this.setLoop(loop as boolean);
+    if (typeof loop === 'boolean') {
+      this.setLoop(loop);
     }
 
     if (trackPosition && trackPosition > 0) {
@@ -316,7 +313,11 @@ export class Sound
     fadeOnLoops,
     fadeOverride,
     loopOverride,
-  }: Partial<IPlaySoundOptions> = {}) => {
+  }: Partial<IPlaySoundOptions> = {
+    fadeOnLoops: false,
+    fadeOverride: null,
+    loopOverride: undefined,
+  }) => {
     try {
       if (this.isPlaying()) {
         return assertValid<Promise<void>>(this.__promise);

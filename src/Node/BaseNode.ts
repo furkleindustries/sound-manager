@@ -37,8 +37,8 @@ export class BaseNode implements IBaseNode {
 
   protected __volume: number = 1;
 
-  constructor(options?: INodeOptions) {
-    const opts = options || {};
+  constructor(options?: INodeOptions | [ INodeOptions ]) {
+    const opts = (Array.isArray(options) ? options[0] : options) || {};
     const {
       context,
       isWebAudio,

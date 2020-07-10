@@ -14,9 +14,6 @@ import {
   ISoundGroupIdentifier,
 } from '../interfaces/ISoundGroupIdentifier';
 import {
-  loopIsValid,
-} from './loopIsValid';
-import {
   makeSoundGroupIdentifier,
 } from '../functions/makeSoundGroupIdentifier';
 import {
@@ -52,12 +49,12 @@ export class Playlist implements IPlaylist {
       this.fade = createFade(fade);
     }
 
-    if (loopIsValid(loop)) {
+    if (typeof loop === 'boolean') {
       this.loop = loop;
     }
   }
 
-  public readonly loopIsValid = () => loopIsValid(this.loop);
+  public readonly loopIsValid = () => typeof this.loop === 'boolean';
 
   public readonly tryCallback = (name?: string) => {
     if (typeof this.callback === 'function') {
