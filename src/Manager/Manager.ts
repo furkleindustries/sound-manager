@@ -71,17 +71,10 @@ export class Manager extends AnalysableNodeMixin(BaseNode) implements IManager {
         getInputNode: () => this.getInputNode(),
         groups: groups || {},
       },
-
-      this.registerStateCallback,
-      this.unregisterStateCallback,
-      this.callStateCallbacks,
     );
 
     this.player = new PlayerSubmanager(
       { getCollection: () => this.collection },
-      this.registerStateCallback,
-      this.unregisterStateCallback,
-      this.callStateCallbacks,
     );
 
     if (isValidVolume(volume)) {

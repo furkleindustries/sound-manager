@@ -1,57 +1,60 @@
 import classNames from 'classnames';
 import {
-  IManagerStateCallback,
-} from '../../interfaces/IManagerStateCallback';
-import {
   ISoundGroupViewProps,
 } from './ISoundGroupViewProps';
+import {
+  SoundGroupController,
+} from '../SoundGroupController';
+import {
+  SoundGroupViewTitle,
+} from '../SoundGroupViewTitle';
 import {
   SoundView,
 } from '../SoundView';
 
 import * as React from 'react';
 
-export class SoundGroupView extends React.PureComponent<ISoundGroupViewProps> {
-  public readonly render = () => {
-    const {
+export const SoundGroupView: React.FC<ISoundGroupViewProps> = ({
+  className,
+  groupName,
+  group,
+  group: {
+    sounds,
+    getLabel,
+    isPanelRegistered,
+  },
+}) => (
+  <div
+    className={classNames(
+      'sound-group-view',
       className,
-      group: { sounds },
-    } = this.props;
+    )}
+  >
+    {isPanelRegistered() ?
+      <div className="sound-group-content-container">
+        <SoundGroupViewTitle
+          groupName={groupName}
+          label={getLabel()}
+        />
 
-    return (
-      <div
-        className={classNames(
-          'sound-group-view',
-          className,
-        )}
+        <SoundGroupController
+          group={group}
+          groupName={groupName}
+        />
+      </div> :
+      null}
 
-        key="sound-group-view"
-      >
-        <ul>
-          {Object.keys(sounds)
-            .filter((key) => sounds[key].isPanelRegistered())
-            .map((key) => (
-              <li key={key}>
-                <SoundView
-                  name={key}
-                  key={key}
-                  sound={sounds[key]}
-                />
-              </li>
-            ))}
-        </ul>
-      </div>
-    );
-  };
-
-  private stateCallback: IManagerStateCallback | null = null;
-  public readonly componentDidMount = () => {
-    this.stateCallback = () => this.forceUpdate();
-    this.props.registerStateCallback(this.stateCallback);
-  };
-
-  public readonly componentWillUnmount = () => {
-    this.props.unregisterStateCallback(this.stateCallback!);
-    this.stateCallback = null;
-  };
-};
+    <ul>
+      {Object.keys(sounds)
+        .filter((key) => sounds[key].isPanelRegistered())
+        .map((key) => (
+          <li key={key}>
+            <SoundView
+              name={key}
+              sound={sounds[key]}
+            />
+          </li>
+        ))}
+    </ul>
+  </div>
+);

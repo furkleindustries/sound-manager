@@ -8,9 +8,6 @@ import {
   ISound,
 } from './ISound';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   Sound,
 } from './Sound';
 import {
@@ -31,9 +28,6 @@ export const strings = {
 
 export const createHtmlAudioSound = (
   options: ICreateSoundOptions,
-  registerStateCallback: (callback: IManagerStateCallback) => void,
-  unregisterStateCallback: (callback: IManagerStateCallback) => void,
-  callStateCallbacks: () => void,
 ): Promise<ISound> => {
   const {
     buffer,
@@ -76,10 +70,6 @@ export const createHtmlAudioSound = (
       trackPosition,
       volume,
     }),
-
-    registerStateCallback,
-    unregisterStateCallback,
-    callStateCallbacks,
   );
 
   const playthroughListener = (resolver: (sound: ISound) => void) => {

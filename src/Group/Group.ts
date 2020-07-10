@@ -15,9 +15,6 @@ import {
   IGroupOptions,
 } from './IGroupOptions';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   ISound,
 } from '../Sound/ISound';
 import {
@@ -57,18 +54,7 @@ export class Group
     return this.__sounds;
   }
 
-  constructor(
-    options: IGroupOptions,
-    public readonly registerStateCallback: (
-      callback: IManagerStateCallback,
-    ) => void,
-
-    public readonly unregisterStateCallback: (
-      callback: IManagerStateCallback,
-    ) => void,
-
-    public readonly callStateCallbacks: () => void,
-  ) {
+  constructor(options: IGroupOptions) {
     super({ ...options });
 
     const {
@@ -93,13 +79,13 @@ export class Group
     if (isValidVolume(volume)) {
       this.setVolume(volume);
     }
+
+    this.panelRegister();
   }
 
   public readonly setVolume = (value: number) => {
     super.setVolume(value);
     this.updateAllAudioElementsVolume();
-
-    this.callStateCallbacks();
 
     return this;
   };
@@ -175,8 +161,6 @@ export class Group
 
     this.__sounds = getFrozenObject(this.sounds, sounds);
 
-    this.callStateCallbacks();
-
     return this;
   };
 
@@ -198,8 +182,6 @@ export class Group
     });
 
     this.__sounds = getFrozenObject(sounds);
-
-    this.callStateCallbacks();
 
     return this;
   };

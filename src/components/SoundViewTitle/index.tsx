@@ -1,5 +1,5 @@
 import * as React from 'react';
 
-export const SoundViewTitle: React.FC<{ name: string }> = ({ name }) => (
-  <h4>{name}</h4>
+export const SoundViewTitle: React.FC<{ title: string }> = ({ title }) => (
+  <h4>{title}</h4>
 );

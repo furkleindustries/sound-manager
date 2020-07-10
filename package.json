@@ -1,6 +1,6 @@
 {
   "name": "sound-manager",
-  "version": "0.17.35",
+  "version": "0.17.38",
   "description": "A full-service sound library.",
   "main": "src/index.ts",
   "scripts": {

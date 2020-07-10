@@ -27,7 +27,7 @@ export const SoundView: React.FunctionComponent<ISoundViewProps> = ({
 
     key="sound-view"
   >
-    <SoundViewTitle name={name} />
+    <SoundViewTitle title={sound.getLabel().title || name} />
 
     <SoundControllerView sound={sound} />
 

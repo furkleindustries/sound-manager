@@ -14,9 +14,6 @@ import {
   ICollectionSubmanager,
 } from './ICollectionSubmanager';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   IPlaylist,
 } from '../Playlist/IPlaylist';
 import {
@@ -59,10 +56,6 @@ export class PlayerSubmanager implements IPlayerSubmanager {
 
   constructor(
     { getCollection }: { getCollection: () => ICollectionSubmanager },
-
-    public readonly registerStateCallback: (cb: IManagerStateCallback) => void,
-    public readonly unregisterStateCallback: (cb: IManagerStateCallback) => void,
-    public readonly callStateCallbacks: () => void,
   )
   {
     this.__getCollection = assertValid<() => ICollectionSubmanager>(getCollection);

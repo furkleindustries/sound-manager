@@ -11,9 +11,6 @@ import {
   ICreateSoundOptions,
 } from './ICreateSoundOptions';
 import {
-  IManagerStateCallback,
-} from '../interfaces/IManagerStateCallback';
-import {
   ISound,
 } from './ISound';
 import {
@@ -28,20 +25,12 @@ export const strings = {
     'Loading Web Audio failed. Falling back to HTML5 audio.',
 };
 
-export async function createWebHelper(
+export  const createWebHelper = async (
   options: ICreateSoundOptions,
-  registerStateCallback: (cb: IManagerStateCallback) => void,
-  unregisterStateCallback: (cb: IManagerStateCallback) => void,
-  callStateCallbacks: () => void,
-): Promise<ISound> {
+): Promise<ISound> => {
   /* Try to create a sound in Web Audio mode. */
   try {
-    return await createWebAudioSound(
-      getFrozenObject(options),
-      registerStateCallback,
-      unregisterStateCallback,
-      callStateCallbacks,
-    );
+    return await createWebAudioSound(getFrozenObject(options));
   } catch (err) {
     /* Warn with generic and specific error messages that Web Audio mode has
      * failed, possibly due to CORS restrictions. */ 
@@ -49,15 +38,10 @@ export async function createWebHelper(
 
     /* Try to create a sound in HTML Audio mode. */
     try {
-      return await createHtmlHelper(
-        getFrozenObject(options),
-        registerStateCallback,
-        unregisterStateCallback,
-        callStateCallbacks,
-      );
+      return await createHtmlHelper(getFrozenObject(options));
     } catch (err) {
       /* Throw after both modes have failed. */
       throw new Error(`${strings.BOTH_FAILED}\n${err}`);
     }
   }
-}
+};

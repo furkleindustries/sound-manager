@@ -41,7 +41,6 @@ import {
   assert,
   assertValid,
 } from 'ts-assertions';
-import { IManagerStateCallback } from '../interfaces/IManagerStateCallback';
 
 export class CollectionSubmanager implements ICollectionSubmanager {
   /* Node collection */
@@ -78,10 +77,6 @@ export class CollectionSubmanager implements ICollectionSubmanager {
       groups?: IGroupsMap,
       isWebAudio?: () => boolean,
     },
-
-    public readonly registerStateCallback: (cb: IManagerStateCallback) => void,
-    public readonly unregisterStateCallback: (cb: IManagerStateCallback) => void,
-    public readonly callStateCallbacks: () => void,
   ) {
     this.__getManagerVolume = assertValid<() => number>(
       typeof getManagerVolume === 'function',
@@ -133,12 +128,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
   };
 
   public readonly addGroup = (name: string, options: IGroupOptions = {}) => {
-    const group = createGroup(
-      options,
-      this.registerStateCallback,
-      this.unregisterStateCallback,
-      this.callStateCallbacks,
-    );
+    const group = createGroup(options);
 
     this.addGroups({ [name]: group });
 
@@ -253,12 +243,7 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     const opts: ICreateSoundOptions = getFrozenObject({ ...options });
 
     this.__registerIntentToAddSound(name, groupName);
-    const sound = await createSound(
-      opts,
-      this.registerStateCallback,
-      this.unregisterStateCallback,
-      this.callStateCallbacks,
-    );
+    const sound = await createSound(opts);
 
     this.addSounds({ [name]: sound }, groupName);
     this.__deregisterIntentToAddSound(name, groupName);

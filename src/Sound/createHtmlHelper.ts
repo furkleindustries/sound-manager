@@ -19,20 +19,12 @@ export const strings = {
     'Generating HTML5 Audio failed. Cannot construct Sound.',
 };
 
-export function createHtmlHelper(
+export const createHtmlHelper = (
   options: ICreateSoundOptions,
-  registerStateCallback: (callback: IManagerStateCallback) => void,
-  unregisterStateCallback: (callback: IManagerStateCallback) => void,
-  callStateCallbacks: () => void,
-): Promise<ISound> {
+): Promise<ISound> => {
   try {
-    return createHtmlAudioSound(
-      getFrozenObject(options),
-      registerStateCallback,
-      unregisterStateCallback,
-      callStateCallbacks,
-    );
+    return createHtmlAudioSound(getFrozenObject(options));
   } catch (err) {
     throw new Error(`${strings.HTML_AUDIO_FAILED}\n${err}`);
   }
-}
+};

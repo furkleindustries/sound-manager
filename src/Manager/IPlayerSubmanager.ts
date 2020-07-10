@@ -31,6 +31,4 @@ export interface IPlayerSubmanager {
   playPlaylists(names: string[]): Promise<void>;
   stopPlaylist(name: string): this;
   stopPlaylists(names: string[]): this;
-  registerStateCallback(callback: () => void): void;
-  unregisterStateCallback(callback: () => void): void;
 }

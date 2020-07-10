@@ -12,8 +12,6 @@ export const SoundManagerView: React.FunctionComponent<ISoundManagerViewProps> =
   className,
   manager: {
     collection: { groups },
-    registerStateCallback,
-    unregisterStateCallback,
   },
 }) => (
   <div
@@ -23,13 +21,13 @@ export const SoundManagerView: React.FunctionComponent<ISoundManagerViewProps> =
     )}
   >
     <ul>
-      {Object.keys(groups).map((name) => (
-        <SoundGroupView
-          group={groups[name]}
-          key={name}
-          registerStateCallback={registerStateCallback}
-          unregisterStateCallback={unregisterStateCallback}
-        />
+      {Object.keys(groups).map((groupName) => (
+        <li key={groupName}>
+          <SoundGroupView
+            group={groups[groupName]}
+            groupName={groupName}
+          />
+        </li>
       ))}
     </ul>
   </div>

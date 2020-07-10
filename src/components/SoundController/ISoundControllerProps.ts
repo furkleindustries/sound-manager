@@ -1,11 +1,8 @@
 import {
- ComponentType,
-} from 'react';
-import {
   ISound,
 } from '../../Sound/ISound';
 
-export interface ISoundControllerViewProps {
+export interface ISoundControllerProps {
   readonly sound: ISound;
   readonly className?: string;
 }

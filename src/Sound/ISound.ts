@@ -47,7 +47,4 @@ export interface ISound
   getGroupVolume(): number;
   getFadeVolume(): number;
   updateAudioElementVolume(): this;
-  registerStateCallback(callback: IManagerStateCallback): void;
-  unregisterStateCallback(callback: IManagerStateCallback): void;
-  callStateCallbacks(): void;
 }
