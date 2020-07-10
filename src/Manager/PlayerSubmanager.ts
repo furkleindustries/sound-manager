@@ -30,7 +30,7 @@ import {
 } from '../interfaces/ISoundGroupIdentifier';
 import {
   log,
-} from '../logging/log';
+} from 'colorful-logging';
 import {
   nameOrAllKeys,
 } from '../functions/nameOrAllKeys';
@@ -253,7 +253,7 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     await sound.play(
       /* Overrides the sound's fade with the playlist fade. This argument is
         * ignored if it's falsy. */
-      playlist.fade,
+      { fadeOverride: playlist.fade },
     );
 
     if (playIndex === playlist.ids.length - 1) {

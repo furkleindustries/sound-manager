@@ -15,7 +15,7 @@ import {
 } from './ISound';
 import {
   warn,
-} from '../logging/warn';
+} from 'colorful-logging';
 
 export const strings = {
   BOTH_FAILED:

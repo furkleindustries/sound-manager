@@ -8,6 +8,9 @@ import {
   IFade,
 } from '../Fade/IFade';
 import {
+  IGetFadeVolumeArgs,
+} from '../Fade/IGetFadeVolumeArgs';
+import {
   IPanelRegisterableNode,
 } from '../Node/IPanelRegisterableNode';
 import {
@@ -19,7 +22,6 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
-import { IGetFadeVolumeArgs } from '../Fade/IGetFadeVolumeArgs';
 
 export interface ISound
   extends
@@ -42,7 +44,7 @@ export interface ISound
   setFade(fade: IFade | null): this;
   play(options?: Partial<IPlaySoundOptions>): Promise<void>;
   pause(): this;
-  stop(): Promise<void>;
+  stop(options?: Partial<IPlaySoundOptions>): Promise<void>;
   rewind(seconds: number): this;
   fastForward(seconds: number): this;
   getGroupVolume(): number;

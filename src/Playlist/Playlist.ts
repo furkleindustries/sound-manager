@@ -2,6 +2,9 @@ import {
   createFade,
 } from '../Fade/createFade';
 import {
+  log,
+} from 'colorful-logging';
+import {
   IFade,
 } from '../Fade/IFade';
 import {
@@ -58,7 +61,7 @@ export class Playlist implements IPlaylist {
 
   public readonly tryCallback = (name?: string) => {
     if (typeof this.callback === 'function') {
-      console.log(
+      log(
         `Firing playlist ${name ? name : '(no name provided)'} callback.`
       );
 

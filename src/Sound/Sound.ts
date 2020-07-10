@@ -11,6 +11,9 @@ import {
   createFade,
 } from '../Fade/createFade';
 import {
+  warn,
+} from 'colorful-logging';
+import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
 import {
@@ -95,7 +98,7 @@ export class Sound
   private __sourceNode: AudioBufferSourceNode | null = null;
   private __startedTime = 0;
 
-  private __resolveOnEnd = () => Promise.resolve();
+  private __resolveOnEnd: (() => Promise<void>) | undefined = undefined;
   private __rejectOnError?: (err: string | Error) => Error;
 
   /* istanbul ignore next */
@@ -310,6 +313,7 @@ export class Sound
   };
 
   public readonly play = ({
+    doneCallback,
     fadeOnLoops,
     fadeOverride,
     loopOverride,
@@ -334,6 +338,7 @@ export class Sound
       }
 
       this.__initializeForPlay({
+        doneCallback,
         fadeOnLoops,
         fadeOverride,
         loopOverride,
@@ -362,6 +367,7 @@ export class Sound
   /* Regenerates the source node, generates the promise if it does not already
    * exist, registers events, etc. */
   private readonly __initializeForPlay = ({
+    doneCallback,
     fadeOnLoops,
     fadeOverride,
     loopOverride,
@@ -404,8 +410,8 @@ export class Sound
      this.__initializePromiseForPlay();
     }
 
-    this.__initializeEventsForPlay(audioElement, timeUpdate);
-  }
+    this.__initializeEventsForPlay(audioElement, timeUpdate, doneCallback);
+  };
 
   /* When an AudioBufferSourceNode is stopped, it can never be used again.
    * Therefore, a new node must be generated to support the pause
@@ -475,6 +481,7 @@ export class Sound
   private readonly __initializeEventsForPlay = (
     audioElement?: HTMLAudioElement | null,
     timeUpdate?: () => void,
+    doneCallback?: () => void,
   ) => {
     const isWebAudio = this.isWebAudio();
     const source = assertValid<AudioBufferSourceNode | HTMLAudioElement>(
@@ -483,15 +490,22 @@ export class Sound
 
     /* Register the ended export function to fire when the audio source emits the
      * 'ended' event. */
-    source.addEventListener(
-      'ended',
-      this.__getEndEventHandler(source, timeUpdate),
+    const endHandler = this.__getEndEventHandler(
+      source,
+      timeUpdate,
+      doneCallback,
     );
+
+    source.addEventListener('ended', endHandler);
+
+    // Pass the handler back up.
+    return endHandler;
   };
 
   private readonly __getEndEventHandler = (
     source: AudioBufferSourceNode | HTMLAudioElement,
     timeUpdate?: () => void,
+    doneCallback?: () => void,
   ) => {
     const ended = () => {
       if (this.getLoop()) {
@@ -499,6 +513,7 @@ export class Sound
         this.pause();
         this.setTrackPosition(0);
         this.play();
+        return;
       }
 
       /* Remove the 'ended' event listener. */
@@ -511,7 +526,7 @@ export class Sound
       }
 
       /* Don't do anything if the track was paused. */
-      if (this.getTrackPosition() < this.getDuration()) {
+      if (this.__playing && this.getTrackPosition() < this.getDuration()) {
         return;
       }
 
@@ -521,6 +536,13 @@ export class Sound
       /* Reset the track position of the sound after it ends. Also resolves
        * the old promise. */
       this.stop();
+
+      if (typeof doneCallback === 'function') {
+        doneCallback();
+      }
+
+      // Delete the resolver.
+      delete this.__resolveOnEnd;
     };
 
     return ended;
@@ -563,33 +585,43 @@ export class Sound
     }
   };
 
-  public readonly stop = () => {
-    setTimeout(() => {
-      try {
+  public readonly stop = ({
+    doneCallback,
+    fadeOnLoops,
+    fadeOverride,
+    loopOverride,
+  }: Partial<IPlaySoundOptions> = {}) => {
+    this.__initializeForPlay({
+      doneCallback: () => {
         this.pause();
         this.setTrackPosition(0);
-        this.__resolveOnEnd();
-      } catch (err) {
-        if (typeof this.__rejectOnError === 'function') {
-          this.__rejectOnError(err);
-        } else {
-          throw err;
+
+        if (typeof this.__resolveOnEnd === 'function') {
+          this.__resolveOnEnd();
         }
-      }
-    }, this.getFade()?.length.out || 0);
+
+        if (typeof doneCallback === 'function') {
+          doneCallback();
+        }
+
+        return this;
+      },
+
+      fadeOnLoops,
+      fadeOverride,
+      loopOverride,
+    });
 
     return this.__promise as Promise<void>;
   };
 
   public readonly rewind = (milliseconds: number) => {
     this.setTrackPosition(this.getTrackPosition() - milliseconds);
-
     return this;
   };
 
   public readonly fastForward = (milliseconds: number) => {
     this.setTrackPosition(this.getTrackPosition() + milliseconds);
-
     return this;
   };
 
@@ -612,7 +644,7 @@ export class Sound
       if (isValidVolume(computedVol)) {
         volumes[ii] = computedVol;
       } else {
-        console.warn(`Expected a volume between the inclusive range of 0 and 1 in Sound.get${key}Volume. Instead, ${computedVol} was received.`)
+        warn(`Expected a volume between the inclusive range of 0 and 1 in Sound.get${key}Volume. Instead, ${computedVol} was received.`)
       }
     }
 
