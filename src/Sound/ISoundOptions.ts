@@ -7,12 +7,19 @@ import {
 import {
   ITaggableNodeOptions,
 } from '../Node/ITaggableNodeOptions';
+import {
+  IPanelRegisterableNodeOptions,
+} from '../Node/IPanelRegisterableNodeOptions';
 
-export interface ISoundOptions extends INodeOptions, ITaggableNodeOptions {
+export interface ISoundOptions
+  extends
+    INodeOptions,
+    ITaggableNodeOptions,
+    IPanelRegisterableNodeOptions
+{
   audioElement?: HTMLAudioElement;
   buffer?: AudioBuffer;
   fade?: boolean | IFadeOptions;
-  isWebAudio?: boolean;
   loop?: boolean;
   trackPosition?: number;
   getManagerVolume?(): number;
