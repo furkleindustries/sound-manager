@@ -1,13 +1,10 @@
 {
   "name": "sound-manager",
-  "version": "0.17.48",
+  "version": "0.17.51",
   "description": "A full-service sound library.",
   "main": "src/index.ts",
   "scripts": {
-    "build:browser": "webpack",
-    "build:esnext": "tsc",
-    "build:dev": "cross-env NODE_ENV=development webpack",
-    "build:docs": "npm run build:docs-md && npm run build:docs-html",
+    "build:docs": "run-s build:docs-md && npm run build:docs-html",
     "build:docs-md": "typedoc --theme markdown --options ./typedoc.json --out typedocs/markdown",
     "build:docs-html": "typedoc --options ./typedoc.json --out typedocs/html",
     "test": "jest",
@@ -39,6 +36,7 @@
     "cross-env": "^5.2.1",
     "jest": "^26.0.1",
     "jest-diff": "^26.0.1",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^2.7.1",
     "ts-jest": "^26.1.1",
     "ts-loader": "^5.4.5",

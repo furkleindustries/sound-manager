@@ -26,6 +26,9 @@ import {
   IFadeOptions,
 } from '../Fade/IFadeOptions';
 import {
+  IPlaySoundOptions,
+} from './IPlaySoundOptions';
+import {
   ISound,
 } from './ISound';
 import {
@@ -62,8 +65,6 @@ import {
   assert,
   assertValid,
 } from 'ts-assertions';
-import { IPlaySoundOptions } from './IPlaySoundOptions';
-import { throws } from 'assert';
 
 export class Sound
   extends
@@ -81,7 +82,7 @@ export class Sound
   private __audioElement: HTMLAudioElement | null = null;
   private __fade: IFade | null = null;
   private __fadeGainNode: GainNode | null = null;
-  private __fadeOnLoops = false;
+  private __fadeOnLoops = true;
   private __fadeOverride?: IFade;
 
   // Tracks how many times the song has looped this play session.
@@ -363,7 +364,7 @@ export class Sound
     fadeOnLoops,
     fadeOverride,
     loopOverride,
-  }: Partial<IPlaySoundOptions>) => {
+  }: Partial<IPlaySoundOptions> = {}) => {
     if (this.isWebAudio()) {
       this.__regenerateSourceNode();
     }
@@ -624,19 +625,18 @@ export class Sound
   public readonly getFadeVolume = ({
     fadeOnLoops: argLoopFade,
     fadeOverride,
-    loopIterationCount: argIterCount,
     loopOverride,
-  }: Partial<IPlaySoundOptions & { readonly loopIterationCount: number }>) => {
+  }: Partial<IPlaySoundOptions> = {}) => {
     const duration = this.getDuration();
+
     const fade = fadeOverride || this.getFade();
-    const fadeOnLoops = this.__fadeOnLoops;
+    const fadeOnLoops = typeof argLoopFade === 'boolean' ?
+      argLoopFade :
+      this.__fadeOnLoops;
+
     const loop = typeof loopOverride === 'boolean' ?
       loopOverride :
       this.getLoop();
-
-    const loopIterationCount =  argIterCount! >= 0 ?
-      argLoopFade :
-      this.__loopIterationCount;
 
     const targetVolume = this.getVolume();
     const time = this.getTrackPosition();
@@ -647,7 +647,7 @@ export class Sound
         fade,
         fadeOnLoops,
         loop,
-        loopIterationCount,
+        loopIterationCount: this.__loopIterationCount,
         targetVolume,
         time,
       });

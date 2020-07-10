@@ -22,15 +22,15 @@ export const getFadeVolume = ({
     return 1;
   }
 
-  const inLen = ;
-  const outLen = Number(fade.length.out);
+  const inLen = fade.length.in || 0;
+  const outLen = fade.length.out || 0;
 
   // Fading in.
   if (fade.easingCurve.in && inLen >= time) {
     return getFadeValueAtTime({
       change: targetVolume,
       curve: fade.easingCurve.in,
-      duration: fade.length.in || 0,
+      duration: inLen,
       initial: 0,
       time,
     });
@@ -38,7 +38,7 @@ export const getFadeVolume = ({
     return getFadeValueAtTime({
       change: -targetVolume,
       curve: fade.easingCurve.out,
-      duration: fade.length.out || 0,
+      duration: outLen,
       initial: targetVolume,
       time,
     });

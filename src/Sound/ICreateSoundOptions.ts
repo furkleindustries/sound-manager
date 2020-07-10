@@ -5,16 +5,17 @@ import {
   ISoundLabel,
 } from '../Node/ISoundLabel';
 
+// Must have buffer+context or an url.
 export interface ICreateSoundOptions {
-  context?: AudioContext;
-  isWebAudio?: boolean;
-  // Must have buffer or url.
+  getManagerVolume?(): number;
   buffer?: AudioBuffer;
-  url?: string;
-  fade?: IFadeOptions | boolean;
+  context?: AudioContext;
+  fade?: IFadeOptions;
+  fadeOnLoops?: boolean;
+  isWebAudio?: boolean;
   label?: ISoundLabel;
   loop?: boolean;
   trackPosition?: number;
+  url?: string;
   volume?: number;
-  getManagerVolume?(): number;
 }

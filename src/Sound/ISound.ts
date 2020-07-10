@@ -19,6 +19,7 @@ import {
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
+import { IGetFadeVolumeArgs } from '../Fade/IGetFadeVolumeArgs';
 
 export interface ISound
   extends
@@ -39,12 +40,12 @@ export interface ISound
   setLoop(loop: boolean): this;
   getFade(): IFade | null;
   setFade(fade: IFade | null): this;
-  play(options: Partial<IPlaySoundOptions>): Promise<void>;
+  play(options?: Partial<IPlaySoundOptions>): Promise<void>;
   pause(): this;
   stop(): Promise<void>;
   rewind(seconds: number): this;
   fastForward(seconds: number): this;
   getGroupVolume(): number;
-  getFadeVolume(): number;
+  getFadeVolume(options?: Partial<IGetFadeVolumeArgs>): number;
   updateAudioElementVolume(): this;
 }
