@@ -33,11 +33,11 @@ export const playAudioSource = (
     strings.SOUND_PLAYING,
   );
 
-  const trackPosition = sound.getTrackPosition() / 1000;
+  const trackPosition = sound.getTrackPosition();
   if (sound.isWebAudio()) {
     assert(contextTime! >= 0);
     /* Play the source node, respecting a possible pause. */
-    sound.getSourceNode().start(contextTime || 0 / 1000, trackPosition);
+    sound.getSourceNode().start(contextTime! / 1000, trackPosition);
   } else {
     /* Set the actual audio element volume to the product of manager, group,
      * and sound volumes. */
@@ -50,7 +50,7 @@ export const playAudioSource = (
 
     /* Just to be safe, we set the current time of the audio element to the
      * track position. */
-    safeAudioElement.currentTime = trackPosition;
+    safeAudioElement.currentTime = trackPosition / 1000;
 
     /* Starts the audio element. This may involve buffering. */
     safeAudioElement.play();

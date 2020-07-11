@@ -28,7 +28,7 @@ export const SoundGroupController: React.FC<
       )}
     >
       <label htmlFor={volumeId}>
-        ⏶/⏷
+        ⏶&#xFE0E;/⏷&#xFE0E;
       </label>
 
       <input

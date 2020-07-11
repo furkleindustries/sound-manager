@@ -49,7 +49,7 @@ export const SoundController: React.FC<
       )}
     >
       <label htmlFor={volumeId}>
-        ⏶/⏷
+        ⏶&#xFE0E;/⏷&#xFE0E;
       </label>
 
       <input
@@ -64,7 +64,7 @@ export const SoundController: React.FC<
       />
 
       <label htmlFor={loopId}>
-        ↻
+        ↻&#xFE0E;
       </label>
 
       <input
@@ -80,7 +80,7 @@ export const SoundController: React.FC<
         key="sound-controller-play"
         onClick={playSetter}
       >
-        {isPlayingNow ? '⏸' : '⏵︎'}
+        {isPlayingNow ? '⏸\uFE0E' : '⏵︎\uFE0E'}
       </button>
     </div>
   );

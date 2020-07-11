@@ -277,9 +277,7 @@ export class Sound
   // Returned in milliseconds.
   public readonly getDuration = () => {
     if (this.isWebAudio()) {
-      const {
-        buffer,
-      } = this.getSourceNode();
+      const { buffer } = this.getSourceNode();
 
       return assertValid<AudioBuffer>(
         buffer,
@@ -296,7 +294,9 @@ export class Sound
   public readonly isPlaying = () => this.__playing;
 
   private __loop = false;
-  public readonly getLoop = () => this.__loopOverride || this.__loop;
+  public readonly getLoop = () => typeof this.__loopOverride === 'boolean' ?
+    this.__loopOverride :
+    this.__loop;
 
   public readonly setLoop = (loop: boolean) => {
     if (this.isWebAudio()) {
@@ -317,7 +317,6 @@ export class Sound
 
   public readonly setFade = (fade: IFade | null) => {
     this.__fade = fade;
-
     return this;
   };
 
@@ -347,7 +346,21 @@ export class Sound
       }
 
       this.__initializeForPlay({
-        doneCallback,
+        doneCallback: () => {
+          this.pause();
+          this.setTrackPosition(0);
+
+          if (typeof this.__resolveOnEnd === 'function') {
+            this.__resolveOnEnd();
+          }
+
+          if (typeof doneCallback === 'function') {
+            doneCallback();
+          }
+
+          return this;
+        },
+
         fadeOnLoops,
         fadeOverride,
         loopOverride,
