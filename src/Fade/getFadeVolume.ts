@@ -14,9 +14,9 @@ export const getFadeVolume = ({
   targetVolume,
   time,
 }: IGetFadeVolumeArgs) => {
-  const shouldSkipFadeForLoop = loop &&
-    fadeOnLoops !== true &&
-    loopIterationCount;
+  const shouldSkipFadeForLoop = loop === true &&
+    fadeOnLoops === true &&
+    loopIterationCount! > 0;
 
   if (!fade || shouldSkipFadeForLoop) {
     return 1;

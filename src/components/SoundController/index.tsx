@@ -49,11 +49,12 @@ export const SoundController: React.FC<
       )}
     >
       <label htmlFor={volumeId}>
-        ⏶&#xFE0E;/⏷&#xFE0E;
+        &#x23F6;&#xFE0E;/&#x23F7;&#xFE0E;
       </label>
 
       <input
         className="sound-controller-volume"
+        id={volumeId}
         key="sound-controller-volume"
         max={1}
         min={0}
@@ -64,12 +65,13 @@ export const SoundController: React.FC<
       />
 
       <label htmlFor={loopId}>
-        ↻&#xFE0E;
+        &#x21BB;&#xFE0E;
       </label>
 
       <input
         className="sound-controller-loop"
         checked={getLoop()}
+        id={loopId}
         key="sound-controller-loop"
         onChange={loopSetter}
         type="checkbox"
@@ -80,7 +82,7 @@ export const SoundController: React.FC<
         key="sound-controller-play"
         onClick={playSetter}
       >
-        {isPlayingNow ? '⏸\uFE0E' : '⏵︎\uFE0E'}
+        {isPlayingNow ? '\uFE0F\uFE0E' : '\u23F5\uFE0E'}
       </button>
     </div>
   );

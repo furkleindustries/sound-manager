@@ -1,7 +1,7 @@
 export enum EasingCurves {
   Linear = 'linear',
   Quadratic = 'quadratic',
-  EqualPower = 'equalPower',
+  Sine = 'sine',
   Cubic = 'cubic',
   Quartic = 'quartic',
   Quintic = 'quintic',

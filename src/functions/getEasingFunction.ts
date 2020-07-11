@@ -18,19 +18,19 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    change * (time / duration) + initial
-  ),
+  {
+    return change * (time / duration) + initial;
+  },
 
-  [EasingCurves.EqualPower]: (
+  [EasingCurves.Sine]: (
     time: number,
     initial: number,
     change: number,
     duration: number,
   ) =>
-  (
-    change * (Math.sqrt((1 + time / duration) * 0.5) + initial)
-  ),
+  {
+		return -change / 2 * (Math.cos(Math.PI * time / duration) - 1) + initial;
+  },
 
   [EasingCurves.Quadratic]: (
     time: number,
@@ -38,9 +38,13 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    change * ((time / duration) * time + initial)
-  ),
+  {
+		if ((time /= duration / 2) < 1) {
+      return change/ 2 * time * time + initial;
+    }
+
+		return -change / 2 * ((--time) * (time - 2) - 1) + initial;
+  },
 
   [EasingCurves.Cubic]: (
     time: number,
@@ -48,9 +52,13 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    change * ((time / duration) * time * time + initial)
-  ),
+  {
+		if ((time /= duration / 2) < 1) {
+      return change / 2 * time * time * time + initial;
+    }
+
+		return change / 2 * ((time -= 2) * time * time + 2) + initial;
+  },
 
   [EasingCurves.Quartic]: (
     time: number,
@@ -58,9 +66,13 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    change * ((time / duration) * time * time * time + initial)
-  ),
+  {
+		if ((time /= duration / 2) < 1) {
+      return change / 2 * time * time * time * time + initial;
+    }
+
+		return -change / 2 * ((time -= 2) * time * time * time - 2) + initial;
+  },
 
   [EasingCurves.Quintic]: (
     time: number,
@@ -68,9 +80,13 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    change * ((time / duration) * time * time * time * time + initial)
-  ),
+  {
+		if ((time /= duration / 2) < 1) {
+      return change / 2 * time * time * time * time * time + initial;
+    }
+
+		return change / 2 * ((time -= 2) * time * time * time * time + 2) + initial;
+  },
 
   [EasingCurves.Exponential]: (
     time: number,
@@ -78,9 +94,15 @@ const funcs = {
     change: number,
     duration: number,
   ) =>
-  (
-    (time === 0) ?
-      initial :
-      change * (Math.pow(2, 10 * (time / duration - 1)) + initial)
-  ),
+  {
+		if (time <= 0) {
+      return initial;
+    } else if (time >= duration) {
+      return initial + change;
+    } else if ((time /= duration / 2) < 1) {
+      return change / 2 * Math.pow(2, 10 * (time - 1)) + initial;
+    }
+
+		return change / 2 * (-Math.pow(2, -10 * --time) + 2) + initial;
+	},
 };

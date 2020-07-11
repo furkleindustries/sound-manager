@@ -28,11 +28,12 @@ export const SoundGroupController: React.FC<
       )}
     >
       <label htmlFor={volumeId}>
-        ⏶&#xFE0E;/⏷&#xFE0E;
+        &#x23F6;&#xFE0E;/&#x23F7;&#xFE0E;
       </label>
 
       <input
         className="sound-group-controller-volume"
+        id={volumeId}
         key="sound-group-controller-volume"
         max={1}
         min={0}

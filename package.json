@@ -1,6 +1,6 @@
 {
   "name": "sound-manager",
-  "version": "0.17.61",
+  "version": "0.17.64",
   "description": "A full-service sound library.",
   "main": "src/index.ts",
   "scripts": {
@@ -23,7 +23,7 @@
     "accelerator"
   ],
   "author": "furkle",
-  "license": "GPL-3.0-only",
+  "license": "CC0",
   "bugs": {
     "url": "https://github.com/furkleindustries/sound-manager/issues"
   },
