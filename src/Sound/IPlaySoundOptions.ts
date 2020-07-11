@@ -6,8 +6,8 @@ import {
 } from './ISound';
 
 export interface IPlaySoundOptions {
-  readonly doneCallback: () => ISound;
   readonly fadeOnLoops: boolean;
-  readonly fadeOverride: IFade | null;
-  readonly loopOverride: boolean;
+  readonly doneCallback?: () => ISound;
+  readonly fadeOverride?: IFade | null;
+  readonly loopOverride?: boolean;
 }

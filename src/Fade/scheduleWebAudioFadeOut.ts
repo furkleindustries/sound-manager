@@ -9,13 +9,18 @@ import {
 } from 'ts-assertions';
 
 export const scheduleWebAudioFadeOut = ({
+  __fadeOnLoops: fadeOnLoops,
+  __startedTime: startingTime,
   getContextCurrentTime,
   getDuration,
   getFade,
   getFadeGainNode,
   getFadeVolume,
   getLoop,
-}: ISound) => {
+}: ISound & {
+  __fadeOnLoops: boolean;
+  __startedTime: number;
+}) => {
   const currentTime = getContextCurrentTime() / 1000;
   const duration = getDuration();
   const fade = assertValid<IFade>(getFade());
@@ -28,7 +33,9 @@ export const scheduleWebAudioFadeOut = ({
       getFadeVolume({
         duration,
         fade,
+        fadeOnLoops,
         loop,
+        startingTime,
         time,
       }),
 

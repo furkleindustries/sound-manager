@@ -11,9 +11,6 @@ import {
   createFade,
 } from '../Fade/createFade';
 import {
-  warn,
-} from 'colorful-logging';
-import {
   getFadeVolume,
 } from '../Fade/getFadeVolume';
 import {
@@ -37,9 +34,6 @@ import {
 import {
   ISoundOptions,
 } from './ISoundOptions';
-import {
-  isValidVolume,
-} from '../functions/isValidVolume';
 import {
   NodeTypes,
 } from '../enums/NodeTypes';
@@ -65,6 +59,7 @@ import {
   assert,
   assertValid,
 } from 'ts-assertions';
+import { IGetFadeVolumeArgs } from '../Fade/IGetFadeVolumeArgs';
 
 export class Sound
   extends
@@ -413,17 +408,12 @@ export class Sound
     }
 
     const fade = this.getFade();
-    let timeUpdate: (() => void) | undefined = undefined;
     const audioElement = this.__audioElement;
     if (fade) {
       /* Update the audio element volume on every tick, including fade
        * volume. */
       /* istanbul ignore next */
-      timeUpdate = () => this.updateAudioElementVolume();
-      this.__initializeFadeForPlay(
-        this.__audioElement,
-        timeUpdate,
-      );
+      this.__initializeFadeForPlay(this.__audioElement);
     }
     
     /* If a promise is already on the Sound, it must be respected, and
@@ -432,7 +422,7 @@ export class Sound
      this.__initializePromiseForPlay();
     }
 
-    this.__initializeEventsForPlay(audioElement, timeUpdate, doneCallback);
+    this.__initializeEventsForPlay(audioElement, doneCallback);
   };
 
   /* When an AudioBufferSourceNode is stopped, it can never be used again.
@@ -454,6 +444,8 @@ export class Sound
   private readonly __updateSoundTimes = () => {
     const trackPosition = this.getTrackPosition();
 
+    this.__fadeStartTime = trackPosition;
+
     if (this.isWebAudio()) {
       /* Reset the started time. */
       this.__startedTime = this.getContextCurrentTime() - trackPosition;
@@ -465,16 +457,16 @@ export class Sound
     }
   };
 
+  private timeUpdater = () => this.updateAudioElementVolume();
   private readonly __initializeFadeForPlay = (
     audioElement?: HTMLAudioElement | null,
-    htmlTimeUpdater?: () => void,
   ) => {
     if (this.isWebAudio()) {
       scheduleWebAudioFades(this);
     } else {
       scheduleHtmlAudioFades(
         assertValid<HTMLAudioElement>(audioElement),
-        assertValid<() => void>(htmlTimeUpdater),
+        assertValid<() => void>(this.timeUpdater),
       );
     }
   };
@@ -502,7 +494,6 @@ export class Sound
 
   private readonly __initializeEventsForPlay = (
     audioElement?: HTMLAudioElement | null,
-    timeUpdate?: () => void,
     doneCallback?: () => void,
   ) => {
     const isWebAudio = this.isWebAudio();
@@ -514,7 +505,6 @@ export class Sound
      * 'ended' event. */
     const endHandler = this.__getEndEventHandler(
       source,
-      timeUpdate,
       doneCallback,
     );
 
@@ -526,7 +516,6 @@ export class Sound
 
   private readonly __getEndEventHandler = (
     source: AudioBufferSourceNode | HTMLAudioElement,
-    timeUpdate?: () => void,
     doneCallback?: () => void,
   ) => {
     const ended = () => {
@@ -541,14 +530,8 @@ export class Sound
       /* Remove the 'ended' event listener. */
       source.removeEventListener('ended', ended);
 
-      /* istanbul ignore next */
-      if (typeof timeUpdate === 'function' && !this.isWebAudio()) {
-        /* Remove the 'timeupdate' event listener. */
-        source.removeEventListener('timeupdate', timeUpdate);
-      }
-
       /* Don't do anything if the track was paused. */
-      if (this.__playing && this.getTrackPosition() < this.getDuration()) {
+      if (!this.__isStopping && this.__playing && this.getTrackPosition() < this.getDuration()) {
         return;
       }
 
@@ -572,6 +555,8 @@ export class Sound
 
   public readonly pause = () => {
     /* Must be executed before __playing = false. */
+    this.__fadeStartTime = 0;
+    this.__loopIterationCount = 0;
     this.__pausedTime = this.getTrackPosition();
     this.__startedTime = 0;
 
@@ -607,17 +592,25 @@ export class Sound
     }
   };
 
+  private __isStopping = false;
   public readonly stop = () => {
-    this.__playing = false;
+    this.__fadeStartTime = this.getTrackPosition();
+    this.__isStopping = true;
+
+    this.__initializeFadeForPlay(this.__audioElement);
+
+    const delay = this.getFade()?.length.out || 1;
     setTimeout(() => {
       this.pause();
       this.setTrackPosition(0);
-      if (this.__resolveOnEnd) {
+      if (typeof this.__resolveOnEnd === 'function') {
         this.__resolveOnEnd();
       } else {
         Promise.resolve(this.__promise);
       }
-    }, this.getFade()?.length.out || 1);
+
+      this.__isStopping = false;
+    }, delay);
   
 
     return this.__promise!;
@@ -633,32 +626,28 @@ export class Sound
     return this;
   };
 
+  private __fadeStartTime = 0;
   public readonly updateAudioElementVolume = () => {
     /* Set the audio element volume to the product of manager, group, and
      * fade, and sound volumes. */
-    const sources = [
-      'Manager',
-      'Group',
-      'Fade',
-      '',
-    ];
+  
+    const managerVolume = this.getManagerVolume();
+    const groupVolume = this.getGroupVolume();
+    const soundVolume = this.getVolume();
+    const fadeVolume = this.getFadeVolume({
+      duration: this.getDuration(),
+      fadeOnLoops: this.__fadeOnLoops,
+      fade: this.getFade(),
+      loop: Boolean(this.__loopOverride),
+      isStopping: this.__isStopping,
+      loopIterationCount: this.__loopIterationCount,
+      startingTime: this.__fadeStartTime,
+      time: this.getTrackPosition(),
+    });
 
-    const volumes = sources.map(() => 1);
-
-    for (let ii = 0; ii < sources.length; ii += 1) {
-      const key = sources[ii];
-      // @ts-ignore
-      const computedVol = this[`get${key}Volume`]();
-      if (isValidVolume(computedVol)) {
-        volumes[ii] = computedVol;
-      } else {
-        warn(`Expected a volume between the inclusive range of 0 and 1 in Sound.get${key}Volume. Instead, ${computedVol} was received.`)
-      }
-    }
-
-    const boundedVolume = volumes.reduce((aa, bb) => aa * bb, 1);
-
-    assertValid<HTMLAudioElement>(this.__audioElement).volume = boundedVolume;
+    const volProduct = managerVolume * groupVolume * soundVolume * fadeVolume;
+    const boundedVol = Math.max(1, Math.min(0, volProduct));
+    assertValid<HTMLAudioElement>(this.__audioElement).volume = boundedVol;
 
     return this;
   };
@@ -666,33 +655,24 @@ export class Sound
   // This is a ratio, so it doesn't need to know anything about the sound's
   // underlying volume(s). This ratio is computed solely from arguments.
   public readonly getFadeVolume = ({
-    fadeOnLoops: argLoopFade,
-    fadeOverride,
-    loopOverride,
-  }: Partial<IPlaySoundOptions> = {}) => {
-    const duration = this.getDuration();
-
-    const fade = fadeOverride || this.getFade();
-    const fadeOnLoops = typeof argLoopFade === 'boolean' ?
-      argLoopFade :
-      this.__fadeOnLoops;
-
-    const loop = typeof loopOverride === 'boolean' ?
-      loopOverride :
-      this.getLoop();
-
-    const time = this.getTrackPosition();
-
+    duration,
+    fadeOnLoops,
+    fade,
+    isStopping,
+    loop,
+    loopIterationCount,
+    startingTime,
+    time,
+  }: IGetFadeVolumeArgs) => {
     if (fade) {
       return getFadeVolume({
         duration,
         fade,
         fadeOnLoops,
+        isStopping,
         loop,
-        loopIterationCount: this.isPlaying() ?
-          this.__loopIterationCount :
-          0,
-
+        loopIterationCount,
+        startingTime,
         time,
       });
     }
