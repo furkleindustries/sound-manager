@@ -44,7 +44,7 @@ export interface ISound
   setFade(fade: IFade | null): this;
   play(options?: Partial<IPlaySoundOptions>): Promise<void>;
   pause(): this;
-  stop(options?: Partial<IPlaySoundOptions>): Promise<void>;
+  stop(): Promise<void>;
   rewind(seconds: number): this;
   fastForward(seconds: number): this;
   getGroupVolume(): number;

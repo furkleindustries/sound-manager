@@ -8,24 +8,27 @@ import {
 export const getFadeValueAtTime = ({
   change,
   curve,
-  duration,
+  fadeDuration: duration,
   initial,
   time
 }: {
   change: number,
   curve: EasingCurves,
-  duration: number,
+  fadeDuration: number,
   initial: number,
   time: number,
-}) => Math.max(
-  0,
-  Math.min(
-    1,
-    getEasingFunction(curve)(
-      time,
-      initial,
-      change,
-      duration,
-    ),
-  ),
-);
+}) => {
+  const value = Math.max(
+    0,
+    Math.min(
+      1,
+      getEasingFunction(curve)(
+        time,
+        initial,
+        change,
+        duration,
+      ),
+  ));
+
+  return value;
+};

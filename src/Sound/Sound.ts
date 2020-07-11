@@ -607,34 +607,20 @@ export class Sound
     }
   };
 
-  public readonly stop = ({
-    doneCallback,
-    fadeOnLoops,
-    fadeOverride,
-    loopOverride,
-  }: Partial<IPlaySoundOptions> = {}) => {
-    this.__initializeForPlay({
-      doneCallback: () => {
-        this.pause();
-        this.setTrackPosition(0);
+  public readonly stop = () => {
+    this.__playing = false;
+    setTimeout(() => {
+      this.pause();
+      this.setTrackPosition(0);
+      if (this.__resolveOnEnd) {
+        this.__resolveOnEnd();
+      } else {
+        Promise.resolve(this.__promise);
+      }
+    }, this.getFade()?.length.out || 1);
+  
 
-        if (typeof this.__resolveOnEnd === 'function') {
-          this.__resolveOnEnd();
-        }
-
-        if (typeof doneCallback === 'function') {
-          doneCallback();
-        }
-
-        return this;
-      },
-
-      fadeOnLoops,
-      fadeOverride,
-      loopOverride,
-    });
-
-    return this.__promise as Promise<void>;
+    return this.__promise!;
   };
 
   public readonly rewind = (milliseconds: number) => {
@@ -677,6 +663,8 @@ export class Sound
     return this;
   };
 
+  // This is a ratio, so it doesn't need to know anything about the sound's
+  // underlying volume(s). This ratio is computed solely from arguments.
   public readonly getFadeVolume = ({
     fadeOnLoops: argLoopFade,
     fadeOverride,
@@ -693,7 +681,6 @@ export class Sound
       loopOverride :
       this.getLoop();
 
-    const targetVolume = this.getVolume();
     const time = this.getTrackPosition();
 
     if (fade) {
@@ -702,8 +689,10 @@ export class Sound
         fade,
         fadeOnLoops,
         loop,
-        loopIterationCount: this.__loopIterationCount,
-        targetVolume,
+        loopIterationCount: this.isPlaying() ?
+          this.__loopIterationCount :
+          0,
+
         time,
       });
     }
