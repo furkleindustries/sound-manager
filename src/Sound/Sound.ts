@@ -20,9 +20,6 @@ import {
   IFade,
 } from '../Fade/IFade';
 import {
-  IGetFadeVolumeArgs,
-} from '../Fade/IGetFadeVolumeArgs';
-import {
   IPlaySoundOptions,
 } from './IPlaySoundOptions';
 import {
@@ -236,21 +233,27 @@ export class Sound
 
   // Must be milliseconds.
   public readonly setTrackPosition = (milliseconds: number) => {
-    if (this.isPlaying()) {
+    const isPlaying = this.isPlaying();
+
+    if (!isPlaying) {
+      this.pause();
+    }
+
+    this.__clearScheduledFades();
+
+    if (isPlaying) {
+      this.__startedTime = milliseconds;
       if (this.isWebAudio()) {
         this.__startedTime = this.getContextCurrentTime() - milliseconds;
-        this.pause();
-        this.play();
       } else {
+        this.__startedTime = milliseconds / 1000;
         assertValid<HTMLAudioElement>(
           this.__audioElement,
           strings.SET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
         ).currentTime = milliseconds / 1000;
-
-        this.__clearScheduledFades();
       }
-    } else {
-      this.__pausedTime = milliseconds;
+
+      this.play();
     }
 
     return this;
@@ -286,7 +289,16 @@ export class Sound
   public readonly getFade = () => this.__fadeOverride || this.__fade;
 
   public readonly setFade = (fade: IFade | null) => {
-    this.__fade = fade;
+    this.__fade = fade === null ? fade : getFrozenObject({
+      easingCurve: {
+        ...fade.easingCurve,
+      },
+
+      length: {
+        ...fade.length,
+      },
+    });
+
     return this;
   };
 
@@ -360,7 +372,15 @@ export class Sound
     }
 
     if (fadeOverride) {
-      this.__fadeOverride = getFrozenObject(fadeOverride);
+      this.__fadeOverride = getFrozenObject(getFrozenObject({
+        easingCurve: {
+          ...fadeOverride.easingCurve,
+        },
+  
+        length: {
+          ...fadeOverride.length,
+        },
+      }));
     }
 
     if (typeof loopOverride === 'boolean') {
@@ -481,8 +501,8 @@ export class Sound
     const ended = () => {
       if (this.getLoop()) {
         this.__loopIterationCount += 1;
+        this.__playing = false
         this.setTrackPosition(0);
-        this.play();
         return;
       }
 
@@ -529,7 +549,6 @@ export class Sound
  
       /* Must be executed after __pausedTime = ... and this.getPlaying(). */
       this.__playing = false;
-      this.__clearScheduledFades();
     } catch (err) {
       if (typeof this.__rejectOnError === 'function') {
         this.__rejectOnError(err);
@@ -593,17 +612,7 @@ export class Sound
     const managerVolume = this.getManagerVolume();
     const groupVolume = this.getGroupVolume();
     const soundVolume = this.getVolume();
-    const fadeVolume = this.getFadeVolume({
-      duration: this.getDuration(),
-      fadeOnLoops: this.__fadeOnLoops,
-      fade: this.getFade(),
-      loop: Boolean(this.__loopOverride),
-      isStopping: this.__isStopping,
-      loopIterationCount: this.__loopIterationCount,
-      startingTime: this.__fadeStartTime,
-      stoppingTime: this.__fadeStopTime,
-      time: this.getTrackPosition(),
-    });
+    const fadeVolume = this.getFadeVolume();
 
     const volProduct = managerVolume * groupVolume * soundVolume * fadeVolume;
     const boundedVol = Math.min(1, Math.max(0, volProduct));
@@ -614,28 +623,19 @@ export class Sound
 
   // This is a ratio, so it doesn't need to know anything about the sound's
   // underlying volume(s). This ratio is computed solely from arguments.
-  public readonly getFadeVolume = ({
-    duration,
-    fadeOnLoops,
-    fade,
-    isStopping,
-    loop,
-    loopIterationCount,
-    startingTime,
-    stoppingTime,
-    time,
-  }: IGetFadeVolumeArgs) => {
+  public readonly getFadeVolume = () => {
+    const fade = this.getFade();
     if (fade) {
       return getFadeVolume({
-        duration,
         fade,
-        fadeOnLoops,
-        isStopping,
-        loop,
-        loopIterationCount,
-        startingTime,
-        stoppingTime,
-        time,
+        duration: this.getDuration(),
+        fadeOnLoops: this.__fadeOnLoops,
+        loop: Boolean(this.__loopOverride),
+        isStopping: this.__isStopping,
+        loopIterationCount: this.__loopIterationCount,
+        startingTime: this.__fadeStartTime,
+        stoppingTime: this.__fadeStopTime,
+        time: this.getTrackPosition(),
       });
     }
 
