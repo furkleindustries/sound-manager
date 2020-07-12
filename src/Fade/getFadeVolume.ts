@@ -13,6 +13,7 @@ export const getFadeVolume = ({
   loop,
   loopIterationCount,
   startingTime,
+  stoppingTime,
   time,
 }: IGetFadeVolumeArgs) => {
   const shouldSkipFadeForLoop = loop === true &&
@@ -26,7 +27,7 @@ export const getFadeVolume = ({
   const inLen = fade.length.in || 0;
   const outLen = fade.length.out || 0;
 
-  if (fade.easingCurve.in && inLen >= time) {
+  if (!isStopping && fade.easingCurve.in && inLen >= time) {
     // Fading in.
     return getFadeValueAtTime({
       change: 1,
@@ -40,11 +41,11 @@ export const getFadeVolume = ({
   {
     // Fading out.
     return getFadeValueAtTime({
-      change: 1,
+      change: -1,
       curve: fade.easingCurve.out,
       fadeDuration: outLen,
-      initial: 0,
-      time: time - startingTime,
+      initial: 1,
+      time: time - stoppingTime,
     });
   }
 

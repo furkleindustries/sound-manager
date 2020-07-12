@@ -1,7 +1,4 @@
 import {
-  createFade,
-} from '../Fade/createFade';
-import {
   log,
 } from 'colorful-logging';
 import {
@@ -46,10 +43,8 @@ export class Playlist implements IPlaylist {
       this.callback = callback;
     }
 
-    if (fade === true) {
-      this.fade = createFade();
-    } else if (fade) {
-      this.fade = createFade(fade);
+    if (fade) {
+      this.fade = fade;
     }
 
     if (typeof loop === 'boolean') {

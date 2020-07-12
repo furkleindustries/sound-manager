@@ -8,6 +8,7 @@ export interface IGetFadeVolumeArgs {
   readonly isStopping: boolean;
   readonly loop: boolean;
   readonly startingTime: number;
+  readonly stoppingTime: number;
   readonly time: number;
   readonly fadeOnLoops?: boolean;
   readonly loopIterationCount?: number;

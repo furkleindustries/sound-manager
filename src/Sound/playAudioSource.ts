@@ -9,7 +9,7 @@ import {
 export const strings = {
   AUDIO_ELEMENT_INVALID:
     'The audio element argument was not present in playAudioSource. This ' +
-    'argument is necessary for a song to be played in HTML Audio mode.',
+      'argument is necessary for a song to be played in HTML Audio mode.',
 
   SOUND_INVALID:
     'The sound argument was not provided to playAudioSource.',

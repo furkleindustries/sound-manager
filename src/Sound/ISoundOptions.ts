@@ -1,15 +1,15 @@
 import {
-  IFadeOptions,
-} from '../Fade/IFadeOptions';
+  IFade,
+} from '../Fade/IFade';
 import {
   INodeOptions,
 } from '../Node/INodeOptions';
 import {
-  ITaggableNodeOptions,
-} from '../Node/ITaggableNodeOptions';
-import {
   IPanelRegisterableNodeOptions,
 } from '../Node/IPanelRegisterableNodeOptions';
+import {
+  ITaggableNodeOptions,
+} from '../Node/ITaggableNodeOptions';
 
 export interface ISoundOptions
   extends
@@ -19,7 +19,7 @@ export interface ISoundOptions
 {
   audioElement?: HTMLAudioElement;
   buffer?: AudioBuffer;
-  fade?: IFadeOptions;
+  fade?: IFade;
   fadeOnLoops?: boolean;
   loop?: boolean;
   trackPosition?: number;

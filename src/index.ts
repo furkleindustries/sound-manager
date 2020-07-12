@@ -30,12 +30,9 @@ export * from './Playlist/Playlist';
 export * from './Playlist/IPlaylist';
 export * from './Playlist/IPlaylistOptions';
 
-export * from './Fade/createFade';
 export * from './Fade/fadeUtils';
-export * from './Fade/Fade';
 export * from './Fade/getFadeVolume';
 export * from './Fade/IFade';
-export * from './Fade/IFadeOptions';
 export * from './Fade/IFadeProperty';
 export * from './Fade/TFadeArg';
 

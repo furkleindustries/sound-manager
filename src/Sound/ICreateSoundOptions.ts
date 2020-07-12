@@ -1,6 +1,6 @@
 import {
-  IFadeOptions,
-} from '../Fade/IFadeOptions';
+  IFade,
+} from '../Fade/IFade';
 import {
   ISoundLabel,
 } from '../Node/ISoundLabel';
@@ -10,7 +10,7 @@ export interface ICreateSoundOptions {
   getManagerVolume?(): number;
   buffer?: AudioBuffer;
   context?: AudioContext;
-  fade?: IFadeOptions;
+  fade?: IFade;
   fadeOnLoops?: boolean;
   isWebAudio?: boolean;
   label?: ISoundLabel;

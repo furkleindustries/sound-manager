@@ -28,8 +28,8 @@ export const SoundController: React.FC<
       pause();
     } else {
       play().then(
-        () => {},
-        () => {},
+        Promise.resolve,
+        Promise.reject,
       );
     }
   };
@@ -54,6 +54,7 @@ export const SoundController: React.FC<
 
       <input
         className="sound-controller-volume"
+        defaultValue={getVolume()}
         id={volumeId}
         key="sound-controller-volume"
         max={1}
@@ -61,7 +62,6 @@ export const SoundController: React.FC<
         step={0.01}
         onChange={volumeSetter}
         type="range"
-        value={getVolume()}
       />
 
       <label htmlFor={loopId}>
@@ -70,7 +70,7 @@ export const SoundController: React.FC<
 
       <input
         className="sound-controller-loop"
-        checked={getLoop()}
+        defaultChecked={getLoop()}
         id={loopId}
         key="sound-controller-loop"
         onChange={loopSetter}
@@ -82,7 +82,7 @@ export const SoundController: React.FC<
         key="sound-controller-play"
         onClick={playSetter}
       >
-        {isPlayingNow ? '\uFE0F\uFE0E' : '\u23F5\uFE0E'}
+        {isPlayingNow ? '\uFE0F\u200D\uFE0E' : '\u23F5\u200D\uFE0E'}
       </button>
     </div>
   );

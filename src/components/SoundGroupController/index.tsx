@@ -33,6 +33,7 @@ export const SoundGroupController: React.FC<
 
       <input
         className="sound-group-controller-volume"
+        defaultValue={getVolume()}
         id={volumeId}
         key="sound-group-controller-volume"
         max={1}
@@ -40,7 +41,6 @@ export const SoundGroupController: React.FC<
         step={0.01}
         onChange={volumeSetter}
         type="range"
-        value={getVolume()}
       />
     </div>
   );
