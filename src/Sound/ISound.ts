@@ -1,7 +1,4 @@
 import {
-  IAnalysableNode,
-} from '../Node/IAnalysableNode';
-import {
   IBaseNode,
 } from '../Node/IBaseNode';
 import {
@@ -26,14 +23,10 @@ import {
 export interface ISound
   extends
     IBaseNode,
-    IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode
 {
   readonly type: NodeTypes.Sound;
-  getSourceNode(): AudioBufferSourceNode;
-  getFadeGainNode(): GainNode;
-  getContextCurrentTime(): number;
   getTrackPosition(): number;
   setTrackPosition(seconds: number): this;
   getDuration(): number;

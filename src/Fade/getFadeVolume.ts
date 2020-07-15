@@ -39,12 +39,21 @@ export const getFadeVolume = ({
   } else if (fade.easingCurve.out &&
       (isStopping || duration - outLen <= time))
   {
-    // Fading out.
-    return getFadeValueAtTime({
+    // Get the last volume before the fadeout began.
+    const initial = getFadeValueAtTime({
+      initial: 1,
       change: -1,
       curve: fade.easingCurve.out,
       fadeDuration: outLen,
-      initial: 1,
+      time: stoppingTime,
+    });
+
+    // Fading out.
+    return getFadeValueAtTime({
+      initial,
+      change: -initial,
+      curve: fade.easingCurve.out,
+      fadeDuration: outLen,
       time: time - stoppingTime,
     });
   }

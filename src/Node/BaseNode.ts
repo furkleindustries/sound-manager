@@ -1,7 +1,4 @@
 import {
-  assertNodeIsWebAudio,
-} from '../assertions/assertNodeIsWebAudio';
-import {
   IBaseNode,
 } from './IBaseNode';
 import {
@@ -25,9 +22,6 @@ export class BaseNode implements IBaseNode {
     throw new Error('Type not implemented.');
   }
 
-  protected __audioContext: AudioContext | null = null;
-  protected __gainNode: GainNode | null = null;
-  protected __isWebAudio: boolean;
   protected __label: ISoundLabel = {
     artistName: '',
     contributors: [],
@@ -40,17 +34,9 @@ export class BaseNode implements IBaseNode {
   constructor(options?: INodeOptions | [ INodeOptions ]) {
     const opts = (Array.isArray(options) ? options[0] : options) || {};
     const {
-      context,
-      isWebAudio,
       label,
       volume,
     } = opts;
-
-    this.__audioContext = context || null;
-    this.__isWebAudio = Boolean(isWebAudio || this.__audioContext);
-    if (this.isWebAudio()) {
-      this.__gainNode = this.getAudioContext().createGain();
-    }
 
     if (label) {
       this.setLabel(label);
@@ -60,24 +46,6 @@ export class BaseNode implements IBaseNode {
       this.setVolume(volume);
     }
   }
-
-  public readonly isWebAudio = () => Boolean(this.__isWebAudio);
-
-  public readonly getAudioContext = () => {
-    assertNodeIsWebAudio(this, 'getAudioContext');
-    return assertValid<AudioContext>(this.__audioContext);
-  };
-
-  public readonly getContextCurrentTime = () => (
-    this.getAudioContext().currentTime * 1000
-  );
-
-  public getGainNode = () => {
-    assertNodeIsWebAudio(this, 'getGainNode');
-    return assertValid<GainNode>(this.__gainNode);
-  };
-
-  public readonly getInputNode = (): AudioNode => this.getGainNode();
 
   public readonly getLabel = (): ISoundLabel => this.__label;
 
@@ -107,17 +75,13 @@ export class BaseNode implements IBaseNode {
 
   public readonly getVolume = () => this.__volume;
 
-  /**
-   * TODO: Figure out why this can't be an arrow function.
-   * (Probably because it needs to exist on the prototype.)
-   */
   public setVolume(value: number) {
-    assertValid(value, '', isValidVolume);
-    this.__volume = value;
-    if (this.isWebAudio()) {
-      const currentTime = this.getContextCurrentTime() / 1000;
-      this.getGainNode().gain.setValueAtTime(value, currentTime);
-    }
+    
+    this.__volume = assertValid(
+      value,
+      'The value passed to Sound.setVolume was not valid.',
+      isValidVolume,
+    );
 
     return this;
   }

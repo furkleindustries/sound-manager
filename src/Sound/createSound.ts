@@ -1,10 +1,4 @@
 import {
-  createHtmlHelper,
-} from './createHtmlHelper';
-import {
-  createWebHelper,
-} from './createWebHelper';
-import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
 import {
@@ -16,6 +10,7 @@ import {
 import {
   assert,
 } from 'ts-assertions';
+import { createHtmlAudioSound } from './createHtmlAudioSound';
 
 export const strings = {
   OPTIONS_INVALID:
@@ -28,12 +23,9 @@ export const createSound = (options: ICreateSoundOptions): Promise<ISound> => {
     strings.OPTIONS_INVALID,
   );
 
-  const opts = getFrozenObject(options);
-
-  /* Default to web audio and require very explicit opt-out. */
-  if (opts.isWebAudio === false) {
-    return createHtmlHelper(opts);
-  } else {
-    return createWebHelper(opts);
+  try {
+    return createHtmlAudioSound(getFrozenObject(options));
+  } catch (err) {
+    throw new Error(`Error loading HTML Audio:\n\n\t${err}`);
   }
 }

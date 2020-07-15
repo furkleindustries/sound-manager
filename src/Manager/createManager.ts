@@ -5,6 +5,4 @@ import {
   Manager,
 } from './Manager';
 
-export const createManager = (
-  context?: AudioContext | null | undefined,
-): IManager => new Manager({ context: context || undefined });
+export const createManager = (): IManager => new Manager();

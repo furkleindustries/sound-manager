@@ -1,7 +1,4 @@
 import {
-  AnalysableNodeMixin,
-} from '../Node/AnalysableNodeMixin';
-import {
   assert,
   assertValid,
 } from 'ts-assertions';
@@ -38,11 +35,10 @@ import {
 
 export class Group
   extends
-    AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(
       BaseNode
-    )))
+    ))
   implements IGroup
 {
   get type(): NodeTypes.Group {
@@ -58,15 +54,10 @@ export class Group
     super({ ...options });
 
     const {
-      context,
       sounds,
       tags,
       volume,
     } = options;
-
-    if (context) {
-      this.getInputNode().connect(this.getOutputNode());
-    }
 
     if (sounds && typeof sounds === 'object') {
       this.addSounds(sounds);
@@ -143,7 +134,6 @@ export class Group
 
   public readonly addSounds = (sounds: ISoundsMap) => {
     const names = Object.keys(sounds);
-    const isWebAudio = this.isWebAudio();
     const volumeGetter = () => this.getVolume();
     names.forEach((soundName) => {
       assert(soundName)
@@ -151,10 +141,6 @@ export class Group
       assert(sounds[soundName]);
       const sound = sounds[soundName];
       sound.getGroupVolume = volumeGetter;
-
-      if (isWebAudio && sound.isWebAudio()) {
-        sound.getOutputNode().connect(this.getOutputNode());
-      }
     });
 
     this.__sounds = getFrozenObject(this.sounds, sounds);
@@ -171,11 +157,6 @@ export class Group
     assert(Array.isArray(names));
     const sounds = { ...this.sounds, };
     names.forEach((soundName: string) => {
-      const sound = sounds[soundName];
-      if (sound.isWebAudio()) {
-        sound.getOutputNode().disconnect();
-      }
-
       delete sounds[soundName];
     });
 
@@ -233,9 +214,7 @@ export class Group
 
   public readonly updateAllAudioElementsVolume = () => {
     this.getAllSounds().forEach((sound) => {
-      if (!sound.isWebAudio()) {
-        sound.updateAudioElementVolume();
-      }
+      sound.updateAudioElementVolume();
     });
 
     return this;

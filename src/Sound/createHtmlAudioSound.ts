@@ -30,11 +30,8 @@ export const createHtmlAudioSound = (
   options: ICreateSoundOptions,
 ): Promise<ISound> => {
   const {
-    buffer,
-    context,
     fade,
     getManagerVolume: getManagerVol,
-    isWebAudio,
     loop,
     trackPosition,
     url,
@@ -60,12 +57,9 @@ export const createHtmlAudioSound = (
   const sound = new Sound(
     getFrozenObject({
       ...options,
-      buffer,
       audioElement,
       fade,
       getManagerVolume,
-      isWebAudio,
-      context,
       loop,
       trackPosition,
       volume,

@@ -1,7 +1,4 @@
 import {
-  IAnalysableNode,
-} from '../Node/IAnalysableNode';
-import {
   IBaseNode,
 } from '../Node/IBaseNode';
 import {
@@ -23,14 +20,12 @@ import {
 export interface IGroup
   extends
     IBaseNode,
-    IAnalysableNode,
     IPanelRegisterableNode,
     ITaggableNode
 {
   readonly type: NodeTypes.Group;
   readonly sounds: ISoundsMap;
   deregisterIntentToAddSound(name: string): void;
-  getContextCurrentTime(): number;
   hasIntentToAddSound(name: string, groupName?: string): boolean;
   hasSound(name: string): boolean;
   getSound(name: string): ISound;

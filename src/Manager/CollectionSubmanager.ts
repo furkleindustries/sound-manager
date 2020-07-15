@@ -49,51 +49,22 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     return this.__groups;
   }
 
-  private readonly __isWebAudio: () => boolean = () => false;
-
-  private readonly __getAudioContext: () => AudioContext = () => {
-    throw new Error();
-  };
-
-  private readonly __getInputNode: () => AudioNode = () => {
-    throw new Error();
-  };
-
   // @ts-ignore
   private readonly __getManagerVolume: () => number;
 
   constructor(
     {
-      getAudioContext,
-      getInputNode,
       getManagerVolume,
       groups,
-      isWebAudio,
     }: {
       getManagerVolume: () => number,
-      getAudioContext?: () => AudioContext,
-      getInputNode?: () => AudioNode;
-      getOutputNode?: () => AnalyserNode;
       groups?: IGroupsMap,
-      isWebAudio?: () => boolean,
     },
   ) {
     this.__getManagerVolume = assertValid<() => number>(
       typeof getManagerVolume === 'function',
       'The getManagerVolume argument to the CollectionSubmanager constructor was invalid.',
     );
-
-    if (typeof isWebAudio === 'function') {
-      this.__isWebAudio = isWebAudio;
-    }
-
-    if (typeof getAudioContext === 'function') {
-      this.__getAudioContext = getAudioContext;
-    }
-
-    if (typeof getInputNode === 'function') {
-      this.__getInputNode = getInputNode;
-    }
 
     this.__initializeGroups(groups);
   }
@@ -104,27 +75,12 @@ export class CollectionSubmanager implements ICollectionSubmanager {
 
     if (groups) {
       this.__groups = getFrozenObject(this.__groups, groups);
-      if (this.__isWebAudio()) {
-        this.__connectGroupNodes();
-      }
     }
   };
 
   private readonly __initializeDefaultGroup = () => {
-    if (this.__isWebAudio()) {
-      this.addGroup('default', { context: this.__getAudioContext() });
-    } else {
-      this.addGroup('default');
-    }
-
+    this.addGroup('default');
     return this;
-  };
-
-  private readonly __connectGroupNodes = () => {
-    assert(this.__isWebAudio());
-    this.getAllGroups().forEach((group) => (
-      group.getOutputNode().connect(this.__getInputNode())
-    ));
   };
 
   public readonly addGroup = (name: string, options: IGroupOptions = {}) => {
@@ -140,14 +96,6 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     names.forEach((groupName) => {
       /* Throw if there is already a group with this name. */
       assert(!(groupName in this.groups));
-      if (this.__isWebAudio()) {
-        const group = groups[groupName];
-
-        if (group.isWebAudio()) {
-          /* Chain the group's output node to the manager's input node. */
-          group.getOutputNode().connect(this.__getInputNode());
-        }
-      }
     });
 
     this.__groups = getFrozenObject(this.groups, groups);
@@ -196,15 +144,6 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     const arr: string[] = typeof names === 'string' ? [ names, ] : names;
     const groups = { ...this.groups };
     arr.forEach((groupName) => {
-      const {
-        isWebAudio,
-        getOutputNode,
-      } = groups[groupName];
-
-      if (isWebAudio()) {
-        getOutputNode().disconnect();
-      }
-
       delete groups[groupName];
     });
 

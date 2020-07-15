@@ -130,26 +130,6 @@ describe('Sound HTML5 Audio unit tests.', () => {
     });
   });
 
-  it('Has a getInputNode function which throws when in HTML Audio mode.', () => {
-    const func = () => testSoundFactory().getInputNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getOutputNode function which throws when in HTML Audio mode.', () => {
-    const func = () => testSoundFactory().getOutputNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getSourceNode function which throws when in HTML Audio mode.', () => {
-    const func = () => testSoundFactory().getSourceNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getFadeGainNode function which throws when in HTML Audio mode.', () => {
-    const func = () => testSoundFactory().getFadeGainNode();
-    expect(func).toThrow();
-  });  
-
   it('Has a setVolume function which alters the volume property and updates the audio element volume.', () => {
     const newVol = 0.5;
     const mock = jest.fn();

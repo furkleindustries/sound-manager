@@ -1,10 +1,4 @@
 import {
-  AnalysableNodeMixin,
-} from '../Node/AnalysableNodeMixin';
-import {
-  assertNodeIsWebAudio,
-} from '../assertions/assertNodeIsWebAudio';
-import {
   BaseNode,
 } from '../Node/BaseNode';
 import {
@@ -36,7 +30,7 @@ import {
 } from 'ts-assertions';
 
 export class Manager
-  extends AnalysableNodeMixin(BaseNode)
+  extends BaseNode
   implements IManager
 {
   get type(): NodeTypes.Manager {
@@ -51,18 +45,10 @@ export class Manager
 
     const { groups } = options || {};
 
-    const isWebAudio = this.isWebAudio();
-    if (isWebAudio) {
-      this.__connectNodes();
-    }
-
     this.collection = new CollectionSubmanager(
       {
         groups,
-        getAudioContext: () => this.getAudioContext(),
-        getInputNode: () => this.getInputNode(),
         getManagerVolume: () => this.getVolume(),
-        isWebAudio: () => isWebAudio,
       },
     );
 
@@ -70,12 +56,6 @@ export class Manager
       { getCollection: () => this.collection },
     );
   }
-
-  private readonly __connectNodes = () => {
-    assertNodeIsWebAudio(this, '__connectNodes' as any);
-    this.getInputNode().connect(this.getOutputNode());
-    this.getOutputNode().connect(this.getAudioContext().destination);
-  };
 
   public readonly setVolume = (value: number) => {
     super.setVolume(value);

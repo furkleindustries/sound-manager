@@ -15,9 +15,7 @@ export * from './Sound/ISound';
 export * from './Sound/ISoundOptions';
 export * from './Sound/createSound';
 
-export * from './Node/AnalysableNodeMixin';
 export * from './Node/BaseNode';
-export * from './Node/IAnalysableNode';
 export * from './Node/IBaseNode';
 export * from './Node/INodeOptions';
 export * from './Node/IPanelRegisterableNode';
@@ -39,23 +37,13 @@ export * from './Fade/TFadeArg';
 export * from './enums/EasingCurves';
 export * from './enums/NodeTypes';
 
-export * from './functions/drawVolumeLevel';
 export * from './functions/getEasingFunction';
 export * from './functions/getFadeValueAtTime';
 export * from './functions/isValidVolume';
-export * from './functions/loadAudioBuffer';
 export * from './functions/makeSoundGroupIdentifier';
 
 export * from './interfaces/ICollection';
 export * from './interfaces/ISoundGroupIdentifier';
-
-export * from './AnalysisSuite/AnalysisSuite';
-export * from './AnalysisSuite/IAnalysisSuite';
-export * from './AnalysisSuite/Analysis';
-export * from './AnalysisSuite/IAnalysis';
-export * from './AnalysisSuite/IAnalysisOptions';
-export * from './AnalysisSuite/IAnalysisRenderCallback';
-export * from './AnalysisSuite/IGetAnalysisOptions';
 
 export * from './components/SoundManagerView';
 export * from './components/SoundGroupView';

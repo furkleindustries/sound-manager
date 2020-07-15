@@ -1,5 +1,9 @@
-import { ICreateSoundOptions } from '../Sound/ICreateSoundOptions';
-import { IGroup } from '../Group/IGroup';
+import {
+  ICreateSoundOptions,
+} from '../Sound/ICreateSoundOptions';
+import {
+  IGroup,
+} from '../Group/IGroup';
 import { IGroupsMap } from './IGroupsMap';
 import { IGroupOptions } from '../Group/IGroupOptions';
 import { ISound } from '../Sound/ISound';
@@ -28,6 +32,7 @@ export interface ICollectionSubmanager {
     options: ICreateSoundOptions,
     groupName?: string,
   ): Promise<ISound>;
+
   addSounds(sounds: ISoundsMap, groupName?: string): this;
   hasSound(name: string, groupName?: string): boolean;
   getSound(name: string, groupName?: string): ISound;

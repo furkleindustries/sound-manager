@@ -8,8 +8,7 @@ import {
 
 export const strings = {
   AUDIO_ELEMENT_INVALID:
-    'The audio element argument was not present in playAudioSource. This ' +
-      'argument is necessary for a song to be played in HTML Audio mode.',
+    'The audio element argument was not present in playAudioSource.',
 
   SOUND_INVALID:
     'The sound argument was not provided to playAudioSource.',
@@ -21,7 +20,6 @@ export const strings = {
 export const playAudioSource = (
   sound: ISound,
   audioElement?: HTMLAudioElement| null,
-  contextTime?: number,
 ) => {
   assert(
     sound,
@@ -33,26 +31,18 @@ export const playAudioSource = (
     strings.SOUND_PLAYING,
   );
 
-  const trackPosition = sound.getTrackPosition();
-  if (sound.isWebAudio()) {
-    assert(contextTime! >= 0);
-    /* Play the source node, respecting a possible pause. */
-    sound.getSourceNode().start(contextTime! / 1000, trackPosition);
-  } else {
-    /* Set the actual audio element volume to the product of manager, group,
-     * and sound volumes. */
-    const safeAudioElement = assertValid<HTMLAudioElement>(
-      audioElement,
-      strings.AUDIO_ELEMENT_INVALID,
-    );
+  /* Set the actual audio element volume to the product of manager, group,
+    * and sound volumes. */
+  const safeAudioElement = assertValid<HTMLAudioElement>(
+    audioElement,
+    strings.AUDIO_ELEMENT_INVALID,
+  );
 
-    sound.updateAudioElementVolume();
+  sound.updateAudioElementVolume();
 
-    /* Just to be safe, we set the current time of the audio element to the
-     * track position. */
-    safeAudioElement.currentTime = trackPosition / 1000;
-
+  // Wait to ensure no clashes with pause DOM events.
+  setTimeout(() => {
     /* Starts the audio element. This may involve buffering. */
     safeAudioElement.play();
-  }
+  }, 5);
 }

@@ -1,10 +1,4 @@
 import {
-  AnalysableNodeMixin,
-} from '../Node/AnalysableNodeMixin';
-import {
-  assertNodeIsWebAudio,
-} from '../assertions/assertNodeIsWebAudio';
-import {
   BaseNode,
 } from '../Node/BaseNode';
 import {
@@ -13,9 +7,6 @@ import {
 import {
   getFrozenObject,
 } from '../functions/getFrozenObject';
-import {
-  getNewSourceNode,
-} from './getNewSourceNode';
 import {
   IFade,
 } from '../Fade/IFade';
@@ -41,9 +32,6 @@ import {
   scheduleHtmlAudioFades,
 } from '../Fade/scheduleHtmlAudioFades';
 import {
-  scheduleWebAudioFades,
-} from '../Fade/scheduleWebAudioFades';
-import {
   strings,
 } from './Sound.strings';
 import {
@@ -56,22 +44,27 @@ import {
 
 export class Sound
   extends
-    AnalysableNodeMixin(
     PanelRegisterableNodeMixin(
     TaggableNodeMixin(
       BaseNode
-    )))
+    ))
   implements ISound
 {
   get type(): NodeTypes.Sound {
     return NodeTypes.Sound;
   }
 
-  private __audioElement: HTMLAudioElement | null = null;
-  private __fade: IFade | null = null;
-  private __fadeGainNode: GainNode | null = null;
-  private __fadeOnLoops = true;
-  private __fadeOverride?: IFade;
+  private __playing = false;
+  private __isStopping = false;
+
+  private __startedTime = 0;
+  private __pausedTime = 0; 
+  private __fadeStartTime = 0;
+  private __fadeStopTime = 0;
+
+  private __promise: Promise<void> | null = null;
+
+  private __loop = false;
 
   // Tracks how many times the song has looped this play session.
   private __loopIterationCount = 0;
@@ -81,11 +74,12 @@ export class Sound
   private __loopOverride?: boolean;
   //
 
-  private __pausedTime = 0; 
-  private __playing = false;
-  private __promise: Promise<void> | null = null;
-  private __sourceNode: AudioBufferSourceNode | null = null;
-  private __startedTime = 0;
+  private __fade: IFade | null = null;
+  private __fadeOnLoops = true;
+  private __fadeOverride?: IFade;
+
+  private __audioElement: HTMLAudioElement | null = null;
+
 
   private __resolveOnEnd: ((value?: void | PromiseLike<void> | undefined) => void) | undefined = undefined;
   private __rejectOnError?: (err: string | Error) => Error;
@@ -104,7 +98,6 @@ export class Sound
 
     const {
       audioElement,
-      buffer,
       fade,
       fadeOnLoops,
       getManagerVolume,
@@ -112,26 +105,17 @@ export class Sound
       trackPosition,
     } = options;
 
-    if (this.isWebAudio()) {
-      this.__initializeSoundForWebAudio(
-        assertValid<AudioBuffer>(
-          buffer,
-          strings.CTOR_BUFFER_INVALID,
-        ),
-      );
-    } else {
-      this.__audioElement = assertValid<HTMLAudioElement>(
-        audioElement,
-        strings.CTOR_AUDIO_ELEMENT_INVALID,
-      );
+    this.__audioElement = assertValid<HTMLAudioElement>(
+      audioElement,
+      strings.CTOR_AUDIO_ELEMENT_INVALID,
+    );
 
-      /* Needed to calculate volume for HTML5 audio. */
-      this.getManagerVolume = assertValid<() => number>(
-        getManagerVolume,
-        strings.CTOR_GET_MANAGER_VOLUME_INVALID,
-        (aa) => typeof aa === 'function',
-      );
-    }
+    /* Needed to calculate volume for HTML5 audio. */
+    this.getManagerVolume = assertValid<() => number>(
+      getManagerVolume,
+      strings.CTOR_GET_MANAGER_VOLUME_INVALID,
+      (aa) => typeof aa === 'function',
+    );
 
     this.__initializeArgumentProperties({
       fade,
@@ -139,25 +123,6 @@ export class Sound
       loop,
       trackPosition,
     });
-  };
-
-  private readonly __initializeSoundForWebAudio = (buffer: AudioBuffer) => {  
-    const context = this.getAudioContext();
-
-    /* Generate the first source node. */
-    this.__sourceNode = getNewSourceNode(
-      context,
-      assertValid<AudioBuffer>(
-        buffer,
-        strings.INITIALIZE_SOUND_FOR_WEB_AUDIO_BUFFER_INVALID,
-      ),
-    );
-
-    /* Generate the gain node used for fading volume. */
-    this.__fadeGainNode = context.createGain();
-
-    /* Connect the fade gain node to the sound's gain node. */
-    this.__fadeGainNode.connect(this.getGainNode());
   };
 
   private readonly __initializeArgumentProperties = ({
@@ -188,40 +153,14 @@ export class Sound
     }
   }
 
-  public readonly getInputNode = () => this.getSourceNode();
-
-  public readonly getSourceNode = () => {
-    assertNodeIsWebAudio(this, 'getSourceNode');
-    return assertValid<AudioBufferSourceNode>(
-      this.__sourceNode,
-      strings.GET_SOURCE_NODE_NODE_INVALID,
-    );
-  };
-
-  public readonly getFadeGainNode = () => {
-    assertNodeIsWebAudio(this, 'getFadeGainNode');
-    return assertValid<GainNode>(
-      this.__fadeGainNode,
-      strings.GET_FADE_GAIN_NODE_NODE_INVALID,
-    );
-  };
-
   public readonly setVolume = (value: number) => {
     super.setVolume(value);
-
-    if (!this.isWebAudio()) {
-      this.updateAudioElementVolume();
-    }
-
+    this.updateAudioElementVolume();
     return this;
   };
 
   public readonly getTrackPosition = () => {
     if (this.isPlaying()) {
-      if (this.isWebAudio()) {
-        return this.getContextCurrentTime() - this.__startedTime;
-      }
-
       return assertValid<HTMLAudioElement>(
         this.__audioElement,
         strings.GET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
@@ -233,41 +172,17 @@ export class Sound
 
   // Must be milliseconds.
   public readonly setTrackPosition = (milliseconds: number) => {
-    const isPlaying = this.isPlaying();
-
-    if (!isPlaying) {
-      this.pause();
-    }
-
-    this.__clearScheduledFades();
-
-    if (isPlaying) {
-      this.__startedTime = milliseconds;
-      if (this.isWebAudio()) {
-        this.__startedTime = this.getContextCurrentTime() - milliseconds;
-      } else {
-        this.__startedTime = milliseconds / 1000;
-        assertValid<HTMLAudioElement>(
-          this.__audioElement,
-          strings.SET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
-        ).currentTime = milliseconds / 1000;
-      }
-
-      this.play();
-    }
+    this.__startedTime = milliseconds / 1000;
+    assertValid<HTMLAudioElement>(
+      this.__audioElement,
+      strings.SET_TRACK_POSITION_AUDIO_ELEMENT_INVALID,
+    ).currentTime = this.__startedTime;
 
     return this;
   };
 
   // Returned in milliseconds.
   public readonly getDuration = () => {
-    if (this.isWebAudio()) {
-      return assertValid<AudioBuffer>(
-        this.getSourceNode().buffer,
-        strings.GET_DURATION_BUFFER_INVALID,
-      ).duration * 1000;
-    }
-
     return assertValid<HTMLAudioElement>(
       this.__audioElement,
       strings.GET_DURATION_AUDIO_ELEMENT_INVALID,
@@ -276,7 +191,6 @@ export class Sound
 
   public readonly isPlaying = () => Boolean(this.__playing);
 
-  private __loop = false;
   public readonly getLoop = () => typeof this.__loopOverride === 'boolean' ?
     this.__loopOverride :
     this.__loop;
@@ -290,13 +204,13 @@ export class Sound
 
   public readonly setFade = (fade: IFade | null) => {
     this.__fade = fade === null ? fade : getFrozenObject({
-      easingCurve: {
+      easingCurve: getFrozenObject({
         ...fade.easingCurve,
-      },
+      }),
 
-      length: {
+      length: getFrozenObject({
         ...fade.length,
-      },
+      }),
     });
 
     return this;
@@ -319,21 +233,13 @@ export class Sound
       this.__fadeStartTime = this.getTrackPosition();
       this.__updateSoundTimes();
 
-      let contextTime = 0;
-
-      /* Regenerate the source node. This *must* be called otherwise paused
-      * Sounds in Web Audio mode will throw. */
-      if (this.isWebAudio()) {
-        contextTime = this.getContextCurrentTime();
-      }
-
       this.__initializeForPlay({
         fadeOnLoops,
         fadeOverride,
         loopOverride,
       });
 
-      playAudioSource(this, this.__audioElement, contextTime);
+      playAudioSource(this, this.__audioElement);
 
       /* Reset the paused time. */
       this.__pausedTime = 0;
@@ -360,11 +266,6 @@ export class Sound
     fadeOverride,
     loopOverride,
   }: Partial<IPlaySoundOptions> = {}) => {
-    const isWebAudio = this.isWebAudio();
-    if (isWebAudio) {
-      this.__regenerateSourceNode();
-    }
-
     /* Sets the override properties e.g. if this sound is part of a
      * playlist, or the changes occurred through play options. */
     if (typeof fadeOnLoops === 'boolean') {
@@ -372,15 +273,15 @@ export class Sound
     }
 
     if (fadeOverride) {
-      this.__fadeOverride = getFrozenObject(getFrozenObject({
-        easingCurve: {
+      this.__fadeOverride = getFrozenObject({
+        easingCurve: getFrozenObject({
           ...fadeOverride.easingCurve,
-        },
+        }),
   
-        length: {
+        length: getFrozenObject({
           ...fadeOverride.length,
-        },
-      }));
+        }),
+      });
     }
 
     if (typeof loopOverride === 'boolean') {
@@ -396,60 +297,31 @@ export class Sound
       this.__initializeFadeForPlay(this.__audioElement);
     }
 
-    if (!isWebAudio) {
-      this.updateAudioElementVolume();
-    }
+    this.updateAudioElementVolume();
     
     /* If a promise is already on the Sound, it must be respected, and
      * a new one should not be constructed. */
-   if (!this.__promise) {
-     this.__initializePromiseForPlay();
+    if (!this.__promise) {
+      this.__initializePromiseForPlay();
     }
 
     this.__initializeEventsForPlay(audioElement);
   };
 
-  /* When an AudioBufferSourceNode is stopped, it can never be used again.
-   * Therefore, a new node must be generated to support the pause
-   * functionality. */
-  private readonly __regenerateSourceNode = () => {
-    this.__sourceNode = getNewSourceNode(
-      this.getAudioContext(),
-      assertValid<AudioBuffer>(this.getSourceNode().buffer),
-    );
-
-    /* Connect the input node to the fade gain node. */
-    this.getInputNode().connect(this.getFadeGainNode());
-
-    /* Connect the fade gain node to the output node. */
-    this.getFadeGainNode().connect(this.getOutputNode());
-  };
-
   private readonly __updateSoundTimes = () => {
-    const trackPosition = this.getTrackPosition();
 
-    if (this.isWebAudio()) {
-      /* Reset the started time. */
-      this.__startedTime = this.getContextCurrentTime() - trackPosition;
-    } else {
-      /* Set the current time to the track position. */
-      assertValid<HTMLAudioElement>(
-        this.__audioElement,
-      ).currentTime = trackPosition / 1000;
-    }
+    assertValid<HTMLAudioElement>(
+      this.__audioElement,
+    ).currentTime = this.getTrackPosition() / 1000;
   };
 
   private readonly __initializeFadeForPlay = (
     audioElement?: HTMLAudioElement | null,
   ) => {
-    if (this.isWebAudio()) {
-      scheduleWebAudioFades(this);
-    } else {
-      scheduleHtmlAudioFades(
-        assertValid<HTMLAudioElement>(audioElement),
-        this.updateAudioElementVolume,
-      );
-    }
+    scheduleHtmlAudioFades(
+      assertValid<HTMLAudioElement>(audioElement),
+      this.updateAudioElementVolume,
+    );
   };
 
   private readonly __initializeStartStopResolver = (
@@ -478,9 +350,9 @@ export class Sound
   private readonly __initializeEventsForPlay = (
     audioElement?: HTMLAudioElement | null,
   ) => {
-    const isWebAudio = this.isWebAudio();
-    const source = assertValid<AudioBufferSourceNode | HTMLAudioElement>(
-      isWebAudio ? this.getSourceNode() : audioElement,
+    const source = assertValid<HTMLAudioElement>(
+      audioElement,
+      'The audio element was not found in Sound.__initializeEventsForPlay.',
     );
 
     /* Register the ended export function to fire when the audio source emits the
@@ -498,34 +370,27 @@ export class Sound
   private readonly __getEndEventHandler = (
     source: AudioBufferSourceNode | HTMLAudioElement,
   ) => {
-    const ended = () => {
+    const ended = (): Promise<void> => {
+      this.__isStopping = true;
+
+      // Remove the 'ended' event listener.
+      source.removeEventListener('ended', ended);
+      // If the track ended, and loop is true, manually reset it to the
+      // beginning and keep playing. Increment the loop counter as well.
+      this.pause();
+
+      this.__isStopping = false;
+
       if (this.getLoop()) {
         this.__loopIterationCount += 1;
-        this.__playing = false
-        this.setTrackPosition(0);
-        return;
+        return this.play({
+          fadeOnLoops: this.__fadeOnLoops,
+          fadeOverride: this.__fadeOverride,
+          loopOverride: this.__loopOverride,
+        });
       }
 
-      /* Remove the 'ended' event listener. */
-      source.removeEventListener('ended', ended);
-
-      /* Don't do anything if the track was paused. */
-      if (!this.__isStopping &&
-          this.__playing &&
-          this.getTrackPosition() < this.getDuration() - 5)
-      {
-        return;
-      }
-
-      /* Reset the track position of the sound after it ends. Also resolves
-       * the old promise. */
-      this.stop();
-
-      /* Delete the rejector. */
-      delete this.__rejectOnError;
-
-      // Delete the resolver.
-      delete this.__resolveOnEnd;
+      return this.stop();
     };
 
     return ended;
@@ -535,16 +400,15 @@ export class Sound
     /* Must be executed before __playing = false. */
     this.__fadeStartTime = 0;
     this.__fadeStopTime = 0;
-    this.__loopIterationCount = 0;
     this.__startedTime = 0;
-    this.__pausedTime = this.getTrackPosition();
+    if (!this.__isStopping) {
+      this.__pausedTime = this.getTrackPosition();
+    }
 
     try {
-      if (!this.isWebAudio()) {
+      if (this.isPlaying()) {
         /* Must be executed after __pausedTime = ... */
         assertValid<HTMLAudioElement>(this.__audioElement).pause();
-      } else if (this.isPlaying()) {
-        this.getSourceNode().stop();
       }
  
       /* Must be executed after __pausedTime = ... and this.getPlaying(). */
@@ -560,36 +424,40 @@ export class Sound
     return this;
   };
 
-  private readonly __clearScheduledFades = () => {
-    delete this.__fadeOverride;
-    if (this.isWebAudio()) {
-      const fadeGain = this.getFadeGainNode();
-      const time = this.getContextCurrentTime() / 1000;
-      fadeGain.gain.cancelScheduledValues(time);
-      fadeGain.gain.setValueAtTime(1, time);
-    }
-  };
-
-  private __isStopping = false;
-  public readonly stop = () => {
-    this.__fadeStopTime = this.getTrackPosition();
+  public readonly stop = (noFadeOut = false) => {
     this.__isStopping = true;
+    this.__loopIterationCount = 0;
+    this.__fadeStopTime = this.getTrackPosition();
 
     this.__initializeFadeForPlay(this.__audioElement);
 
-    const delay = this.getFade()?.length.out || 0;
-    setTimeout(() => {
-      this.pause();
-      this.setTrackPosition(0);
-      if (typeof this.__resolveOnEnd === 'function') {
-        this.__resolveOnEnd();
-      } else {
-        Promise.resolve(this.__promise);
-      }
+    if (noFadeOut) {
+      // Delete the rejector.
+      delete this.__rejectOnError;
 
-      this.__isStopping = false;
-    }, delay + 50);
-  
+      // Delete the resolver.
+      delete this.__resolveOnEnd;
+    } else {
+      const delay = this.getFade()?.length.out || 0;
+      setTimeout(() => {
+        this.pause();
+        this.setTrackPosition(0);
+        if (typeof this.__resolveOnEnd === 'function') {
+          this.__resolveOnEnd();
+        } else {
+          Promise.resolve(this.__promise);
+        }
+
+        this.__isStopping = false;
+    
+        // Delete the rejector.
+        delete this.__rejectOnError;
+    
+        // Delete the resolver.
+        delete this.__resolveOnEnd;
+      }, delay + 50);
+    }
+
     return this.__promise!;
   };
 
@@ -603,8 +471,6 @@ export class Sound
     return this;
   };
 
-  private __fadeStartTime = 0;
-  private __fadeStopTime = 0;
   public readonly updateAudioElementVolume = () => {
     /* Set the audio element volume to the product of manager, group, and
      * fade, and sound volumes. */

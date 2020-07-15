@@ -6,13 +6,7 @@ import {
 } from '../../src/enums/NodeTypes';
 
 const testGroupFactory = (opts = {}) => new Group(
-  {
-    ...opts,
-  },
-
-  jest.fn(),
-  jest.fn(),
-  jest.fn(),
+  { ...opts },
 );
 
 describe('Group HTML5 Audio unit tests.', () => {
@@ -30,37 +24,12 @@ describe('Group HTML5 Audio unit tests.', () => {
   });
 
   it('Allows setting the sounds property through the options object.', () => {
-    const sound = { isWebAudio: jest.fn(), } as any;
+    const sound = {} as any;
     const group = testGroupFactory({
       sounds: { test: sound, },
     });
 
     expect(group.sounds).toEqual({ test: sound, });
-  });
-
-  it('Has a getContextCurrentTime function which throws when the group is in HTML Audio mode.', () => {
-    const func = () => testGroupFactory().getContextCurrentTime();
-    expect(func).toThrow();
-  });
-
-  it('Has a getInputNode property which throws when the group is in HTML Audio mode.', () => {
-    const func = () => testGroupFactory().getInputNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getOutputNode function which throws when the group is in HTML Audio mode.', () => {
-    const func = () => testGroupFactory().getOutputNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getAnalyserNode function which throws when the group is in HTML Audio mode.', () => {
-    const func = () => testGroupFactory().getAnalyserNode();
-    expect(func).toThrow();
-  });
-
-  it('Has a getGainNode function which throws when the group is HTML Audio mode.', () => {
-    const func = () => testGroupFactory().getGainNode();
-    expect(func).toThrow();
   });
 
   it('Has a getVolume function which returns a number between 0 and 1.', () => {
@@ -100,7 +69,7 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has an addSound function which puts the sound in the sounds object at the specified key.', () => {
     const group = testGroupFactory();
-    const sound = { isWebAudio: jest.fn(), } as any;
+    const sound = {} as any;
     const key = 'test';
     group.addSound(key, sound);
 
@@ -109,7 +78,7 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has an addSound function which returns the Group.', () => {
     const group = testGroupFactory();
-    const sound = { isWebAudio: jest.fn(), };
+    const sound = {};
     const ret = group.addSound('test1', sound as any);
 
     expect(ret).toBe(group);
@@ -117,8 +86,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has an addSounds function which merges the sounds argument with the sounds property.', () => {
     const group = testGroupFactory();
-    const soundOne = { isWebAudio: jest.fn(), } as any;
-    const soundTwo = { isWebAudio: jest.fn(), } as any;
+    const soundOne = {} as any;
+    const soundTwo = {} as any;
 
     group.addSounds({
       one: soundOne,
@@ -165,8 +134,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has a removeSounds function which removes the provided string from the sounds map.', () => {
     const group = testGroupFactory();
-    const soundOne = { isWebAudio: jest.fn(), } as any;
-    const soundTwo = { isWebAudio: jest.fn(), } as any;
+    const soundOne = {} as any;
+    const soundTwo = {} as any;
 
     // @ts-ignore
     group.__sounds = {
@@ -183,8 +152,8 @@ describe('Group HTML5 Audio unit tests.', () => {
 
   it('Has a removeSounds function which removes all the values in the provided array from the sound map.', () => {
     const group = testGroupFactory();
-    const soundOne = { isWebAudio: jest.fn(), } as any;
-    const soundTwo = { isWebAudio: jest.fn(), } as any;
+    const soundOne = {} as any;
+    const soundTwo = {} as any;
 
     // @ts-ignore
     group.__sounds = {
@@ -206,8 +175,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const group = testGroupFactory();
     (group as any).removeSounds = jest.fn();
 
-    const soundOne = { isWebAudio: jest.fn(), } as any;
-    const soundTwo = { isWebAudio: jest.fn(), } as any;
+    const soundOne = {} as any;
+    const soundTwo = {} as any;
     const sounds = {
       one: soundOne,
       two: soundTwo,
@@ -226,12 +195,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mockTwo = jest.fn();
     const sounds = {
       testOne: {
-        isWebAudio: jest.fn(),
         play: mockOne,
       },
 
       testTwo: {
-        isWebAudio: jest.fn(),
         play: mockTwo,
       },
     };
@@ -247,12 +214,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mockTwo = jest.fn();
     const sounds = {
       testOne: {
-        isWebAudio: jest.fn(),
         play: mockOne,
       },
 
       testTwo: {
-        isWebAudio: jest.fn(),
         play: mockTwo,
       },
     };
@@ -269,8 +234,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     (group as any).playSounds = mock;
     const sounds = {
-      testOne: { isWebAudio: jest.fn(), },
-      testTwo: { isWebAudio: jest.fn(), },
+      testOne: {},
+      testTwo: {},
     };
 
     group.addSounds(sounds as any);
@@ -285,12 +250,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         play: jest.fn(),
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         play: jest.fn(),
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -306,12 +269,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: mockOne,
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: mockTwo,
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -327,12 +288,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -347,8 +306,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     (group as any).pauseSounds = mock;
     const sounds = {
-      testOne: { isWebAudio: jest.fn(), },
-      testTwo: { isWebAudio: jest.fn(), },
+      testOne: {},
+      testTwo: {},
     };
 
     group.addSounds(sounds as any);
@@ -363,12 +322,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         pause: jest.fn(),
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -383,7 +340,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     const sound = {
       stop: mock,
-      isWebAudio: jest.fn(),
     };
 
     const key = 'test';
@@ -398,7 +354,6 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     const sound = {
       stop: mock,
-      isWebAudio: jest.fn(),
     };
 
     const key = 'test';
@@ -415,12 +370,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: mockOne,
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: mockTwo,
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -436,12 +389,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -456,8 +407,8 @@ describe('Group HTML5 Audio unit tests.', () => {
     const mock = jest.fn();
     (group as any).stopSounds = mock;
     const sounds = {
-      testOne: { isWebAudio: jest.fn(), },
-      testTwo: { isWebAudio: jest.fn(), },
+      testOne: {},
+      testTwo: {},
     };
 
     group.addSounds(sounds as any);
@@ -472,12 +423,10 @@ describe('Group HTML5 Audio unit tests.', () => {
     const sounds = {
       testOne: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(),
       },
 
       testTwo: {
         stop: jest.fn(),
-        isWebAudio: jest.fn(),
       },
     };
 
@@ -487,19 +436,17 @@ describe('Group HTML5 Audio unit tests.', () => {
     expect(ret).toBe(group);
   });
 
-  it('Has an updateAllAudioElementsVolume function which calls updateAudioElementVolume on all sounds which are in HTML Audio mode.', () => {
+  it('Has an updateAllAudioElementsVolume function which calls updateAudioElementVolume on all sounds.', () => {
     const group = testGroupFactory();
     const mockOne = jest.fn();
     const mockTwo = jest.fn();
     // @ts-ignore
     group.__sounds = {
       one: {
-        isWebAudio: jest.fn(),
         updateAudioElementVolume: mockOne,
       },
 
       two: {
-        isWebAudio: jest.fn(() => true),
         updateAudioElementVolume: mockTwo,
       },
     } as any;
