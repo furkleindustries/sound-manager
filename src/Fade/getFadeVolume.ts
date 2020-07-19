@@ -37,6 +37,7 @@ export const getFadeVolume = ({
       time: time - startingTime,
     });
   } else if (fade.easingCurve.out &&
+      fadeOnLoops === true &&
       (isStopping || duration - outLen <= time))
   {
     // Get the last volume before the fadeout began.
