@@ -17,7 +17,7 @@ export const getFadeVolume = ({
   time,
 }: IGetFadeVolumeArgs) => {
   const shouldSkipFadeForLoop = loop === true &&
-    fadeOnLoops === false &&
+    !fadeOnLoops &&
     loopIterationCount! > 0;
 
   if (!fade || shouldSkipFadeForLoop) {
@@ -37,22 +37,13 @@ export const getFadeVolume = ({
       time: time - startingTime,
     });
   } else if (fade.easingCurve.out &&
-      fadeOnLoops === true &&
+      (fadeOnLoops === true || isStopping) &&
       (isStopping || duration - outLen <= time))
   {
-    // Get the last volume before the fadeout began.
-    const initial = getFadeValueAtTime({
-      initial: 1,
-      change: -1,
-      curve: fade.easingCurve.out,
-      fadeDuration: outLen,
-      time: stoppingTime,
-    });
-
     // Fading out.
     return getFadeValueAtTime({
-      initial,
-      change: -initial,
+      initial: 1,
+      change: -1,
       curve: fade.easingCurve.out,
       fadeDuration: outLen,
       time: time - stoppingTime,

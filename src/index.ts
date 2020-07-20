@@ -44,12 +44,3 @@ export * from './functions/makeSoundGroupIdentifier';
 
 export * from './interfaces/ICollection';
 export * from './interfaces/ISoundGroupIdentifier';
-
-export * from './components/SoundManagerView';
-export * from './components/SoundGroupView';
-export * from './components/SoundGroupViewTitle';
-export * from './components/SoundGroupController';
-export * from './components/SoundView';
-export * from './components/SoundViewTitle';
-export * from './components/SoundViewLabel';
-export * from './components/SoundController';
