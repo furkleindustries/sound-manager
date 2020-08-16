@@ -424,14 +424,14 @@ export class Sound
     return this;
   };
 
-  public readonly stop = (noFadeOut = false) => {
+  public readonly stop = (hard = false) => {
     this.__isStopping = true;
     this.__loopIterationCount = 0;
     this.__fadeStopTime = this.getTrackPosition();
 
     this.__initializeFadeForPlay(this.__audioElement);
 
-    if (noFadeOut) {
+    if (hard) {
       // Delete the rejector.
       delete this.__rejectOnError;
 

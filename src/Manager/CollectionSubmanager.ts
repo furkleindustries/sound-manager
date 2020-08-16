@@ -177,12 +177,13 @@ export class CollectionSubmanager implements ICollectionSubmanager {
     name: string,
     options: ICreateSoundOptions,
     groupName = 'default',
+    isPreloading = false,
   ): Promise<ISound> =>
   {
     const opts: ICreateSoundOptions = getFrozenObject({ ...options });
 
     this.__registerIntentToAddSound(name, groupName);
-    const sound = await createSound(opts);
+    const sound = await createSound(opts, isPreloading);
 
     this.addSounds({ [name]: sound }, groupName);
     this.__deregisterIntentToAddSound(name, groupName);

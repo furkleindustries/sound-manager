@@ -28,6 +28,7 @@ export const strings = {
 
 export const createHtmlAudioSound = (
   options: ICreateSoundOptions,
+  preloadDirective: keyof GlobalEventHandlersEventMap = 'canplay',
 ): Promise<ISound> => {
   const {
     fade,
@@ -47,7 +48,7 @@ export const createHtmlAudioSound = (
   );
 
   const audioElement = new Audio(safeUrl);
-  audioElement.preload = 'auto';
+  audioElement.preload = preloadDirective === 'canplay' ? 'auto' : 'metadata';
 
   const getManagerVolume = assertValid<() => number>(
     getManagerVol,
@@ -77,8 +78,9 @@ export const createHtmlAudioSound = (
   return new Promise((resolve, reject) => {
     const boundPlayListener = playthroughListener.bind(null, resolve);
     const boundErrListener = errorListener.bind(null, reject);
+
     audioElement.addEventListener(
-      'canplaythrough',
+      preloadDirective,
       boundPlayListener,
     );
 

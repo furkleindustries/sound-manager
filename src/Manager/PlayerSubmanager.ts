@@ -14,6 +14,9 @@ import {
   ICollectionSubmanager,
 } from './ICollectionSubmanager';
 import {
+  IGroup,
+} from '../Group/IGroup';
+import {
   IPlaylist,
 } from '../Playlist/IPlaylist';
 import {
@@ -143,9 +146,25 @@ export class PlayerSubmanager implements IPlayerSubmanager {
     return this;
   };
 
-  public readonly stopAllSounds = (groupName?: string) => {
-    const oneOrMany = nameOrAllKeys(groupName, this.__getCollection().groups);
-    doToOneOrMany(this.__getCollection().groups, oneOrMany, 'stopAllSounds');
+  public readonly stopAllSounds = (hard = false, groupName?: string) => {
+    if (hard === true) {
+      let groups: IGroup[];
+      if (groupName) {
+        groups = this.__getCollection().getGroups([ groupName ]);
+      } else {
+        groups = this.__getCollection().getAllGroups();
+      }
+
+      for (const group of groups) {
+        for (const soundName of Object.keys(group.sounds)) {
+          const sound = group.getSound(soundName);
+          sound.stop(true);
+        }
+      }
+    } else {
+      const oneOrMany = nameOrAllKeys(groupName, this.__getCollection().groups);
+      doToOneOrMany(this.__getCollection().groups, oneOrMany, 'stopAllSounds');
+    }
 
     return this;
   };

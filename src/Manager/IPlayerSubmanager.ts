@@ -20,7 +20,7 @@ export interface IPlayerSubmanager {
   pauseAllSounds(groupName?: string): this;
   stopSound(name: string, groupName?: string): this;
   stopSounds(names: string[], groupName?: string): this;
-  stopAllSounds(groupName?: string): this;
+  stopAllSounds(hard?: boolean, groupName?: string): this;
   addPlaylist(name: string, options: IPlaylistOptions): IPlaylist;
   addPlaylists(playlists: IPlaylistsMap): this;
   hasPlaylist(name: string): boolean;

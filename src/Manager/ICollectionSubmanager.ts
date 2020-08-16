@@ -4,10 +4,18 @@ import {
 import {
   IGroup,
 } from '../Group/IGroup';
-import { IGroupsMap } from './IGroupsMap';
-import { IGroupOptions } from '../Group/IGroupOptions';
-import { ISound } from '../Sound/ISound';
-import { ISoundsMap } from '../Group/ISoundsMap';
+import {
+  IGroupsMap,
+} from './IGroupsMap';
+import {
+  IGroupOptions,
+} from '../Group/IGroupOptions';
+import {
+  ISound,
+} from '../Sound/ISound';
+import {
+  ISoundsMap,
+} from '../Group/ISoundsMap';
 
 export interface ICollectionSubmanager {
   /* Node collection */
@@ -31,6 +39,7 @@ export interface ICollectionSubmanager {
     name: string,
     options: ICreateSoundOptions,
     groupName?: string,
+    isPreloading?: boolean,
   ): Promise<ISound>;
 
   addSounds(sounds: ISoundsMap, groupName?: string): this;

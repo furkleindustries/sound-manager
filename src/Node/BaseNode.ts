@@ -26,6 +26,7 @@ export class BaseNode implements IBaseNode {
     artistName: '',
     contributors: [],
     license: '',
+    link: '',
     title: '',
   };
 
@@ -62,6 +63,10 @@ export class BaseNode implements IBaseNode {
 
     if (label.license) {
       newLabel.license = label.license;
+    }
+
+    if (label.link) {
+      newLabel.link = label.link;
     }
 
     if (label.title) {
